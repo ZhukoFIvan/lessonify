@@ -34,7 +34,11 @@ export function ProfileSection() {
   async function onSubmit(data: FormData) {
     setSaving(true)
     try {
-      await updateProfile({ name: data.name, gender, avatarUrl: avatar || null })
+      await updateProfile({
+        name: data.name || undefined,
+        gender: gender ?? undefined,
+        avatarUrl: avatar?.startsWith('data:') ? undefined : (avatar || null),
+      })
       toast({ variant: 'success', title: 'Профиль обновлён' })
       setExpanded(false)
     } catch {

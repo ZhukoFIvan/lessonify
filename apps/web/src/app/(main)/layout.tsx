@@ -10,7 +10,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <Sidebar />
 
       <div className="flex flex-col flex-1 min-h-screen">
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 min-w-0">
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 min-w-0 animate-in fade-in duration-150">
           {children}
         </main>
 

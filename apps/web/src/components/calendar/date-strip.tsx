@@ -31,7 +31,7 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
   return (
     <div
       ref={scrollRef}
-      className="scrollbar-hide overflow-x-auto whitespace-nowrap px-3 py-2 lg:flex lg:flex-wrap lg:justify-center lg:gap-0.5 lg:whitespace-normal lg:px-8"
+      className="scrollbar-hide flex overflow-x-auto px-3 py-2 lg:flex-wrap lg:justify-center lg:gap-0.5 lg:px-8"
       role="group"
       aria-label="Выбор даты"
     >

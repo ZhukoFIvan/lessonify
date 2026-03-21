@@ -35,9 +35,11 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onOpenAutoFocus={(e) => e.preventDefault()}
       className={cn(
-        'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
+        'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 origin-center',
         'w-[calc(100%-2rem)] max-w-lg',
+        'max-h-[calc(100dvh-4rem)] overflow-y-auto',
         'bg-card text-card-foreground border border-border',
         'rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.24)]',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',

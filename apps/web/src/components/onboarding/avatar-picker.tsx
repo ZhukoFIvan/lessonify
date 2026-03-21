@@ -1,9 +1,10 @@
 'use client'
 
 import Image from 'next/image'
-import { Check, Upload } from 'lucide-react'
-import { useRef } from 'react'
+import { Check, Upload, Loader2 } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import api from '@/lib/api'
 
 // 4 варианта аватарок DiceBear (avataaars стиль)
 const DICEBEAR_PRESETS = [
@@ -25,6 +26,7 @@ interface AvatarPickerProps {
 
 export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
   const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
 
   // Генерируем 4 варианта: 3 preset + 1 на основе имени пользователя
   const presets = [
@@ -32,17 +34,23 @@ export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
     dicebearUrl(userName ?? 'User'),
   ]
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-
-    // Для MVP создаём data URL — в продакшене загружать на S3
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const result = ev.target?.result
-      if (typeof result === 'string') onChange(result)
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('files', file)
+      const { data } = await api.post<{ data: { urls: string[] } }>('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      onChange(data.data.urls[0]!)
+    } catch {
+      // ignore upload error
+    } finally {
+      setUploading(false)
+      e.target.value = ''
     }
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -86,10 +94,11 @@ export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
       <button
         type="button"
         onClick={() => fileRef.current?.click()}
-        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+        disabled={uploading}
+        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
       >
-        <Upload size={16} />
-        Загрузить свою фото
+        {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+        {uploading ? 'Загрузка...' : 'Загрузить свою фото'}
       </button>
       <input
         ref={fileRef}
