@@ -28,11 +28,11 @@ calendarRouter.get('/callback', async (req: Request, res: Response) => {
 
     await calendarService.handleCallback(code, tutorId)
 
-    const webUrl = process.env.WEB_URL ?? 'http://localhost:3000'
+    const webUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
     res.redirect(`${webUrl}/settings?calendarConnected=1`)
   } catch (err) {
     console.error('[calendar/callback]', err)
-    const webUrl = process.env.WEB_URL ?? 'http://localhost:3000'
+    const webUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
     res.redirect(`${webUrl}/settings?calendarError=1`)
   }
 })

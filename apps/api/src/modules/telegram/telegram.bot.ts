@@ -7,7 +7,7 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 
 export const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 
-const WEB_URL = process.env.WEB_URL ?? 'http://localhost:3000'
+const WEB_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'
 
 // ── /start ────────────────────────────────────────────────────────────────────
 // Форматы deep link:

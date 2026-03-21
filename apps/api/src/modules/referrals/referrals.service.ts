@@ -71,7 +71,7 @@ export const referralsService = {
       where: { userId, status: 'PENDING', createdAt: { gte: monthStart } },
     })
 
-    const webUrl = process.env.WEB_URL ?? 'http://localhost:3000'
+    const webUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
 
     return {
       referralCode: user.referralCode,

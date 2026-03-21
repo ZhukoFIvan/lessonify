@@ -222,7 +222,7 @@ export const studentsService = {
       data: { inviteToken: token },
     })
 
-    const baseUrl = process.env.WEB_URL ?? 'http://localhost:3000'
+    const baseUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000'
     return `${baseUrl}/invite/${token}`
   },
 
