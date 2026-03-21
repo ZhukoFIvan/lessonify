@@ -1,0 +1,103 @@
+'use client'
+
+import Image from 'next/image'
+import { Check, Upload } from 'lucide-react'
+import { useRef } from 'react'
+import { cn } from '@/lib/utils'
+
+// 4 варианта аватарок DiceBear (avataaars стиль)
+const DICEBEAR_PRESETS = [
+  'Felix',
+  'Mia',
+  'Zara',
+  'Leo',
+] as const
+
+function dicebearUrl(seed: string) {
+  return `https://api.dicebear.com/8.x/avataaars/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc&radius=50`
+}
+
+interface AvatarPickerProps {
+  value: string
+  onChange: (url: string) => void
+  userName?: string
+}
+
+export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  // Генерируем 4 варианта: 3 preset + 1 на основе имени пользователя
+  const presets = [
+    ...DICEBEAR_PRESETS.slice(0, 3).map(dicebearUrl),
+    dicebearUrl(userName ?? 'User'),
+  ]
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Для MVP создаём data URL — в продакшене загружать на S3
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const result = ev.target?.result
+      if (typeof result === 'string') onChange(result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm font-medium text-foreground">Выберите аватарку</p>
+
+      {/* Текущий выбор — большой preview */}
+      {value && (
+        <div className="flex justify-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary shadow-card">
+            <Image src={value} alt="Аватарка" width={96} height={96} className="w-full h-full object-cover" />
+          </div>
+        </div>
+      )}
+
+      {/* 4 варианта */}
+      <div className="grid grid-cols-4 gap-3">
+        {presets.map((url, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onChange(url)}
+            className={cn(
+              'relative rounded-full overflow-hidden border-3 transition-all duration-150',
+              value === url ? 'border-primary scale-105' : 'border-transparent',
+            )}
+          >
+            <Image src={url} alt={`Вариант ${i + 1}`} width={64} height={64} className="w-16 h-16 object-cover" />
+            {value === url && (
+              <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                  <Check size={12} className="text-white" />
+                </div>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Загрузить свою */}
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+      >
+        <Upload size={16} />
+        Загрузить свою фото
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+    </div>
+  )
+}

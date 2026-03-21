@@ -1,0 +1,509 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  TUTOR
+  STUDENT
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum LessonStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum HomeworkStatus {
+  ASSIGNED
+  SUBMITTED
+  REVIEWED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PAID
+  REJECTED
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// User — базовый аккаунт (репетитор или ученик)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?   // null если вход только через Google
+  name         String
+  avatarUrl    String?
+  gender       Gender?
+  role         UserRole
+  googleId     String?   @unique
+  isBlocked    Boolean   @default(false)
+  plan          String    @default("FREE")   // FREE, PRO
+  planExpiresAt DateTime?
+  trialUsed     Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Реферальная система
+  referralCode       String?   @unique
+  referredById       String?
+  referredBy         User?     @relation("Referrals", fields: [referredById], references: [id])
+  referrals          User[]    @relation("Referrals")
+  referralEarnings   ReferralEarning[]
+  withdrawalRequests WithdrawalRequest[]
+  promoCodeUses      PromoCodeUse[]
+
+  // Relations
+  tutor              Tutor?
+  students           Student[]           @relation("UserStudent")
+  refreshTokens      RefreshToken[]
+  pushSubs           PushSubscription[]
+  passwordResetCodes PasswordResetCode[]
+
+  @@index([email])
+  @@index([googleId])
+  @@index([referralCode])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tutor — профиль репетитора (1:1 с User)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Tutor {
+  id                      String  @id @default(cuid())
+  userId                  String  @unique
+  subjects                String[] // ["Математика", "Физика"]
+  hourlyRate              Int?     // базовая ставка в рублях
+  timezone                String  @default("Europe/Moscow")
+  reminderBeforeLesson    Int     @default(60)  // минуты
+  reminderAfterLesson     Int     @default(120) // минуты до напоминания об оплате
+  defaultMeetingUrl       String? // постоянная ссылка на конференцию
+  defaultMeetingPlatform  String? // zoom | meet | telemost | other
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students           Student[]
+  lessons            Lesson[]
+  homework           Homework[]
+  lessonNotes        LessonNote[]
+  availabilitySlots  AvailabilitySlot[]
+  bookingRequests    BookingRequest[]
+  telegramConnection TelegramConnection?
+  calendarSync       CalendarSync?
+
+  @@map("tutors")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Student — ученик репетитора
+// userId может быть null если ученик не зарегистрирован в системе
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Student {
+  id          String  @id @default(cuid())
+  tutorId     String
+  userId      String? // если ученик зарегистрировался по invite-ссылке (НЕ unique!)
+  name        String
+  email       String?
+  phone       String?
+  subject     String?  // основной предмет с этим репетитором
+  hourlyRate  Int?     // индивидуальная ставка (переопределяет tutor.hourlyRate)
+  notes       String?  // заметки репетитора
+  inviteToken String?  @unique // для ссылки-приглашения
+  color       String?  // цвет для отображения в календаре (HEX)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tutor              Tutor               @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  user               User?               @relation("UserStudent", fields: [userId], references: [id], onDelete: SetNull)
+  lessons            Lesson[]
+  homework           Homework[]
+  bookingRequests    BookingRequest[]
+  telegramConnection TelegramConnection?
+
+  @@index([tutorId])
+  @@index([inviteToken])
+  @@index([userId])
+  @@map("students")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lesson — урок
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Lesson {
+  id              String        @id @default(cuid())
+  tutorId         String
+  studentId       String
+  subject         String
+  startTime       DateTime
+  durationMinutes Int           @default(60)
+  status          LessonStatus  @default(SCHEDULED)
+  paymentStatus   PaymentStatus @default(PENDING)
+  price           Int           // стоимость конкретного урока в рублях
+  notes           String?
+  googleEventId   String?       // ID события в Google Calendar
+  paidAt          DateTime?     // когда отмечен как оплаченный
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tutor          Tutor          @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  homework       Homework[]
+  payment        Payment?
+  lessonNotes    LessonNote[]
+  bookingRequest BookingRequest?
+
+  @@index([tutorId, startTime])
+  @@index([studentId])
+  @@index([tutorId, paymentStatus])
+  @@index([startTime])
+  @@map("lessons")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Payment — запись об оплате урока
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Payment {
+  id       String @id @default(cuid())
+  lessonId String @unique
+  amount   Int    // фактически оплаченная сумма
+  paidAt   DateTime @default(now())
+  note     String?  // например "перевод на карту"
+
+  // Relations
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Homework — домашнее задание к уроку
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Homework {
+  id          String         @id @default(cuid())
+  lessonId    String
+  tutorId     String
+  studentId   String
+  description String
+  deadline    DateTime?
+  status         HomeworkStatus @default(ASSIGNED)
+  feedback       String?        // комментарий репетитора после проверки
+  submissionText String?        // комментарий ученика при сдаче
+  fileUrls       String[]       // прикреплённые файлы ученика
+  attachmentUrls String[]       // материалы репетитора к заданию
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  lesson  Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  tutor   Tutor   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([tutorId])
+  @@index([studentId])
+  @@index([lessonId])
+  @@map("homework")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TelegramConnection — привязка Telegram-аккаунта
+// Может быть привязан к репетитору ИЛИ к ученику
+// ─────────────────────────────────────────────────────────────────────────────
+
+model TelegramConnection {
+  id         String   @id @default(cuid())
+  tutorId    String?  @unique
+  studentId  String?  @unique
+  telegramId String   @unique // числовой ID пользователя в Telegram
+  username   String?           // @username (опционально)
+  firstName  String?
+  connectCode String? @unique  // одноразовый код для привязки (/start CODE)
+  connectedAt DateTime @default(now())
+
+  // Relations
+  tutor   Tutor?   @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  student Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([telegramId])
+  @@index([connectCode])
+  @@map("telegram_connections")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RefreshToken — токены для JWT refresh rotation
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique // bcrypt-хэш токена (не храним plaintext)
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  revokedAt DateTime? // null = активен
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PushSubscription — Web Push подписки (PWA fallback)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PasswordResetCode — одноразовые коды для сброса пароля
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PasswordResetCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String    // bcrypt hash 6-значного кода
+  expiresAt DateTime  // 15 минут от создания
+  usedAt    DateTime? // null — не использован
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_codes")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LessonNote — журнал урока (заметки репетитора)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model LessonNote {
+  id       String @id @default(cuid())
+  lessonId String
+  tutorId  String
+  content  String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  tutor  Tutor  @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@index([tutorId])
+  @@map("lesson_notes")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AvailabilitySlot — слоты доступности репетитора для записи
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AvailabilitySlot {
+  id              String  @id @default(cuid())
+  tutorId         String
+  dayOfWeek       Int     // 0=Вс, 1=Пн ... 6=Сб
+  startHour       Int     // 0-23
+  startMinute     Int     @default(0) // 0-59
+  durationMinutes Int     @default(60)
+  isActive        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tutor    Tutor            @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  bookings BookingRequest[]
+
+  @@index([tutorId])
+  @@map("availability_slots")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BookingRequest — запрос ученика на запись к репетитору
+// ─────────────────────────────────────────────────────────────────────────────
+
+model BookingRequest {
+  id          String        @id @default(cuid())
+  slotId      String
+  studentId   String
+  tutorId     String
+  requestedAt DateTime      // конкретная дата+время записи
+  status      BookingStatus @default(PENDING)
+  note        String?       @db.Text // комментарий ученика
+  lessonId    String?       @unique  // заполняется при подтверждении
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slot    AvailabilitySlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  student Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   Tutor            @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  lesson  Lesson?          @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  @@index([tutorId, status])
+  @@index([studentId])
+  @@map("booking_requests")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ReferralEarning — начисление за покупку приглашённого пользователя
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ReferralEarning {
+  id             String   @id @default(cuid())
+  earnerId       String   // тот, кто пригласил и получает %
+  referredId     String   // тот, кто совершил покупку
+  purchaseAmount Int      // сумма покупки в рублях
+  earnAmount     Int      // начислено (20% от purchaseAmount)
+  paid           Boolean  @default(false) // включено в выплату
+  description    String?  // например "Покупка Pro 499 ₽"
+
+  createdAt DateTime @default(now())
+
+  earner User @relation(fields: [earnerId], references: [id], onDelete: Cascade)
+
+  @@index([earnerId])
+  @@index([earnerId, paid])
+  @@map("referral_earnings")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WithdrawalRequest — заявка на вывод реферального дохода
+// ─────────────────────────────────────────────────────────────────────────────
+
+model WithdrawalRequest {
+  id          String           @id @default(cuid())
+  userId      String
+  amount      Int              // сумма к выводу в рублях
+  cardDetails String           // реквизиты: номер карты / телефон СБП
+  status      WithdrawalStatus @default(PENDING)
+  adminNote   String?          // комментарий при обработке
+
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("withdrawal_requests")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PromoCode — промокоды для получения Pro
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PromoCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  description String?  // для кого (например "Блогер @ivanov")
+  daysToAdd   Int      // сколько дней Pro добавляется
+  maxUses     Int?     // null = безлимит
+  usedCount   Int      @default(0)
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  uses      PromoCodeUse[]
+
+  @@index([code])
+  @@map("promo_codes")
+}
+
+model PromoCodeUse {
+  id          String   @id @default(cuid())
+  promoCodeId String
+  userId      String
+  usedAt      DateTime @default(now())
+
+  promoCode PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promoCodeId, userId])
+  @@index([userId])
+  @@map("promo_code_uses")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CalendarSync — настройки синхронизации с Google Calendar
+// ─────────────────────────────────────────────────────────────────────────────
+
+model CalendarSync {
+  id                String   @id @default(cuid())
+  tutorId           String   @unique
+  googleCalendarId  String
+  accessToken       String   // зашифрованный (задача #5)
+  refreshToken      String   // зашифрованный
+  tokenExpiresAt    DateTime
+  syncEnabled       Boolean  @default(true)
+  lastSyncAt        DateTime?
+
+  // Relations
+  tutor Tutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("calendar_syncs")
+}
