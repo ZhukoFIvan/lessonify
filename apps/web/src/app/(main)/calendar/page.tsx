@@ -16,12 +16,16 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [viewMonth, setViewMonth] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    if (typeof window === 'undefined') return 'strip'
-    return (localStorage.getItem('calendarViewMode') as ViewMode) ?? 'strip'
+    if (typeof window === 'undefined') return 'grid'
+    // На мобиле всегда grid
+    if (window.innerWidth < 1024) return 'grid'
+    return (localStorage.getItem('calendarViewMode') as ViewMode) ?? 'grid'
   })
 
   useEffect(() => {
-    localStorage.setItem('calendarViewMode', viewMode)
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      localStorage.setItem('calendarViewMode', viewMode)
+    }
   }, [viewMode])
 
   const monthStart = startOfMonth(viewMonth)
@@ -97,10 +101,10 @@ export default function CalendarPage() {
             </button>
           </MonthYearPicker>
 
-          {/* Переключатель режима */}
+          {/* Переключатель режима — только на десктопе */}
           <button
             onClick={() => setViewMode(viewMode === 'strip' ? 'grid' : 'strip')}
-            className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+            className="hidden lg:flex p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
             aria-label={viewMode === 'strip' ? 'Показать календарь' : 'Показать список'}
           >
             {viewMode === 'strip' ? <CalendarDays size={18} /> : <LayoutList size={18} />}

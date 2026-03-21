@@ -124,23 +124,20 @@ export function AddLessonModal({ open, onClose, onCreated, defaultDate }: AddLes
           </div>
 
           {/* Дата + Время */}
-          <div className="flex flex-col gap-1.5">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5 min-w-0">
-                <Label>Дата</Label>
-                <Input
-                  type="date"
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full"
-                  {...register('date')}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5 min-w-0">
-                <Label>Время</Label>
-                <Input type="time" className="w-full" {...register('time')} />
-              </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label>Дата</Label>
+              <Input
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
+                {...register('date')}
+              />
+              {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
             </div>
-            {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
+            <div className="flex flex-col gap-1.5">
+              <Label>Время</Label>
+              <Input type="time" {...register('time')} />
+            </div>
           </div>
 
           {/* Длительность */}
