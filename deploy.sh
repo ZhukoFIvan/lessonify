@@ -11,6 +11,8 @@ echo "=== Running DB migrations ==="
 cd apps/api && ./node_modules/.bin/prisma migrate deploy && cd ../..
 
 echo "=== Building web app ==="
+# .env.local must NOT exist on production — it overrides all other env files
+rm -f apps/web/.env.local
 cd apps/web && NODE_OPTIONS="--max-old-space-size=1400" pnpm build && cd ../..
 
 echo "=== Restarting services ==="
