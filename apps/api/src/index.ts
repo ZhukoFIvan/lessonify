@@ -30,7 +30,7 @@ const IS_PROD = process.env.NODE_ENV === 'production'
 app.use(helmet())
 app.use(
   cors({
-    origin: process.env.WEB_URL ?? 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
     credentials: true,
   }),
 )
