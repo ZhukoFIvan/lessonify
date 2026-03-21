@@ -9,6 +9,7 @@ export interface ReferralStats {
   totalEarned: number
   paidOut: number
   balance: number
+  availableBalance: number
   hasPendingRequest: boolean
   earnings: {
     id: string
@@ -26,7 +27,7 @@ export function useReferral() {
   const refetch = useCallback(() => {
     setLoading(true)
     api.get<ReferralStats>('/referrals/stats')
-      .then(r => setStats(r.data))
+      .then(r => setStats({ ...r.data, balance: r.data.availableBalance ?? 0 }))
       .catch(() => setStats(null))
       .finally(() => setLoading(false))
   }, [])
