@@ -1,104 +1,150 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useAuthStore } from '@/store/auth.store'
-import { AvatarPicker } from '@/components/onboarding/avatar-picker'
-import { GenderPicker } from '@/components/onboarding/gender-picker'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useAuth } from '@/hooks/use-auth'
-import { toast } from '@/components/ui/use-toast'
-import { Sparkles } from 'lucide-react'
+import { StepWelcome } from '@/components/onboarding/step-welcome'
+import { StepProfile } from '@/components/onboarding/step-profile'
+import { StepSubjects } from '@/components/onboarding/step-subjects'
+import { StepFirstStudent } from '@/components/onboarding/step-first-student'
+import { StepTelegram } from '@/components/onboarding/step-telegram'
+import { StepDone } from '@/components/onboarding/step-done'
 
-type Gender = 'MALE' | 'FEMALE' | 'OTHER'
+export interface OnboardingData {
+  name: string
+  gender: 'MALE' | 'FEMALE' | 'OTHER' | null
+  avatarUrl: string
+  subjects: string[]
+  hourlyRate: number | null
+  studentAdded: boolean
+}
 
-// Дефолтная аватарка из DiceBear
-function defaultAvatar(name: string) {
-  return `https://api.dicebear.com/8.x/avataaars/svg?seed=${encodeURIComponent(name)}&backgroundColor=b6e3f4&radius=50`
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0,
+    scale: 0.95,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -300 : 300,
+    opacity: 0,
+    scale: 0.95,
+  }),
 }
 
 export default function OnboardingPage() {
   const { user } = useAuthStore()
-  const { finishOnboarding } = useAuth()
+  const isTutor = user?.role === 'TUTOR'
 
-  const [name, setName] = useState(user?.name ?? '')
-  const [gender, setGender] = useState<Gender | null>(null)
-  const [avatarUrl, setAvatarUrl] = useState(defaultAvatar(user?.name ?? 'User'))
-  const [loading, setLoading] = useState(false)
+  const steps = isTutor
+    ? ['welcome', 'profile', 'subjects', 'student', 'telegram', 'done'] as const
+    : ['welcome', 'profile', 'telegram', 'done'] as const
 
-  const isValid = name.trim().length >= 2 && gender !== null && avatarUrl !== ''
+  const [stepIndex, setStepIndex] = useState(0)
+  const [direction, setDirection] = useState(1)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!isValid) return
+  const [data, setData] = useState<OnboardingData>({
+    name: user?.name ?? '',
+    gender: (user?.gender as OnboardingData['gender']) ?? null,
+    avatarUrl: user?.avatarUrl ?? `https://api.dicebear.com/8.x/avataaars/svg?seed=${encodeURIComponent(user?.name ?? 'User')}&backgroundColor=b6e3f4&radius=50`,
+    subjects: [],
+    hourlyRate: null,
+    studentAdded: false,
+  })
 
-    setLoading(true)
-    try {
-      await finishOnboarding({ name: name.trim(), gender: gender!, avatarUrl })
-    } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Попробуйте ещё раз' })
-      setLoading(false)
-    }
-  }
+  const updateData = useCallback((patch: Partial<OnboardingData>) => {
+    setData(prev => ({ ...prev, ...patch }))
+  }, [])
+
+  const next = useCallback(() => {
+    setDirection(1)
+    setStepIndex(prev => Math.min(prev + 1, steps.length - 1))
+  }, [steps.length])
+
+  const back = useCallback(() => {
+    setDirection(-1)
+    setStepIndex(prev => Math.max(prev - 1, 0))
+  }, [])
+
+  const currentStep = steps[stepIndex]
+  const progress = ((stepIndex) / (steps.length - 1)) * 100
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* Карточка */}
-      <div className="w-full max-w-2xl bg-card rounded-3xl shadow-xl border border-border p-8">
-        {/* Шапка */}
-        <div className="mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center mb-3 shadow-md">
-            <Sparkles size={24} className="text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-foreground tracking-tight">Расскажите о себе</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Это займёт меньше минуты
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          {/* Имя */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="name">Ваше имя</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                // Обновляем дефолтный аватар при смене имени
-                if (avatarUrl.includes('api.dicebear.com')) {
-                  setAvatarUrl(defaultAvatar(e.target.value))
-                }
-              }}
-              placeholder="Иван Иванко"
-              autoFocus
+    <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-primary/5 flex flex-col">
+      {/* Progress bar */}
+      {stepIndex > 0 && stepIndex < steps.length - 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-0 left-0 right-0 z-50"
+        >
+          <div className="h-1 bg-border">
+            <motion.div
+              className="h-full bg-gradient-to-r from-primary to-primary-foreground/50"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
             />
           </div>
+        </motion.div>
+      )}
 
-          {/* Пол */}
-          <GenderPicker value={gender} onChange={setGender} />
-
-          {/* Аватарка */}
-          <AvatarPicker value={avatarUrl} onChange={setAvatarUrl} userName={name} />
-
-          {/* Кнопка */}
-          <div className="mt-2">
-            {/* Индикатор заполненности */}
-            <div className="flex gap-1.5 justify-center mb-6">
-              {[name.trim().length >= 2, gender !== null, avatarUrl !== ''].map((done, i) => (
-                <div
-                  key={i}
-                  className={`h-1.5 w-8 rounded-full transition-colors duration-300 ${done ? 'bg-primary' : 'bg-border'}`}
-                />
-              ))}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={!isValid || loading} size="lg">
-              {loading ? 'Сохранение...' : 'Начать работу →'}
-            </Button>
-          </div>
-        </form>
+      {/* Step content */}
+      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentStep}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            className="w-full max-w-lg"
+          >
+            {currentStep === 'welcome' && (
+              <StepWelcome onNext={next} userName={user?.name} />
+            )}
+            {currentStep === 'profile' && (
+              <StepProfile
+                data={data}
+                onChange={updateData}
+                onNext={next}
+                onBack={back}
+              />
+            )}
+            {currentStep === 'subjects' && (
+              <StepSubjects
+                data={data}
+                onChange={updateData}
+                onNext={next}
+                onBack={back}
+              />
+            )}
+            {currentStep === 'student' && (
+              <StepFirstStudent
+                data={data}
+                onChange={updateData}
+                onNext={next}
+                onBack={back}
+              />
+            )}
+            {currentStep === 'telegram' && (
+              <StepTelegram
+                onNext={next}
+                onBack={back}
+              />
+            )}
+            {currentStep === 'done' && (
+              <StepDone data={data} isTutor={isTutor} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )

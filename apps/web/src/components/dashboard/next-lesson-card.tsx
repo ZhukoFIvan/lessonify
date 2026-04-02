@@ -42,11 +42,11 @@ export function NextLessonCard() {
   const { lesson, loading } = useNextLesson()
   const countdown = useCountdown(lesson?.startTime ?? null)
 
-  if (loading) return <Skeleton className="mx-4 h-28" />
+  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-2xl" />
 
   if (!lesson) {
     return (
-      <div className="mx-4 rounded-2xl bg-secondary/50 border border-border px-4 py-3.5 flex items-center gap-3">
+      <div className="h-full rounded-2xl bg-secondary/50 border border-border px-4 py-4 flex items-center gap-3">
         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
           <PartyPopper size={17} className="text-primary" />
         </div>
@@ -62,9 +62,9 @@ export function NextLessonCard() {
   const isImminent = minutesLeft <= 30 && minutesLeft > 0
 
   return (
-    <Link href={`/calendar`}>
-      <Card className="mx-4 bg-gradient-to-r from-primary to-purple-500 text-white card-hover">
-        <CardContent className="p-4">
+    <Link href={`/calendar`} className="block h-full">
+      <Card className="h-full bg-gradient-to-r from-primary to-purple-500 text-white card-hover">
+        <CardContent className="p-4 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5 text-white/80 text-xs font-medium">
               <Clock size={13} />

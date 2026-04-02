@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { HomeworkCard } from '@/components/homework/homework-card'
 import { TutorHomeworkCard } from '@/components/homework/tutor-homework-card'
@@ -10,6 +11,12 @@ import { toast } from '@/components/ui/use-toast'
 import { BookOpen } from 'lucide-react'
 import type { HomeworkStatus } from '@tutorflow/types'
 import { cn } from '@/lib/utils'
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
+})
 
 const FILTERS: { label: string; value: HomeworkStatus | undefined }[] = [
   { label: 'Все', value: undefined },
@@ -116,14 +123,14 @@ function HomeworkLayout({
 
   return (
     <div className="flex flex-col min-h-full lg:p-8">
-      <div className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3">
+      <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3">
         <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Домашние задания</h1>
         <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 min-h-[1em]">
           {!showSkeleton && (count === 0 ? 'Нет заданий' : `${count} задан${count === 1 ? 'ие' : 'ия'}`)}
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex gap-2 px-4 lg:px-0 pb-3 overflow-x-auto scrollbar-hide">
+      <motion.div {...fadeUp(0.08)} className="flex gap-2 px-4 lg:px-0 pb-3 overflow-x-auto scrollbar-hide">
         {FILTERS.map(({ label, value }) => (
           <button
             key={label}
@@ -138,9 +145,9 @@ function HomeworkLayout({
             {label}
           </button>
         ))}
-      </div>
+      </motion.div>
 
-      <div className={cn('flex-1 px-4 lg:px-0 pb-4 transition-opacity duration-150', isDimmed && 'opacity-40 pointer-events-none')}>
+      <motion.div {...fadeUp(0.16)} className={cn('flex-1 px-4 lg:px-0 pb-4 transition-opacity duration-150', isDimmed && 'opacity-40 pointer-events-none')}>
         {showSkeleton ? (
           <div className="grid gap-3 lg:grid-cols-2">
             {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-[140px] rounded-2xl" />)}
@@ -160,7 +167,7 @@ function HomeworkLayout({
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">{children}</div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }

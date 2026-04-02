@@ -2,69 +2,60 @@
 
 import Link from 'next/link'
 import { ChevronRight, AlertCircle } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDebtors } from '@/hooks/use-payments'
-import { usePayLesson } from '@/hooks/use-lessons'
 import { formatRub, getInitials, pluralize } from '@tutorflow/utils'
 
 export function DebtorsStrip() {
-  const { debtors, loading, refetch } = useDebtors()
-  const { payLesson, loadingId } = usePayLesson()
+  const { debtors, loading } = useDebtors()
 
-  if (loading) return <Skeleton className="mx-4 h-24" />
+  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-2xl" />
   if (debtors.length === 0) return null
 
   const total = debtors.reduce((s, d) => s + d.debtAmount, 0)
 
   return (
-    <section className="px-4">
-      {/* Заголовок */}
+    <section className="h-full rounded-2xl bg-card border border-border p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <AlertCircle size={15} className="text-warning" />
-          <h2 className="text-base font-bold text-foreground">Должны заплатить</h2>
+          <AlertCircle size={16} className="text-warning" />
+          <h3 className="text-sm font-semibold text-foreground">Должны заплатить</h3>
         </div>
         <Link href="/finances" className="flex items-center text-xs text-primary font-medium gap-0.5">
           Все <ChevronRight size={14} />
         </Link>
       </div>
 
-      {/* Горизонтальный скролл карточек должников */}
-      <div className="scroll-x flex gap-3 pb-1">
-        {debtors.slice(0, 5).map((debtor) => (
-          <Card key={debtor.studentId} className="shrink-0 w-44">
-            <CardContent className="p-3 flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src={debtor.avatarUrl ?? undefined} />
-                  <AvatarFallback className="text-xs">
-                    {getInitials(debtor.studentName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-foreground truncate">{debtor.studentName}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {pluralize(debtor.unpaidLessonsCount, ['урок', 'урока', 'уроков'])}
-                  </p>
-                </div>
-              </div>
-              <p className="text-sm font-bold text-warning">{formatRub(debtor.debtAmount)}</p>
-            </CardContent>
-          </Card>
+      <div className="flex flex-col gap-2.5">
+        {debtors.slice(0, 3).map((debtor) => (
+          <div key={debtor.studentId} className="flex items-center gap-2.5">
+            <Avatar className="w-8 h-8 shrink-0">
+              <AvatarImage src={debtor.avatarUrl ?? undefined} />
+              <AvatarFallback className="text-xs">
+                {getInitials(debtor.studentName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{debtor.studentName}</p>
+              <p className="text-xs text-muted-foreground">
+                {pluralize(debtor.unpaidLessonsCount, ['урок', 'урока', 'уроков'])}
+              </p>
+            </div>
+            <span className="text-sm font-bold text-warning shrink-0">{formatRub(debtor.debtAmount)}</span>
+          </div>
         ))}
 
-        {/* Итого */}
-        {debtors.length > 1 && (
-          <Card className="shrink-0 w-36 bg-warning/5 border-warning/20">
-            <CardContent className="p-3 flex flex-col items-center justify-center gap-1 h-full">
-              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Итого долг</p>
-              <p className="text-base font-bold text-warning">{formatRub(total)}</p>
-              <p className="text-[10px] text-muted-foreground">{debtors.length} чел.</p>
-            </CardContent>
-          </Card>
+        {debtors.length > 3 && (
+          <Link href="/finances" className="text-xs text-primary font-medium text-center pt-1">
+            ещё {debtors.length - 3} чел. · итого {formatRub(total)}
+          </Link>
+        )}
+
+        {debtors.length <= 3 && debtors.length > 1 && (
+          <div className="text-xs text-muted-foreground text-center pt-1 border-t border-border">
+            Итого: <span className="font-semibold text-warning">{formatRub(total)}</span>
+          </div>
         )}
       </div>
     </section>

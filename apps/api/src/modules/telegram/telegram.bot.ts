@@ -2,10 +2,12 @@ import { Telegraf, Markup } from 'telegraf'
 import { prisma } from '../../lib/prisma'
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
-  throw new Error('TELEGRAM_BOT_TOKEN is not set')
+  console.warn('[telegram] TELEGRAM_BOT_TOKEN is not set — bot disabled')
 }
 
-export const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
+export const bot = process.env.TELEGRAM_BOT_TOKEN
+  ? new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
+  : (null as unknown as Telegraf)
 
 const WEB_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'
 
@@ -14,7 +16,7 @@ const WEB_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'
 //   /start tutor_<connectCode>   — привязка репетитора
 //   /start student_<connectCode> — привязка ученика
 
-bot.command('start', async (ctx) => {
+bot?.command('start', async (ctx) => {
   const payload = ctx.message.text.split(' ')[1] ?? ''
   const tgUser = ctx.from
 
@@ -84,7 +86,7 @@ bot.command('start', async (ctx) => {
 
 // ── /help ─────────────────────────────────────────────────────────────────────
 
-bot.command('help', async (ctx) => {
+bot?.command('help', async (ctx) => {
   await ctx.reply(
     `*TutorFlow Bot* — команды:\n\n` +
       `/start — главное меню\n` +
@@ -97,10 +99,10 @@ bot.command('help', async (ctx) => {
 // ── Публичные функции отправки сообщений ─────────────────────────────────────
 
 export async function sendMessage(telegramId: string, text: string): Promise<void> {
+  if (!bot) return
   try {
     await bot.telegram.sendMessage(telegramId, text, { parse_mode: 'Markdown' })
   } catch (err) {
-    // Пользователь мог заблокировать бота — логируем, не падаем
     console.error(`[telegram] Failed to send to ${telegramId}:`, err)
   }
 }

@@ -23,22 +23,21 @@ export function GreetingHeader() {
   const firstName = user?.name?.split(' ')[0] ?? ''
 
   return (
-    <div className="flex items-center justify-between px-4 pt-6 pb-2">
-      <div>
-        <p className="text-sm text-muted-foreground">{today}</p>
-        <h1 className="text-xl font-bold text-foreground tracking-tight mt-0.5">
-          {greeting}, {firstName}
-        </h1>
-      </div>
-
+    <div className="flex items-center gap-4">
       <Link href="/settings">
-        <Avatar className="w-11 h-11 ring-2 ring-primary/20">
+        <Avatar className="w-12 h-12 ring-2 ring-primary/20">
           <AvatarImage src={user?.avatarUrl ?? undefined} alt={user?.name} />
           <AvatarFallback className="text-sm">
             {getInitials(user?.name ?? '?')}
           </AvatarFallback>
         </Avatar>
       </Link>
+      <div>
+        <p className="text-sm text-muted-foreground">{today}</p>
+        <h1 className="text-xl font-bold text-foreground tracking-tight mt-0.5">
+          {greeting}, {firstName}
+        </h1>
+      </div>
     </div>
   )
 }

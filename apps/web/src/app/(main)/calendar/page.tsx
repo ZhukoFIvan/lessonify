@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { format, isToday, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, LayoutList, CalendarDays } from 'lucide-react'
@@ -9,6 +10,12 @@ import { MonthGrid } from '@/components/calendar/month-grid'
 import { DayView } from '@/components/calendar/day-view'
 import { MonthYearPicker } from '@/components/calendar/month-year-picker'
 import { useCalendarDots, useDayView } from '@/hooks/use-calendar'
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
+})
 
 type ViewMode = 'strip' | 'grid'
 
@@ -60,8 +67,7 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col min-h-full lg:p-8">
-      {/* ── Заголовок с навигацией ───────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-1">
+      <motion.div {...fadeUp(0)} className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-1">
         <div className="flex items-center gap-3">
           {/* Навигация по месяцам */}
           <div className="flex items-center gap-1">
@@ -111,7 +117,6 @@ export default function CalendarPage() {
           </button>
         </div>
 
-        {/* Кнопка "сегодня" */}
         {!isToday(selectedDate) && (
           <button
             onClick={handleToday}
@@ -120,10 +125,9 @@ export default function CalendarPage() {
             Сегодня
           </button>
         )}
-      </div>
+      </motion.div>
 
-      {/* ── Выбор даты (полоска или сетка) ──────────────────────────────── */}
-      <div className={viewMode === 'strip' ? 'sticky top-0 bg-background z-10 border-b border-border/60 pb-1 shadow-sm lg:mt-4 overflow-hidden' : 'border-b border-border/60 pb-2 lg:mt-4 overflow-hidden'}>
+      <motion.div {...fadeUp(0.08)} className={viewMode === 'strip' ? 'sticky top-0 bg-background z-10 border-b border-border/60 pb-1 shadow-sm lg:mt-4 overflow-hidden' : 'border-b border-border/60 pb-2 lg:mt-4 overflow-hidden'}>
         {viewMode === 'strip' ? (
           <DateStrip
             days={monthDays}
@@ -139,17 +143,16 @@ export default function CalendarPage() {
             onSelect={setSelectedDate}
           />
         )}
-      </div>
+      </motion.div>
 
-      {/* ── Уроки выбранного дня ─────────────────────────────────────────── */}
-      <div className="flex-1 pt-3 lg:max-w-4xl lg:mx-auto lg:w-full">
+      <motion.div {...fadeUp(0.16)} className="flex-1 pt-3 lg:max-w-4xl lg:mx-auto lg:w-full">
         <DayView
           date={selectedDate}
           lessons={dayLessons}
           loading={loading}
           onRefetch={refetch}
         />
-      </div>
+      </motion.div>
     </div>
   )
 }

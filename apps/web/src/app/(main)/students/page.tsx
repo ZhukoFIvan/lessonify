@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { Plus, Search, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,12 @@ import { StudentDetailModal } from '@/components/students/student-detail-modal'
 import { AddStudentModal } from '@/components/students/add-student-modal'
 import { useStudents } from '@/hooks/use-students'
 
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
+})
+
 export default function StudentsPage() {
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -17,7 +24,6 @@ export default function StudentsPage() {
 
   const { students, loading, refetch } = useStudents()
 
-  // Клиентский поиск по имени/предмету
   const filtered = useMemo(() => {
     if (!search.trim()) return students
     const q = search.toLowerCase()
@@ -31,8 +37,7 @@ export default function StudentsPage() {
 
   return (
     <div className="flex flex-col min-h-full lg:p-8">
-      {/* ── Заголовок ── */}
-      <div className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-3">
+      <motion.div {...fadeUp(0)} className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-3">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Ученики</h1>
           {!loading && (
@@ -45,10 +50,9 @@ export default function StudentsPage() {
           <Plus size={15} />
           Добавить
         </Button>
-      </div>
+      </motion.div>
 
-      {/* ── Поиск ── */}
-      <div className="px-4 lg:px-0 pb-3">
+      <motion.div {...fadeUp(0.08)} className="px-4 lg:px-0 pb-3">
         <div className="relative lg:max-w-md">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -58,10 +62,9 @@ export default function StudentsPage() {
             className="pl-9"
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* ── Список ── */}
-      <div className="flex-1 px-4 lg:px-0 pb-4">
+      <motion.div {...fadeUp(0.16)} className="flex-1 px-4 lg:px-0 pb-4">
         {loading ? (
           <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -97,18 +100,23 @@ export default function StudentsPage() {
           </div>
         ) : (
           <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((student) => (
-              <StudentCard
+            {filtered.map((student, i) => (
+              <motion.div
                 key={student.id}
-                student={student}
-                onClick={() => setSelectedId(student.id)}
-              />
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.2 + i * 0.04, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <StudentCard
+                  student={student}
+                  onClick={() => setSelectedId(student.id)}
+                />
+              </motion.div>
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
-      {/* ── Модалки ── */}
       <StudentDetailModal
         studentId={selectedId}
         open={!!selectedId}

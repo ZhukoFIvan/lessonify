@@ -1,69 +1,89 @@
 'use client'
 
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+import { CalendarDays, ChevronRight, Plus } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { LessonCard } from '@/components/lesson/lesson-card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AddLessonModal } from '@/components/lesson/add-lesson-modal'
-import { useDayLessons, usePayLesson } from '@/hooks/use-lessons'
-import { pluralize } from '@tutorflow/utils'
+import { useDayLessons } from '@/hooks/use-lessons'
+import { getInitials, pluralize } from '@tutorflow/utils'
+import { Badge } from '@/components/ui/badge'
 import { useState } from 'react'
+
+const PAYMENT_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
+  PAID: 'success',
+  PENDING: 'warning',
+  OVERDUE: 'danger',
+}
+const PAYMENT_LABELS: Record<string, string> = {
+  PAID: 'Оплачено',
+  PENDING: 'Ожидает',
+  OVERDUE: 'Просрочено',
+}
 
 export function TodayLessons() {
   const { lessons, loading, refetch } = useDayLessons(new Date())
-  const { payLesson, loadingId } = usePayLesson()
   const [addOpen, setAddOpen] = useState(false)
 
-  async function handlePay(lessonId: string) {
-    await payLesson(lessonId)
-    refetch()
-  }
+  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-2xl" />
 
   return (
-    <section className="px-4">
-      {/* Заголовок */}
+    <section className="h-full rounded-2xl bg-card border border-border p-4 flex flex-col">
       <div className="flex items-center justify-between mb-3">
-        <div>
-          <h2 className="text-base font-bold text-foreground">Сегодня</h2>
-          {!loading && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {lessons.length === 0
-                ? 'Уроков нет'
-                : pluralize(lessons.length, ['урок', 'урока', 'уроков'])}
-            </p>
-          )}
+        <div className="flex items-center gap-2">
+          <CalendarDays size={18} className="text-primary" />
+          <h3 className="text-sm font-semibold text-foreground">Уроки сегодня</h3>
         </div>
-        <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5 px-4">
-          <Plus size={15} />
-          Добавить
-        </Button>
+        {lessons.length > 0 && (
+          <span className="text-xs text-muted-foreground">
+            {pluralize(lessons.length, ['урок', 'урока', 'уроков'])}
+          </span>
+        )}
       </div>
 
-      {/* Список */}
-      {loading ? (
-        <div className="flex flex-col gap-3">
-          {[1, 2].map((i) => <Skeleton key={i} className="h-20" />)}
-        </div>
-      ) : lessons.length === 0 ? (
+      {lessons.length === 0 ? (
         <button
           onClick={() => setAddOpen(true)}
-          className="w-full rounded-2xl border-2 border-dashed border-border py-8 flex flex-col items-center gap-2 text-muted-foreground"
+          className="flex-1 rounded-xl border-2 border-dashed border-border py-4 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-            <Plus size={20} />
-          </div>
-          <span className="text-sm">Добавить первый урок на сегодня</span>
+          <Plus size={20} />
+          <span className="text-xs">Запланировать урок</span>
         </button>
       ) : (
-        <div className="flex flex-col gap-3">
-          {lessons.map((lesson) => (
-            <LessonCard
+        <div className="flex flex-col gap-2 flex-1">
+          {lessons.slice(0, 4).map((lesson) => (
+            <Link
               key={lesson.id}
-              lesson={lesson}
-              onPay={handlePay}
-              payLoading={loadingId === lesson.id}
-            />
+              href="/calendar"
+              className="flex items-center gap-2.5 py-1.5 rounded-lg hover:bg-secondary/50 transition-colors px-1 -mx-1"
+            >
+              <span className="text-xs font-mono text-muted-foreground w-10 shrink-0">
+                {new Date(lesson.startTime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <div
+                className="w-1 h-8 rounded-full shrink-0"
+                style={{ backgroundColor: lesson.student.color ?? '#6C63FF' }}
+              />
+              <Avatar className="w-7 h-7 shrink-0">
+                <AvatarImage src={lesson.student.user?.avatarUrl ?? undefined} />
+                <AvatarFallback className="text-[10px]">
+                  {getInitials(lesson.student.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{lesson.student.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{lesson.subject}</p>
+              </div>
+              <Badge variant={PAYMENT_VARIANT[lesson.paymentStatus] ?? 'secondary'} className="text-[10px] shrink-0">
+                {PAYMENT_LABELS[lesson.paymentStatus]}
+              </Badge>
+            </Link>
           ))}
+          {lessons.length > 4 && (
+            <Link href="/calendar" className="flex items-center justify-center gap-1 text-xs text-primary font-medium pt-1">
+              ещё {lessons.length - 4} <ChevronRight size={14} />
+            </Link>
+          )}
         </div>
       )}
 
