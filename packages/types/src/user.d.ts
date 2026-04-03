@@ -10,6 +10,8 @@ export interface User {
     isBlocked: boolean;
     plan: 'FREE' | 'PRO';
     planExpiresAt: string | null;
+    trialUsed: boolean;
+    referralCode: string | null;
     createdAt: string;
     updatedAt: string;
 }

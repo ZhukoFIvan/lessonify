@@ -145,9 +145,6 @@ export const authService = {
         if (referrer) referredById = referrer.id
       }
 
-      const trialExpiresAt = new Date()
-      trialExpiresAt.setDate(trialExpiresAt.getDate() + 14)
-
       user = await prisma.user.create({
         data: {
           email: data.email,
@@ -155,9 +152,8 @@ export const authService = {
           name: data.name,
           role: 'TUTOR',
           referralCode: generateReferralCode(),
-          plan: 'PRO',
-          planExpiresAt: trialExpiresAt,
-          trialUsed: true,
+          plan: 'FREE',
+          trialUsed: false,
           ...(referredById ? { referredById } : {}),
           tutor: { create: { subjects: [] } },
         },

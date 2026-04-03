@@ -9,6 +9,7 @@ import {
   studentsQuerySchema,
 } from './students.schemas'
 import { studentsService, NotFoundError, ForbiddenError } from './students.service'
+import { BillingError } from '../billing/billing.service'
 
 export const studentsRouter = Router()
 
@@ -72,6 +73,10 @@ function handleError(res: Response, err: unknown): void {
   }
   if (err instanceof ForbiddenError) {
     res.status(403).json({ error: err.message })
+    return
+  }
+  if (err instanceof BillingError) {
+    res.status(err.statusCode).json({ error: err.message })
     return
   }
   console.error('[students]', err)

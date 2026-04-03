@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { Zap, Crown, Check, Tag, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Zap, Crown, Check, Tag, Clock, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { usePromo } from '@/hooks/use-promo'
+import { useBilling } from '@/hooks/use-billing'
 import { toast } from '@/components/ui/use-toast'
+import { useSearchParams } from 'next/navigation'
 
 const FREE_FEATURES = [
-  'До 10 учеников',
+  'До 5 учеников',
   'Расписание и календарь',
   'Учёт оплат',
   'Домашние задания',
@@ -20,21 +22,36 @@ const PRO_FEATURES = [
   'Страница записи для учеников',
   'Google Calendar синхронизация',
   'Реферальная программа',
+  'Генерация PDF-счетов',
   'Приоритетная поддержка',
 ]
 
 export function TariffSection() {
   const user = useAuthStore((s) => s.user)
   const isPro = user?.plan === 'PRO'
+  const canTrial = !user?.trialUsed && user?.plan === 'FREE'
+
   const [promoInput, setPromoInput] = useState('')
   const [showPromo, setShowPromo] = useState(false)
   const { apply, loading: promoLoading, error: promoError } = usePromo()
+  const { activateTrial, checkout, refreshStatus, loading: billingLoading, error: billingError } = useBilling()
+
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const payment = searchParams.get('payment')
+    if (payment === 'success') {
+      refreshStatus()
+      toast({ variant: 'success', title: 'Оплата прошла успешно! PRO-план активирован.' })
+    } else if (payment === 'cancelled') {
+      toast({ variant: 'destructive', title: 'Оплата отменена' })
+    }
+  }, [searchParams])
 
   const expiresAt = user?.planExpiresAt
     ? new Date(user.planExpiresAt).toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
-  // Считаем дни до истечения
   const daysLeft = user?.planExpiresAt
     ? Math.ceil((new Date(user.planExpiresAt).getTime() - Date.now()) / 86400000)
     : null
@@ -45,9 +62,18 @@ export function TariffSection() {
     if (!promoInput.trim()) return
     const result = await apply(promoInput.trim())
     if (result) {
-      toast({ variant: 'success', title: `Промокод применён! +${result.daysAdded} дней Pro` })
+      toast({ variant: 'success', title: `Промокод применён! +${result.daysAdded} дней PRO` })
       setPromoInput('')
       setShowPromo(false)
+    }
+  }
+
+  const handleTrial = async () => {
+    const ok = await activateTrial()
+    if (ok) {
+      toast({ variant: 'success', title: 'Пробный период на 30 дней активирован!' })
+    } else if (billingError) {
+      toast({ variant: 'destructive', title: billingError })
     }
   }
 
@@ -60,7 +86,7 @@ export function TariffSection() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">
-            {isPro ? 'Pro план' : 'Бесплатный план'}
+            {isPro ? 'PRO план' : 'Бесплатный план'}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
             {isPro && expiresAt ? `Активен до ${expiresAt}` : isPro ? 'Активен' : 'Базовые возможности'}
@@ -71,12 +97,12 @@ export function TariffSection() {
         </span>
       </div>
 
-      {/* Trial expiring soon banner */}
+      {/* Trial expiring soon */}
       {isTrialExpiringSoon && (
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
           <Clock size={14} className="text-amber-600 shrink-0" />
           <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-            {daysLeft === 0 ? 'Pro-план истекает сегодня!' : `Pro-план заканчивается через ${daysLeft} дн.`}
+            {daysLeft === 0 ? 'PRO-план истекает сегодня!' : `PRO-план заканчивается через ${daysLeft} дн.`}
           </p>
         </div>
       )}
@@ -126,17 +152,76 @@ export function TariffSection() {
         </button>
       )}
 
-      {/* Upgrade CTA */}
-      {!isPro && (
-        <a
-          href="https://t.me/lessonify_bot"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-[#6C63FF] to-[#9C8FFF] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+      {/* Trial CTA */}
+      {canTrial && (
+        <button
+          onClick={handleTrial}
+          disabled={billingLoading}
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
-          <Crown size={15} />
-          Перейти на Pro
-        </a>
+          <Sparkles size={15} />
+          {billingLoading ? 'Активация...' : 'Попробовать PRO бесплатно — 30 дней'}
+        </button>
+      )}
+
+      {/* Payment plans */}
+      {!isPro && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-foreground">Тарифы PRO</p>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Monthly */}
+            <button
+              onClick={() => checkout('monthly')}
+              disabled={billingLoading}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border hover:border-primary/50 transition-colors disabled:opacity-50"
+            >
+              <span className="text-lg font-bold text-foreground">499 ₽</span>
+              <span className="text-[11px] text-muted-foreground">в месяц</span>
+            </button>
+            {/* Yearly */}
+            <button
+              onClick={() => checkout('yearly')}
+              disabled={billingLoading}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl border border-primary/30 bg-primary/5 hover:border-primary/50 transition-colors relative disabled:opacity-50"
+            >
+              <span className="absolute -top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600">
+                −33%
+              </span>
+              <span className="text-lg font-bold text-foreground">3 990 ₽</span>
+              <span className="text-[11px] text-muted-foreground">в год</span>
+            </button>
+          </div>
+          {billingError && <p className="text-xs text-destructive mt-1">{billingError}</p>}
+        </div>
+      )}
+
+      {/* Extend PRO */}
+      {isPro && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-foreground">Продлить PRO</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => checkout('monthly')}
+              disabled={billingLoading}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border hover:border-amber-500/50 transition-colors disabled:opacity-50"
+            >
+              <span className="text-lg font-bold text-foreground">499 ₽</span>
+              <span className="text-[11px] text-muted-foreground">+1 месяц</span>
+            </button>
+            <button
+              onClick={() => checkout('yearly')}
+              disabled={billingLoading}
+              className="flex flex-col items-center gap-1 p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50 transition-colors relative disabled:opacity-50"
+            >
+              <span className="absolute -top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-600">
+                −33%
+              </span>
+              <span className="text-lg font-bold text-foreground">3 990 ₽</span>
+              <span className="text-[11px] text-muted-foreground">+1 год</span>
+            </button>
+          </div>
+          {billingError && <p className="text-xs text-destructive mt-1">{billingError}</p>}
+        </div>
       )}
     </div>
   )

@@ -18,6 +18,7 @@ import { calendarRouter } from './modules/calendar/calendar.router'
 import { referralsRouter } from './modules/referrals/referrals.router'
 import { adminRouter } from './modules/admin/admin.router'
 import { promoRouter } from './modules/promo/promo.router'
+import { billingRouter } from './modules/billing/billing.router'
 import { bot } from './modules/telegram/telegram.bot'
 import { startCronJobs } from './cron/reminders'
 
@@ -57,6 +58,7 @@ app.use('/calendar', calendarRouter)
 app.use('/referrals', referralsRouter)
 app.use('/admin', adminRouter)
 app.use('/promo', promoRouter)
+app.use('/billing', billingRouter)
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 

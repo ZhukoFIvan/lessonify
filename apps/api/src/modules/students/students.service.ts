@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { prisma } from '../../lib/prisma'
+import { billingService } from '../billing/billing.service'
 import type { CreateStudentInput, UpdateStudentInput, StudentsQuery } from './students.schemas'
 
 // ── Custom errors ─────────────────────────────────────────────────────────────
@@ -131,6 +132,8 @@ export const studentsService = {
   // ── POST /students ──────────────────────────────────────────────────────────
 
   async create(tutorId: string, data: CreateStudentInput) {
+    await billingService.checkStudentLimit(tutorId)
+
     const student = await prisma.student.create({
       data: {
         tutorId,
