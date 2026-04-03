@@ -69,11 +69,11 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col min-h-full lg:p-8">
       <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-4">
-        <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Настройки</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Настройки</h1>
       </motion.div>
 
-      <div className="px-4 lg:px-0 pb-6 lg:max-w-4xl">
-        <div className="flex flex-col gap-4">
+      <div className="px-4 lg:px-0 pb-6 lg:max-w-3xl">
+        <div className="flex flex-col gap-5">
           {sections.map((section, i) => (
             <motion.div key={i} {...fadeUp(0.06 + i * 0.05)}>
               {section}

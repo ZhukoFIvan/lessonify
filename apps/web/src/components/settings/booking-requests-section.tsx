@@ -37,19 +37,19 @@ export function BookingRequestsSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
-          <CalendarCheck size={20} className="text-warning" />
+        <div className="w-11 h-11 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+          <CalendarCheck size={22} className="text-warning" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-foreground">Запросы на запись</h3>
+            <h3 className="text-base font-semibold text-foreground">Запросы на запись</h3>
             {!loading && bookings.length > 0 && (
               <Badge variant="warning" className="text-[10px]">{bookings.length}</Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">Ученики хотят записаться на урок</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Ученики хотят записаться на урок</p>
         </div>
       </div>
 

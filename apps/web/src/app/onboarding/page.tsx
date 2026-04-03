@@ -8,6 +8,7 @@ import { StepProfile } from '@/components/onboarding/step-profile'
 import { StepSubjects } from '@/components/onboarding/step-subjects'
 import { StepFirstStudent } from '@/components/onboarding/step-first-student'
 import { StepTelegram } from '@/components/onboarding/step-telegram'
+import { StepPlan } from '@/components/onboarding/step-plan'
 import { StepDone } from '@/components/onboarding/step-done'
 
 export interface OnboardingData {
@@ -42,8 +43,8 @@ export default function OnboardingPage() {
   const isTutor = user?.role === 'TUTOR'
 
   const steps = isTutor
-    ? ['welcome', 'profile', 'subjects', 'student', 'telegram', 'done'] as const
-    : ['welcome', 'profile', 'telegram', 'done'] as const
+    ? ['welcome', 'profile', 'subjects', 'student', 'telegram', 'plan', 'done'] as const
+    : ['welcome', 'profile', 'telegram', 'plan', 'done'] as const
 
   const [stepIndex, setStepIndex] = useState(0)
   const [direction, setDirection] = useState(1)
@@ -136,6 +137,12 @@ export default function OnboardingPage() {
             )}
             {currentStep === 'telegram' && (
               <StepTelegram
+                onNext={next}
+                onBack={back}
+              />
+            )}
+            {currentStep === 'plan' && (
+              <StepPlan
                 onNext={next}
                 onBack={back}
               />

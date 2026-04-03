@@ -40,15 +40,15 @@ export function TelegramSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#229ED9]/10 flex items-center justify-center shrink-0">
-          <MessageCircle size={20} className="text-[#229ED9]" />
+        <div className="w-11 h-11 rounded-full bg-[#229ED9]/10 flex items-center justify-center shrink-0">
+          <MessageCircle size={22} className="text-[#229ED9]" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-sm font-semibold text-foreground">Telegram</p>
+            <p className="text-base font-semibold text-foreground">Telegram</p>
             {!loading && status?.connected && (
               <Badge variant="success" className="text-[10px]">Подключён</Badge>
             )}
@@ -57,11 +57,11 @@ export function TelegramSection() {
           {loading ? (
             <Skeleton className="h-4 w-32 mt-1" />
           ) : status?.connected ? (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {status.firstName ?? ''}{status.username ? ` · @${status.username}` : ''}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Получайте напоминания об уроках в Telegram
             </p>
           )}

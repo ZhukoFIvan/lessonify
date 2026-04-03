@@ -16,7 +16,7 @@ export function useBilling() {
     try {
       const { data } = await api.post('/billing/trial')
       if (user) {
-        setUser({ ...user, plan: 'PRO', planExpiresAt: data.planExpiresAt })
+        setUser({ ...user, plan: 'PRO', planExpiresAt: data.planExpiresAt, trialUsed: true })
       }
       return true
     } catch (e: any) {
@@ -46,7 +46,7 @@ export function useBilling() {
     try {
       const { data } = await api.get('/billing/status')
       if (user) {
-        setUser({ ...user, plan: data.plan, planExpiresAt: data.planExpiresAt })
+        setUser({ ...user, plan: data.plan, planExpiresAt: data.planExpiresAt, trialUsed: data.trialUsed })
       }
     } catch {}
   }

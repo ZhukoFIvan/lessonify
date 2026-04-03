@@ -39,9 +39,9 @@ const DialogContent = React.forwardRef<
       className={cn(
         'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 origin-center',
         'w-[calc(100%-2rem)] max-w-lg',
-        'max-h-[calc(100dvh-4rem)] overflow-y-auto',
+        'max-h-[calc(100dvh-4rem)] flex flex-col',
         'bg-card text-card-foreground border border-border',
-        'rounded-2xl p-6 shadow-[0_8px_40px_rgba(0,0,0,0.24)]',
+        'rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.24)]',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',
         'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
         'data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95',
@@ -52,10 +52,12 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      {children}
-      <DialogPrimitive.Close className="absolute right-5 top-5 rounded-full p-1 opacity-60 hover:opacity-100 transition-opacity">
+      <DialogPrimitive.Close className="sticky top-0 z-10 self-end shrink-0 mt-4 mr-4 rounded-full p-1.5 opacity-60 hover:opacity-100 hover:bg-secondary transition-all">
         <X size={20} />
       </DialogPrimitive.Close>
+      <div className="overflow-y-auto flex-1 min-h-0 px-6 pb-6 -mt-2">
+        {children}
+      </div>
     </DialogPrimitive.Content>
   </DialogPortal>
 ))

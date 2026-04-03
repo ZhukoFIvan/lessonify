@@ -52,18 +52,18 @@ export function ProfileSection() {
     <div className="rounded-2xl border border-border bg-card overflow-hidden">
       {/* Заголовок секции */}
       <button
-        className="w-full flex items-center justify-between px-4 py-4"
+        className="w-full flex items-center justify-between px-5 py-5"
         onClick={() => setExpanded((v) => !v)}
       >
         <div className="text-left">
-          <p className="text-sm font-semibold text-foreground">Профиль</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{user?.name}</p>
+          <p className="text-base font-semibold text-foreground">Профиль</p>
+          <p className="text-sm text-muted-foreground mt-0.5">{user?.name}</p>
         </div>
-        {expanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+        {expanded ? <ChevronUp size={18} className="text-muted-foreground" /> : <ChevronDown size={18} className="text-muted-foreground" />}
       </button>
 
       {expanded && (
-        <form onSubmit={handleSubmit(onSubmit)} className="px-4 pb-4 flex flex-col gap-5 border-t border-border pt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-5 pb-5 flex flex-col gap-5 border-t border-border pt-5">
           {/* Аватарка */}
           <AvatarPicker value={avatar} onChange={setAvatar} userName={user?.name} />
 

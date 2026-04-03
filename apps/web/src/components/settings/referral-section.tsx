@@ -101,21 +101,21 @@ export function ReferralSection() {
 
   return (
     <>
-      <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <Gift size={18} className="text-primary" />
+          <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Gift size={22} className="text-primary" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Реферальная программа</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Приглашайте коллег и зарабатывайте</p>
+            <p className="text-base font-semibold text-foreground">Реферальная программа</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Приглашайте коллег и зарабатывайте</p>
           </div>
         </div>
 
         {/* Referral code */}
         <div className="rounded-xl bg-secondary/50 border border-border p-3">
-          <p className="text-xs text-muted-foreground mb-2">Ваш реферальный код</p>
+          <p className="text-sm text-muted-foreground mb-2">Ваш реферальный код</p>
           <div className="flex items-center justify-between gap-3">
             <span className="text-xl font-black tracking-widest text-primary">
               {stats.referralCode}
@@ -140,25 +140,25 @@ export function ReferralSection() {
           <div className="rounded-xl bg-secondary/40 p-3 text-center">
             <Users size={16} className="text-muted-foreground mx-auto mb-1" />
             <p className="text-lg font-black text-foreground">{stats.referralsCount}</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Приглашённых</p>
+            <p className="text-xs text-muted-foreground leading-tight">Приглашённых</p>
           </div>
           <div className="rounded-xl bg-secondary/40 p-3 text-center">
             <Wallet size={16} className="text-muted-foreground mx-auto mb-1" />
             <p className="text-lg font-black text-foreground">{stats.totalEarned.toLocaleString('ru')}</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Заработано ₽</p>
+            <p className="text-xs text-muted-foreground leading-tight">Заработано ₽</p>
           </div>
           <div className="rounded-xl bg-secondary/40 p-3 text-center">
             <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-1">
               <div className="w-2 h-2 rounded-full bg-green-500" />
             </div>
             <p className="text-lg font-black text-foreground">{stats.balance.toLocaleString('ru')}</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Баланс ₽</p>
+            <p className="text-xs text-muted-foreground leading-tight">Баланс ₽</p>
           </div>
         </div>
 
         {/* Description */}
         <div className="rounded-xl bg-primary/5 border border-primary/10 p-3">
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             <span className="font-semibold text-foreground">20% с каждой покупки Pro</span> от приглашённого репетитора.
             Минимальная сумма вывода — 500 ₽.
           </p>
