@@ -125,19 +125,19 @@ export function AddLessonModal({ open, onClose, onCreated, defaultDate }: AddLes
 
           {/* Дата + Время */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5 min-w-0">
+            <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
               <Label>Дата</Label>
               <Input
                 type="date"
-                className="w-full max-w-full"
+                className="w-full max-w-full overflow-hidden"
                 min={new Date().toISOString().split('T')[0]}
                 {...register('date')}
               />
               {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
             </div>
-            <div className="flex flex-col gap-1.5 min-w-0">
+            <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
               <Label>Время</Label>
-              <Input type="time" className="w-full max-w-full" {...register('time')} />
+              <Input type="time" className="w-full max-w-full overflow-hidden" {...register('time')} />
             </div>
           </div>
 

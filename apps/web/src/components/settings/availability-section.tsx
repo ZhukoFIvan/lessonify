@@ -101,12 +101,12 @@ export function AvailabilitySection() {
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <CalendarClock size={22} className="text-primary" />
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <CalendarClock size={20} className="text-primary" />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-foreground">Расписание записи</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Укажите, когда ученики могут записаться</p>
+          <h3 className="text-sm font-semibold text-foreground">Расписание записи</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Укажите, когда ученики могут записаться</p>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export function AvailabilitySection() {
           {orderedDays.map((dayIdx) => (
             <div key={dayIdx}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-medium text-foreground">{DAY_NAMES_FULL[dayIdx]}</span>
+                <span className="text-xs font-medium text-foreground">{DAY_NAMES_FULL[dayIdx]}</span>
                 <button
                   onClick={() => setAddingDay(addingDay === dayIdx ? null : dayIdx)}
                   className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"

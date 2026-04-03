@@ -54,7 +54,7 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
               aria-pressed={isSelected}
               aria-label={format(day, 'd MMMM yyyy')}
               className={cn(
-                'flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors active:scale-95',
+                'flex flex-col items-center justify-center gap-0.5 min-h-[44px] rounded-xl transition-colors active:scale-95',
                 isSelected
                   ? 'bg-primary shadow-md shadow-primary/30'
                   : _isToday

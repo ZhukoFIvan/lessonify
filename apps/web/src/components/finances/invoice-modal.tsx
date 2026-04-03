@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { FileDown, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useStudents } from '@/hooks/use-students'
 import { useDownloadInvoice } from '@/hooks/use-invoice'
@@ -49,14 +51,14 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="flex flex-col gap-4">
           {/* Ученик */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Ученик</label>
+          <div className="flex flex-col gap-1.5">
+            <Label>Ученик</Label>
             <select
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-12 w-full rounded-2xl border border-input bg-secondary/50 px-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary"
             >
               <option value="">Выберите ученика...</option>
               {students.map((s) => (
@@ -69,22 +71,22 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
 
           {/* Период */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">С</label>
-              <input
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <Label>С</Label>
+              <Input
                 type="date"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full max-w-full overflow-hidden"
               />
             </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">По</label>
-              <input
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <Label>По</Label>
+              <Input
                 type="date"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full max-w-full overflow-hidden"
               />
             </div>
           </div>

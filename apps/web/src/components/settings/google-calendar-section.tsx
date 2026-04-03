@@ -59,13 +59,13 @@ export function GoogleCalendarSection() {
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-full bg-[#4285F4]/10 flex items-center justify-center shrink-0">
-          <CalendarDays size={22} className="text-[#4285F4]" />
+        <div className="w-10 h-10 rounded-full bg-[#4285F4]/10 flex items-center justify-center shrink-0">
+          <CalendarDays size={20} className="text-[#4285F4]" />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-base font-semibold text-foreground">Google Календарь</p>
+            <p className="text-sm font-semibold text-foreground">Google Календарь</p>
             {!loading && status?.connected && (
               <Badge variant="success" className="text-[10px]">Подключён</Badge>
             )}
@@ -75,7 +75,7 @@ export function GoogleCalendarSection() {
             <Skeleton className="h-4 w-40 mt-1" />
           ) : status?.connected ? (
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Уроки автоматически синхронизируются в Google Календарь
               </p>
               {status.lastSyncAt && (
@@ -85,7 +85,7 @@ export function GoogleCalendarSection() {
               )}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Синхронизируйте уроки с Google Календарём автоматически
             </p>
           )}

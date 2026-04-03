@@ -104,18 +104,18 @@ export function ReferralSection() {
       <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <Gift size={22} className="text-primary" />
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Gift size={18} className="text-primary" />
           </div>
           <div>
-            <p className="text-base font-semibold text-foreground">Реферальная программа</p>
-            <p className="text-sm text-muted-foreground mt-0.5">Приглашайте коллег и зарабатывайте</p>
+            <p className="text-sm font-semibold text-foreground">Реферальная программа</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Приглашайте коллег и зарабатывайте</p>
           </div>
         </div>
 
         {/* Referral code */}
         <div className="rounded-xl bg-secondary/50 border border-border p-3">
-          <p className="text-sm text-muted-foreground mb-2">Ваш реферальный код</p>
+          <p className="text-xs text-muted-foreground mb-2">Ваш реферальный код</p>
           <div className="flex items-center justify-between gap-3">
             <span className="text-xl font-black tracking-widest text-primary">
               {stats.referralCode}
@@ -158,7 +158,7 @@ export function ReferralSection() {
 
         {/* Description */}
         <div className="rounded-xl bg-primary/5 border border-primary/10 p-3">
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             <span className="font-semibold text-foreground">20% с каждой покупки Pro</span> от приглашённого репетитора.
             Минимальная сумма вывода — 500 ₽.
           </p>

@@ -55,9 +55,9 @@ export function RemindersSection() {
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center gap-2.5 mb-4">
-        <Bell size={20} className="text-primary" />
-        <p className="text-base font-semibold text-foreground">Напоминания</p>
+      <div className="flex items-center gap-2 mb-4">
+        <Bell size={16} className="text-primary" />
+        <p className="text-sm font-semibold text-foreground">Напоминания</p>
       </div>
 
       {loading ? (
@@ -69,14 +69,14 @@ export function RemindersSection() {
         <div className="flex flex-col gap-5">
           {/* До урока */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">За сколько до урока</p>
+            <p className="text-xs text-muted-foreground mb-2">За сколько до урока</p>
             <div className="flex gap-2 flex-wrap">
               {BEFORE_OPTIONS.map(({ value, label }) => (
                 <button
                   key={value}
                   onClick={() => setBefore(value)}
                   className={cn(
-                    'rounded-full px-4 py-2 text-sm font-medium border transition-colors',
+                    'rounded-full px-3 py-1.5 text-xs font-medium border transition-colors',
                     currentBefore === value
                       ? 'bg-primary text-white border-primary'
                       : 'bg-background text-foreground border-border',
@@ -90,14 +90,14 @@ export function RemindersSection() {
 
           {/* После урока (напоминание об оплате) */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Напомнить об оплате через</p>
+            <p className="text-xs text-muted-foreground mb-2">Напомнить об оплате через</p>
             <div className="flex gap-2 flex-wrap">
               {AFTER_OPTIONS.map(({ value, label }) => (
                 <button
                   key={value}
                   onClick={() => setAfter(value)}
                   className={cn(
-                    'rounded-full px-4 py-2 text-sm font-medium border transition-colors',
+                    'rounded-full px-3 py-1.5 text-xs font-medium border transition-colors',
                     currentAfter === value
                       ? 'bg-primary text-white border-primary'
                       : 'bg-background text-foreground border-border',

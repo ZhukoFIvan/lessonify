@@ -113,10 +113,11 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
           </div>
 
           {/* Дедлайн */}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
             <Label>Дедлайн (необязательно)</Label>
             <Input
               type="date"
+              className="w-full max-w-full overflow-hidden"
               min={new Date().toISOString().split('T')[0]}
               {...register('deadline')}
             />

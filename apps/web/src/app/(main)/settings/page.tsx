@@ -37,18 +37,14 @@ export default function SettingsPage() {
     }
   }
 
-  const sections = [
+  const leftColumn = [
     <ProfileSection key="profile" />,
-    <TelegramSection key="telegram" />,
-    ...(isTutor ? [
-      <Suspense key="gcal" fallback={null}><GoogleCalendarSection /></Suspense>,
-    ] : []),
-    <div key="theme" className="rounded-2xl bg-card border border-border p-4">
+    <div key="theme" className="rounded-2xl bg-card border border-border p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Palette size={20} className="text-primary" />
           <div>
-            <h3 className="font-semibold text-foreground">Тема оформления</h3>
+            <h3 className="text-sm font-semibold text-foreground">Тема оформления</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               Системная, светлая или тёмная
             </p>
@@ -57,45 +53,62 @@ export default function SettingsPage() {
         <ThemeToggle />
       </div>
     </div>,
+    <TariffSection key="tariff" />,
+  ]
+
+  const rightColumn = [
+    <TelegramSection key="telegram" />,
     ...(isTutor ? [
+      <Suspense key="gcal" fallback={null}><GoogleCalendarSection /></Suspense>,
       <RemindersSection key="reminders" />,
       <AvailabilitySection key="availability" />,
       <BookingRequestsSection key="booking" />,
       <ReferralSection key="referral" />,
     ] : []),
-    <TariffSection key="tariff" />,
   ]
 
   return (
     <div className="flex flex-col min-h-full lg:p-8">
       <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-4">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Настройки</h1>
+        <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Настройки</h1>
       </motion.div>
 
-      <div className="px-4 lg:px-0 pb-6 lg:max-w-3xl">
-        <div className="flex flex-col gap-5">
-          {sections.map((section, i) => (
-            <motion.div key={i} {...fadeUp(0.06 + i * 0.05)}>
-              {section}
-            </motion.div>
-          ))}
+      <div className="px-4 lg:px-0 pb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 lg:items-start">
+          {/* Left column */}
+          <div className="flex flex-col gap-4">
+            {leftColumn.map((section, i) => (
+              <motion.div key={i} {...fadeUp(0.06 + i * 0.05)}>
+                {section}
+              </motion.div>
+            ))}
+          </div>
 
-          <motion.div {...fadeUp(0.06 + sections.length * 0.05)}>
-            <Button
-              variant="outline"
-              className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 mt-2"
-              onClick={handleLogout}
-              disabled={loggingOut}
-            >
-              <LogOut size={16} />
-              {loggingOut ? 'Выход...' : 'Выйти из аккаунта'}
-            </Button>
-
-            <p className="text-center text-xs text-muted-foreground pb-2 mt-4">
-              Lessonify · MVP
-            </p>
-          </motion.div>
+          {/* Right column */}
+          <div className="flex flex-col gap-4">
+            {rightColumn.map((section, i) => (
+              <motion.div key={i} {...fadeUp(0.06 + (leftColumn.length + i) * 0.05)}>
+                {section}
+              </motion.div>
+            ))}
+          </div>
         </div>
+
+        <motion.div {...fadeUp(0.06 + (leftColumn.length + rightColumn.length) * 0.05)} className="mt-4 lg:max-w-md lg:mx-auto">
+          <Button
+            variant="outline"
+            className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/5"
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            <LogOut size={16} />
+            {loggingOut ? 'Выход...' : 'Выйти из аккаунта'}
+          </Button>
+
+          <p className="text-center text-xs text-muted-foreground pb-2 mt-4">
+            Lessonify · MVP
+          </p>
+        </motion.div>
       </div>
     </div>
   )

@@ -12,6 +12,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type,
         'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-secondary',
         'disabled:cursor-not-allowed disabled:opacity-50',
         'transition-all duration-150',
+        (type === 'date' || type === 'time') && 'max-w-full overflow-hidden appearance-none',
         className,
       )}
       ref={ref}
