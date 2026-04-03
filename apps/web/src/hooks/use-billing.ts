@@ -33,7 +33,7 @@ export function useBilling() {
     try {
       const { data } = await api.post('/billing/checkout', { period })
       if (data.url) {
-        window.open(data.url, '_blank')
+        window.location.href = data.url
       }
     } catch (e: any) {
       setError(e.response?.data?.error ?? 'Ошибка создания платежа')
