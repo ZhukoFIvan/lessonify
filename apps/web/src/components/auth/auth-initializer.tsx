@@ -33,9 +33,11 @@ export function AuthInitializer() {
         setAccessToken(data.data.accessToken)
       })
       .catch(() => {
-        // Refresh провалился — сессия истекла, разлогиниваем
+        // Refresh провалился — чистим cookie и store, редиректим на логин
         logout()
-        window.location.href = '/auth/login'
+        axios.post('/api/auth/logout', {}, { withCredentials: true }).finally(() => {
+          window.location.href = '/auth/login'
+        })
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
