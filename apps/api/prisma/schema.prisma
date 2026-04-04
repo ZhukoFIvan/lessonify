@@ -258,7 +258,7 @@ model TelegramConnection {
   id         String   @id @default(cuid())
   tutorId    String?  @unique
   studentId  String?  @unique
-  telegramId String   @unique // числовой ID пользователя в Telegram
+  telegramId String?  @unique // числовой ID пользователя в Telegram
   username   String?           // @username (опционально)
   firstName  String?
   connectCode String? @unique  // одноразовый код для привязки (/start CODE)
