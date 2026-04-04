@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 // import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers'
+import { AuthInitializer } from '@/components/auth/auth-initializer'
 
 // const inter = Inter({
 //   subsets: ['latin', 'cyrillic'],
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru">
       <body>
         <Providers>
+          <AuthInitializer />
           <div className="min-h-screen">{children}</div>
         </Providers>
       </body>
