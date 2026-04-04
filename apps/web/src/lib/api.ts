@@ -92,13 +92,16 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null)
 
-        // Refresh провалился — разлогиниваем
+        // Refresh провалился — чистим store и cookie, потом редиректим
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const { useAuthStore } = require('@/store/auth.store') as typeof import('@/store/auth.store')
         useAuthStore.getState().logout()
 
         if (typeof window !== 'undefined') {
-          window.location.href = '/auth/login'
+          // Сначала чистим cookie через logout endpoint, потом редиректим
+          fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).finally(() => {
+            window.location.href = '/auth/login'
+          })
         }
         return Promise.reject(refreshError)
       } finally {
