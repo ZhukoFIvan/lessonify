@@ -135,20 +135,20 @@ export function AvailabilitySection() {
                   <span className="text-sm font-medium">
                     {pad(slot.startHour)}:{pad(slot.startMinute)} · {slot.durationMinutes} мин
                   </span>
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleToggle(slot)}
-                      className="h-9 w-9 rounded-full flex items-center justify-center transition-colors hover:bg-primary/10"
+                      className="h-10 w-10 rounded-full flex items-center justify-center transition-colors hover:bg-primary/10"
                     >
                       {slot.isActive
-                        ? <ToggleRight size={22} className="text-primary" />
-                        : <ToggleLeft size={22} className="text-muted-foreground" />}
+                        ? <ToggleRight size={28} className="text-primary" />
+                        : <ToggleLeft size={28} className="text-muted-foreground" />}
                     </button>
                     <button
                       onClick={() => handleDelete(slot.id)}
-                      className="h-9 w-9 rounded-full flex items-center justify-center transition-colors text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      className="h-10 w-10 rounded-full flex items-center justify-center transition-colors text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
                 </div>

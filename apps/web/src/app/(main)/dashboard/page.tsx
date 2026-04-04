@@ -51,7 +51,7 @@ export default function DashboardPage() {
       <TrialBanner />
 
       {/* Stats */}
-      <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.05 }}>
+      <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.05 }} className="mt-4">
         <QuickStats />
       </motion.div>
 
