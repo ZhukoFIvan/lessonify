@@ -79,119 +79,82 @@ async function remind24h(): Promise<void> {
   }
 }
 
-// ── Напоминание за 5 минут до урока (репетитор + ученик) ─────────────────────
+// ── Напоминание до урока — все значения из настроек (репетитор + ученик) ──────
+// Поддерживаемые значения reminderBeforeLesson: 5, 10, 15, 30, 60, 120 минут.
+// Каждую минуту проверяем каждое значение — репетитору отправляем только если
+// его настройка точно совпадает с окном. Ученику — при тех же окнах.
 
-async function remind5min(): Promise<void> {
-  const target = addMinutes(new Date(), 5)
-  const window = timeWindow(target)
+const REMINDER_OPTIONS = [5, 10, 15, 30, 60, 120]
 
-  const lessons = await prisma.lesson.findMany({
-    where: {
-      startTime: window,
-      status: 'SCHEDULED',
-    },
-    select: {
-      id: true,
-      subject: true,
-      startTime: true,
-      tutor: {
-        select: {
-          reminderBeforeLesson: true,
-          user: { select: { name: true } },
-          telegramConnection: { select: { telegramId: true } },
-        },
-      },
-      student: {
-        select: {
-          name: true,
-          telegramConnection: { select: { telegramId: true } },
-        },
-      },
-    },
-  })
-
-  for (const lesson of lessons) {
-    const tutorTg = lesson.tutor.telegramConnection?.telegramId
-    if (tutorTg) {
-      await sendLessonReminder(tutorTg, {
-        studentName: lesson.student.name,
-        subject: lesson.subject,
-        startTime: lesson.startTime,
-        timeLabel: '5 минут',
-      })
-    }
-
-    const studentTg = lesson.student.telegramConnection?.telegramId
-    if (studentTg) {
-      await sendStudentLessonReminder(studentTg, {
-        tutorName: lesson.tutor.user.name,
-        subject: lesson.subject,
-        startTime: lesson.startTime,
-        timeLabel: '5 минут',
-      })
-    }
-  }
-
-  if (lessons.length > 0) {
-    console.log(`[cron 5min] Отправлено напоминаний: ${lessons.length}`)
-  }
+function timeLabelFromMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} мин`
+  const h = minutes / 60
+  if (h === 1) return '1 час'
+  if (h === 2) return '2 часа'
+  return `${h} часа`
 }
 
-// ── Напоминание за 1 час до урока (репетитор + ученик) ───────────────────────
+async function remindBeforeLesson(): Promise<void> {
+  const now = new Date()
+  let totalSent = 0
 
-async function remind1h(): Promise<void> {
-  const target = addHours(new Date(), 1)
-  const window = timeWindow(target)
+  for (const minutes of REMINDER_OPTIONS) {
+    const window = timeWindow(addMinutes(now, minutes))
 
-  const lessons = await prisma.lesson.findMany({
-    where: {
-      startTime: window,
-      status: 'SCHEDULED',
-    },
-    select: {
-      id: true,
-      subject: true,
-      startTime: true,
-      tutor: {
-        select: {
-          reminderBeforeLesson: true,
-          user: { select: { name: true } },
-          telegramConnection: { select: { telegramId: true } },
+    const lessons = await prisma.lesson.findMany({
+      where: {
+        startTime: window,
+        status: 'SCHEDULED',
+        tutor: { reminderBeforeLesson: minutes }, // точное совпадение с настройкой
+      },
+      select: {
+        id: true,
+        subject: true,
+        startTime: true,
+        tutor: {
+          select: {
+            user: { select: { name: true } },
+            telegramConnection: { select: { telegramId: true } },
+          },
+        },
+        student: {
+          select: {
+            name: true,
+            telegramConnection: { select: { telegramId: true } },
+          },
         },
       },
-      student: {
-        select: {
-          name: true,
-          telegramConnection: { select: { telegramId: true } },
-        },
-      },
-    },
-  })
+    })
 
-  for (const lesson of lessons) {
-    const tutorTg = lesson.tutor.telegramConnection?.telegramId
-    if (tutorTg && lesson.tutor.reminderBeforeLesson <= 60) {
-      await sendLessonReminder(tutorTg, {
-        studentName: lesson.student.name,
-        subject: lesson.subject,
-        startTime: lesson.startTime,
-        timeLabel: '1 час',
-      })
-    }
+    const timeLabel = timeLabelFromMinutes(minutes)
 
-    const studentTg = lesson.student.telegramConnection?.telegramId
-    if (studentTg) {
-      await sendStudentLessonReminder(studentTg, {
-        tutorName: lesson.tutor.user.name,
-        subject: lesson.subject,
-        startTime: lesson.startTime,
-        timeLabel: '1 час',
-      })
+    for (const lesson of lessons) {
+      const tutorTg = lesson.tutor.telegramConnection?.telegramId
+      if (tutorTg) {
+        await sendLessonReminder(tutorTg, {
+          studentName: lesson.student.name,
+          subject: lesson.subject,
+          startTime: lesson.startTime,
+          timeLabel,
+        })
+      }
+
+      const studentTg = lesson.student.telegramConnection?.telegramId
+      if (studentTg) {
+        await sendStudentLessonReminder(studentTg, {
+          tutorName: lesson.tutor.user.name,
+          subject: lesson.subject,
+          startTime: lesson.startTime,
+          timeLabel,
+        })
+      }
+
+      totalSent++
     }
   }
 
-  if (lessons.length > 0) {
-    console.log(`[cron 1h] Отправлено напоминаний: ${lessons.length}`)
+  if (totalSent > 0) {
+    console.log(`[cron remind] Отправлено напоминаний: ${totalSent}`)
   }
 }
 
@@ -307,9 +270,9 @@ async function checkPlanExpiry(): Promise<void> {
 // ── Регистрация всех задач ────────────────────────────────────────────────────
 
 export function startCronJobs(): void {
-  // Каждую минуту — проверяем уроки через 5мин, 1ч и 24ч, оплаты
+  // Каждую минуту — напоминания до урока (по настройке препода) и оплаты
   cron.schedule('* * * * *', async () => {
-    await Promise.allSettled([remind5min(), remind1h(), remind24h(), remindPayment()])
+    await Promise.allSettled([remindBeforeLesson(), remind24h(), remindPayment()])
   })
 
   // Раз в день в 03:00 — помечаем просроченные, чистим токены, проверяем планы

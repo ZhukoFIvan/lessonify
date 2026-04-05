@@ -46,9 +46,11 @@ export function AddLessonModal({ open, onClose, onCreated, defaultDate }: AddLes
   const { students } = useStudents()
   const { createLesson, loading } = useCreateLesson()
 
-  const defaultDateStr = defaultDate
-    ? defaultDate.toISOString().split('T')[0]
-    : new Date().toISOString().split('T')[0]
+  // Форматируем в локальной таймзоне чтобы не было сдвига на -1 день
+  function toLocalDateStr(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+  const defaultDateStr = defaultDate ? toLocalDateStr(defaultDate) : toLocalDateStr(new Date())
 
   const {
     register,
