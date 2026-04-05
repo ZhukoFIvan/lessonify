@@ -18,6 +18,22 @@ function timeWindow(target: Date): { gte: Date; lt: Date } {
   }
 }
 
+// TelegramConnection привязан к Student-записи, а не к User.
+// Студент мог подключить Telegram через другого репетитора —
+// ищем его telegramId по userId если прямая связь отсутствует.
+async function resolveStudentTelegramId(
+  directTelegramId: string | null | undefined,
+  userId: string | null | undefined,
+): Promise<string | null> {
+  if (directTelegramId) return directTelegramId
+  if (!userId) return null
+  const conn = await prisma.telegramConnection.findFirst({
+    where: { student: { userId } },
+    select: { telegramId: true },
+  })
+  return conn?.telegramId ?? null
+}
+
 // ── Напоминание за 24 часа до урока (репетитор + ученик) ─────────────────────
 
 async function remind24h(): Promise<void> {
@@ -44,6 +60,7 @@ async function remind24h(): Promise<void> {
       student: {
         select: {
           name: true,
+          userId: true,
           telegramConnection: { select: { telegramId: true } },
         },
       },
@@ -62,8 +79,11 @@ async function remind24h(): Promise<void> {
       })
     }
 
-    // Ученику
-    const studentTg = lesson.student.telegramConnection?.telegramId
+    // Ученику — ищем telegram через userId если прямой связи нет
+    const studentTg = await resolveStudentTelegramId(
+      lesson.student.telegramConnection?.telegramId,
+      lesson.student.userId,
+    )
     if (studentTg) {
       await sendStudentLessonReminder(studentTg, {
         tutorName: lesson.tutor.user.name,
@@ -120,6 +140,7 @@ async function remindBeforeLesson(): Promise<void> {
         student: {
           select: {
             name: true,
+            userId: true,
             telegramConnection: { select: { telegramId: true } },
           },
         },
@@ -139,7 +160,10 @@ async function remindBeforeLesson(): Promise<void> {
         })
       }
 
-      const studentTg = lesson.student.telegramConnection?.telegramId
+      const studentTg = await resolveStudentTelegramId(
+        lesson.student.telegramConnection?.telegramId,
+        lesson.student.userId,
+      )
       if (studentTg) {
         await sendStudentLessonReminder(studentTg, {
           tutorName: lesson.tutor.user.name,

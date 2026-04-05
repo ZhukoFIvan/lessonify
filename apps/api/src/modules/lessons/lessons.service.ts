@@ -2,6 +2,14 @@ import { startOfDay, endOfDay, addWeeks } from 'date-fns'
 import type { Prisma } from '@prisma/client'
 import { prisma } from '../../lib/prisma'
 import { NotFoundError, ForbiddenError } from '../students/students.service'
+
+export class BadRequestError extends Error {
+  readonly statusCode = 400
+  constructor(message: string) {
+    super(message)
+    this.name = 'BadRequestError'
+  }
+}
 import type { CreateLessonInput, UpdateLessonInput, LessonsQuery } from './lessons.schemas'
 import { sendLessonCreatedToStudent, sendLessonCreatedToTutor } from '../telegram/telegram.bot'
 
@@ -339,6 +347,7 @@ export const lessonsService = {
         student: {
           select: {
             name: true,
+            userId: true,
             telegramConnection: { select: { telegramId: true } },
           },
         },
@@ -348,9 +357,20 @@ export const lessonsService = {
     if (!lesson) throw new NotFoundError('Урок не найден')
     if (lesson.tutorId !== tutorId) throw new ForbiddenError('Нет доступа')
 
-    const studentTelegramId = lesson.student.telegramConnection?.telegramId
+    // TelegramConnection привязан к конкретной Student-записи.
+    // Если студент подключил Telegram через другого репетитора —
+    // ищем его telegram по userId через все его записи.
+    let studentTelegramId = lesson.student.telegramConnection?.telegramId
+    if (!studentTelegramId && lesson.student.userId) {
+      const conn = await prisma.telegramConnection.findFirst({
+        where: { student: { userId: lesson.student.userId } },
+        select: { telegramId: true },
+      })
+      studentTelegramId = conn?.telegramId ?? null
+    }
+
     if (!studentTelegramId) {
-      throw new Error('У ученика не подключен Telegram')
+      throw new BadRequestError('У ученика не подключен Telegram')
     }
 
     // Получаем имя репетитора

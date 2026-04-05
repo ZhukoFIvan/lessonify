@@ -7,7 +7,7 @@ import {
   updateLessonSchema,
   lessonsQuerySchema,
 } from './lessons.schemas'
-import { lessonsService } from './lessons.service'
+import { lessonsService, BadRequestError } from './lessons.service'
 import { NotFoundError, ForbiddenError } from '../students/students.service'
 
 export const lessonsRouter = Router()
@@ -25,6 +25,10 @@ function handleError(res: Response, err: unknown): void {
   }
   if (err instanceof ForbiddenError) {
     res.status(403).json({ error: err.message })
+    return
+  }
+  if (err instanceof BadRequestError) {
+    res.status(400).json({ error: err.message })
     return
   }
   console.error('[lessons]', err)
