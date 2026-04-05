@@ -61,7 +61,7 @@ bot?.command('start', async (ctx) => {
 
     if (isHttps) {
       replyOptions.reply_markup = Markup.keyboard([
-        [Markup.button.webApp('Открыть TutorFlow', WEB_URL)],
+        [Markup.button.webApp('Открыть Lessonify', WEB_URL)],
       ]).resize().reply_markup
     }
 
@@ -74,11 +74,11 @@ bot?.command('start', async (ctx) => {
 
   // ── Обычный /start без кода ────────────────────────────────────────────────
   await ctx.reply(
-    `👋 Привет! Я бот *TutorFlow* — помогаю репетиторам управлять расписанием и напоминаю об уроках.\n\nЧтобы подключить бота к своему аккаунту, откройте настройки в приложении TutorFlow.`,
+    `👋 Привет! Я бот *Lessonify* — помогаю репетиторам управлять расписанием и напоминаю об уроках.\n\nЧтобы подключить бота к своему аккаунту, откройте настройки в приложении Lessonify.`,
     {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
-        [Markup.button.url('Открыть TutorFlow', WEB_URL)],
+        [Markup.button.url('Открыть Lessonify', WEB_URL)],
       ]),
     },
   )
@@ -88,10 +88,10 @@ bot?.command('start', async (ctx) => {
 
 bot?.command('help', async (ctx) => {
   await ctx.reply(
-    `*TutorFlow Bot* — команды:\n\n` +
+    `*Lessonify Bot* — команды:\n\n` +
       `/start — главное меню\n` +
       `/help — эта справка\n\n` +
-      `Бот автоматически напоминает о занятиях и оплатах. Управление — в приложении TutorFlow.`,
+      `Бот автоматически напоминает о занятиях и оплатах. Управление — в приложении Lessonify.`,
     { parse_mode: 'Markdown' },
   )
 })
@@ -145,7 +145,7 @@ export async function sendPaymentReminder(
       `Урок с *${opts.studentName}* завершён.\n` +
       `📚 Предмет: ${opts.subject}\n` +
       `💰 Сумма: ${opts.amount.toLocaleString('ru-RU')} ₽\n\n` +
-      `Отметьте оплату в приложении TutorFlow.`,
+      `Отметьте оплату в приложении Lessonify.`,
   )
 }
 
