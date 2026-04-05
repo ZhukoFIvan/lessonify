@@ -105,9 +105,13 @@ export default function SettingsPage() {
             {loggingOut ? 'Выход...' : 'Выйти из аккаунта'}
           </Button>
 
-          <p className="text-center text-xs text-muted-foreground pb-2 mt-4">
-            Lessonify · MVP
-          </p>
+          <div className="flex items-center justify-center gap-3 pb-2 mt-4">
+            <p className="text-xs text-muted-foreground">Lessonify · MVP</p>
+            <span className="text-border text-xs">·</span>
+            <a href="/offer" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Оферта</a>
+            <span className="text-border text-xs">·</span>
+            <a href="/privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Конфиденциальность</a>
+          </div>
         </motion.div>
       </div>
     </div>

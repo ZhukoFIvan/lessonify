@@ -197,7 +197,7 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
 
       <p className="text-center text-xs text-muted-foreground">
         Регистрируясь, вы соглашаетесь с{' '}
-        <a href="https://lessonify.ru/offer.html" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+        <a href="/offer" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
           публичной офертой
         </a>
       </p>

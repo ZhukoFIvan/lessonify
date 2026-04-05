@@ -198,7 +198,7 @@ export function TariffSection() {
           {billingError && <p className="text-xs text-destructive mt-1">{billingError}</p>}
           <p className="text-[11px] text-muted-foreground">
             Оплачивая, вы соглашаетесь с{' '}
-            <a href="https://lessonify.ru/offer.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
+            <a href="/offer" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
               публичной офертой
             </a>
           </p>
@@ -233,7 +233,7 @@ export function TariffSection() {
           {billingError && <p className="text-xs text-destructive mt-1">{billingError}</p>}
           <p className="text-[11px] text-muted-foreground">
             Оплачивая, вы соглашаетесь с{' '}
-            <a href="https://lessonify.ru/offer.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
+            <a href="/offer" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
               публичной офертой
             </a>
           </p>
