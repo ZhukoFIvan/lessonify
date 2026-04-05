@@ -11,10 +11,10 @@ import { authService } from '../modules/auth/auth.service'
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 // Окно поиска: ±1 минута от целевого времени (cron запускается каждую минуту)
-function timeWindow(target: Date): { gte: Date; lte: Date } {
+function timeWindow(target: Date): { gte: Date; lt: Date } {
   return {
     gte: startOfMinute(target),
-    lte: addMinutes(startOfMinute(target), 1),
+    lt: addMinutes(startOfMinute(target), 1),
   }
 }
 
