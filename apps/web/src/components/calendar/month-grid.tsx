@@ -34,7 +34,7 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
       </div>
 
       {/* Сетка дней */}
-      <div className="grid grid-cols-7 gap-y-1">
+      <div className="grid grid-cols-7">
         {/* Пустые ячейки до первого дня месяца */}
         {Array.from({ length: offset }).map((_, i) => (
           <div key={`empty-${i}`} />
@@ -54,9 +54,9 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
               aria-pressed={isSelected}
               aria-label={format(day, 'd MMMM yyyy')}
               className={cn(
-                'flex flex-col items-center justify-center gap-0.5 min-h-[44px] rounded-xl transition-colors active:scale-95',
+                'flex flex-col items-center justify-center gap-0.5 h-9 lg:h-8 rounded-lg transition-colors active:scale-95',
                 isSelected
-                  ? 'bg-primary shadow-md shadow-primary/30'
+                  ? 'bg-primary shadow-sm shadow-primary/30'
                   : _isToday
                     ? 'bg-primary/10'
                     : 'hover:bg-secondary',
@@ -64,7 +64,7 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
             >
               <span
                 className={cn(
-                  'text-sm font-bold leading-none',
+                  'text-xs font-semibold leading-none',
                   isSelected
                     ? 'text-white'
                     : _isToday
@@ -76,17 +76,17 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
               </span>
 
               {/* Точки уроков */}
-              <div className="flex gap-[3px] h-[5px] items-center">
+              <div className="flex gap-[3px] h-[4px] items-center">
                 {dotColors.map((color, i) => (
                   <div
                     key={i}
-                    className="w-[4px] h-[4px] rounded-full"
+                    className="w-[3px] h-[3px] rounded-full"
                     style={{
                       backgroundColor: isSelected ? 'rgba(255,255,255,0.75)' : color,
                     }}
                   />
                 ))}
-                {dotColors.length === 0 && <div className="w-[4px] h-[4px]" />}
+                {dotColors.length === 0 && <div className="w-[3px] h-[3px]" />}
               </div>
             </button>
           )

@@ -13,7 +13,7 @@ import { BillingError } from '../billing/billing.service'
 
 export const studentsRouter = Router()
 
-// ── GET /students/my-tutor — репетитор ученика (только ученик) ───────────────
+// ── GET /students/my-tutor — первый репетитор ученика (только ученик) ────────
 
 studentsRouter.get('/my-tutor', requireAuth, requireStudent, async (req: Request, res: Response) => {
   try {
@@ -34,6 +34,39 @@ studentsRouter.get('/my-tutor', requireAuth, requireStudent, async (req: Request
     })
     if (!student) { res.status(404).json({ error: 'Ученик не найден' }); return }
     res.json({ data: student.tutor })
+  } catch (err) {
+    handleError(res, err)
+  }
+})
+
+// ── GET /students/my-tutors — все преподаватели ученика ───────────────────────
+
+studentsRouter.get('/my-tutors', requireAuth, requireStudent, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.sub
+    const students = await prisma.student.findMany({
+      where: { userId },
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            subjects: true,
+            hourlyRate: true,
+            user: { select: { name: true, avatarUrl: true } },
+          },
+        },
+        _count: { select: { lessons: true } },
+      },
+    })
+
+    const result = students.map((s) => ({
+      studentRecordId: s.id,
+      subject: s.subject,
+      tutor: s.tutor,
+      lessonsCount: s._count.lessons,
+    }))
+
+    res.json({ data: result })
   } catch (err) {
     handleError(res, err)
   }

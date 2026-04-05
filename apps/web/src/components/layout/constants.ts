@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, Home, Settings, Users, Wallet } from 'lucide-react'
+import { BookOpen, CalendarDays, GraduationCap, Home, Settings, Users, Wallet } from 'lucide-react'
 
 export const TUTOR_TABS = [
   { href: '/dashboard', icon: Home, label: 'Главная' },
@@ -12,6 +12,7 @@ export const TUTOR_TABS = [
 export const STUDENT_TABS = [
   { href: '/dashboard', icon: Home, label: 'Главная' },
   { href: '/calendar', icon: CalendarDays, label: 'Расписание' },
+  { href: '/teachers', icon: GraduationCap, label: 'Преподаватели' },
   { href: '/homework', icon: BookOpen, label: 'ДЗ' },
   { href: '/settings', icon: Settings, label: 'Настройки' },
 ] as const

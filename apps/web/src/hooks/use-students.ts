@@ -88,6 +88,68 @@ export function useDeleteStudent() {
   return { deleteStudent, loadingId }
 }
 
+// ── Все преподаватели студента ────────────────────────────────────────────────
+
+export interface MyTutor {
+  studentRecordId: string
+  subject: string | null
+  lessonsCount: number
+  tutor: {
+    id: string
+    subjects: string[]
+    hourlyRate: number | null
+    user: { name: string; avatarUrl: string | null }
+  }
+}
+
+export function useMyTutors() {
+  const [tutors, setTutors] = useState<MyTutor[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data } = await api.get('/students/my-tutors')
+      setTutors(data.data)
+    } catch {
+      setTutors([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { tutors, loading, refetch: fetch }
+}
+
+// ── Принять приглашение от преподавателя (уже зарегистрированный студент) ─────
+
+export function useAcceptInvite() {
+  const [loading, setLoading] = useState(false)
+
+  async function acceptInvite(tokenOrUrl: string): Promise<void> {
+    // Извлекаем токен из URL если передали полную ссылку
+    let token = tokenOrUrl.trim()
+    try {
+      const url = new URL(token)
+      const parts = url.pathname.split('/')
+      token = parts[parts.length - 1] ?? token
+    } catch {
+      // Не URL — используем как есть
+    }
+
+    setLoading(true)
+    try {
+      await api.post('/students/accept-invite', { token })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { acceptInvite, loading }
+}
+
 // ── Сгенерировать ссылку-приглашение ─────────────────────────────────────────
 
 export function useGenerateInvite() {
