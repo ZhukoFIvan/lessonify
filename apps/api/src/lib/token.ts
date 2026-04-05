@@ -8,7 +8,7 @@ export const REFRESH_EXPIRES_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
 export const COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  sameSite: 'lax',
   maxAge: REFRESH_EXPIRES_MS,
   path: '/',
 }
