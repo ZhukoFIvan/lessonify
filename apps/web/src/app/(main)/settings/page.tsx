@@ -53,7 +53,7 @@ export default function SettingsPage() {
         <ThemeToggle />
       </div>
     </div>,
-    <TariffSection key="tariff" />,
+    ...(isTutor ? [<TariffSection key="tariff" />] : []),
   ]
 
   const rightColumn = [

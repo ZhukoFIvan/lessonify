@@ -44,7 +44,7 @@ export default function OnboardingPage() {
 
   const steps = isTutor
     ? ['welcome', 'profile', 'subjects', 'student', 'telegram', 'plan', 'done'] as const
-    : ['welcome', 'profile', 'telegram', 'plan', 'done'] as const
+    : ['welcome', 'profile', 'telegram', 'done'] as const
 
   const [stepIndex, setStepIndex] = useState(0)
   const [direction, setDirection] = useState(1)

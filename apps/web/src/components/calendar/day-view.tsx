@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { isToday, isTomorrow, isYesterday, format } from 'date-fns'
+import { isToday, isTomorrow, isYesterday, format, formatISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -127,6 +127,7 @@ export function DayView({ date, lessons, loading, onRefetch }: DayViewProps) {
 
       {isTutor && (
         <AddLessonModal
+          key={format(date, 'yyyy-MM-dd')}
           open={addOpen}
           onClose={() => setAddOpen(false)}
           onCreated={onRefetch}

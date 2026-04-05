@@ -80,7 +80,7 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
           <GraduationCap size={28} className="text-white" />
         </div>
         <h1 className="text-xl font-bold text-foreground tracking-tight">Создать аккаунт</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Присоединяйтесь к TutorFlow</p>
+        <p className="text-muted-foreground mt-1 text-sm">Присоединяйтесь к Lessonify</p>
       </div>
 
       {/* Выбор роли */}

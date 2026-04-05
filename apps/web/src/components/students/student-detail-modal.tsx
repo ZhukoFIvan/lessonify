@@ -55,7 +55,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
     try {
       const url = await generateInvite(studentId)
       await navigator.clipboard.writeText(url)
-      toast({ variant: 'success', title: 'Ссылка скопирована', description: url })
+      toast({ variant: 'success', title: 'Ссылка скопирована' })
     } catch {
       toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось скопировать ссылку' })
     }

@@ -28,7 +28,7 @@ bot?.command('start', async (ctx) => {
       where: { connectCode },
       include: {
         tutor: { include: { user: true } },
-        student: true,
+        student: { include: { user: true } },
       },
     })
 
@@ -53,7 +53,7 @@ bot?.command('start', async (ctx) => {
     const name =
       type === 'tutor'
         ? connection.tutor?.user.name ?? 'Репетитор'
-        : connection.student?.name ?? 'Ученик'
+        : connection.student?.user?.name ?? connection.student?.name ?? 'Ученик'
 
     // WebApp кнопка работает только с HTTPS
     const isHttps = WEB_URL.startsWith('https://')

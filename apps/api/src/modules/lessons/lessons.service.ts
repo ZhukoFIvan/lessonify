@@ -361,13 +361,25 @@ export const lessonsService = {
 
     if (!tutor) throw new NotFoundError('Репетитор не найден')
 
+    // Вычисляем время до урока
+    const minutesLeft = Math.round((lesson.startTime.getTime() - Date.now()) / 60000)
+    let timeLabel: string
+    if (minutesLeft <= 0) {
+      timeLabel = 'несколько минут'
+    } else if (minutesLeft < 60) {
+      timeLabel = `${minutesLeft} мин`
+    } else {
+      const hours = Math.round(minutesLeft / 60)
+      timeLabel = hours === 1 ? '1 час' : `${hours} часа`
+    }
+
     // Отправляем напоминание
     const { sendStudentLessonReminder } = await import('../telegram/telegram.bot')
     await sendStudentLessonReminder(studentTelegramId, {
       tutorName: tutor.user.name,
       subject: lesson.subject,
       startTime: lesson.startTime,
-      timeLabel: 'скоро',
+      timeLabel,
     })
   },
 

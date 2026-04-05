@@ -29,7 +29,7 @@ export const telegramService = {
       await prisma.telegramConnection.upsert({
         where: { tutorId },
         create: { tutorId, connectCode: code },
-        update: { connectCode: code, telegramId: null },
+        update: { connectCode: code, telegramId: null, connectedAt: new Date() },
       })
 
       return {
@@ -43,7 +43,7 @@ export const telegramService = {
       await prisma.telegramConnection.upsert({
         where: { studentId },
         create: { studentId, connectCode: code },
-        update: { connectCode: code, telegramId: null },
+        update: { connectCode: code, telegramId: null, connectedAt: new Date() },
       })
 
       return {

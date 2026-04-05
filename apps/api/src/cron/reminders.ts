@@ -1,5 +1,5 @@
 import cron from 'node-cron'
-import { addHours, subHours, startOfMinute, addMinutes } from 'date-fns'
+import { addHours, addMinutes, subHours, startOfMinute } from 'date-fns'
 import { prisma } from '../lib/prisma'
 import {
   sendLessonReminder,
@@ -76,6 +76,64 @@ async function remind24h(): Promise<void> {
 
   if (lessons.length > 0) {
     console.log(`[cron 24h] Отправлено напоминаний: ${lessons.length}`)
+  }
+}
+
+// ── Напоминание за 5 минут до урока (репетитор + ученик) ─────────────────────
+
+async function remind5min(): Promise<void> {
+  const target = addMinutes(new Date(), 5)
+  const window = timeWindow(target)
+
+  const lessons = await prisma.lesson.findMany({
+    where: {
+      startTime: window,
+      status: 'SCHEDULED',
+    },
+    select: {
+      id: true,
+      subject: true,
+      startTime: true,
+      tutor: {
+        select: {
+          reminderBeforeLesson: true,
+          user: { select: { name: true } },
+          telegramConnection: { select: { telegramId: true } },
+        },
+      },
+      student: {
+        select: {
+          name: true,
+          telegramConnection: { select: { telegramId: true } },
+        },
+      },
+    },
+  })
+
+  for (const lesson of lessons) {
+    const tutorTg = lesson.tutor.telegramConnection?.telegramId
+    if (tutorTg) {
+      await sendLessonReminder(tutorTg, {
+        studentName: lesson.student.name,
+        subject: lesson.subject,
+        startTime: lesson.startTime,
+        timeLabel: '5 минут',
+      })
+    }
+
+    const studentTg = lesson.student.telegramConnection?.telegramId
+    if (studentTg) {
+      await sendStudentLessonReminder(studentTg, {
+        tutorName: lesson.tutor.user.name,
+        subject: lesson.subject,
+        startTime: lesson.startTime,
+        timeLabel: '5 минут',
+      })
+    }
+  }
+
+  if (lessons.length > 0) {
+    console.log(`[cron 5min] Отправлено напоминаний: ${lessons.length}`)
   }
 }
 
@@ -249,9 +307,9 @@ async function checkPlanExpiry(): Promise<void> {
 // ── Регистрация всех задач ────────────────────────────────────────────────────
 
 export function startCronJobs(): void {
-  // Каждую минуту — проверяем уроки через 1ч и 24ч, оплаты
+  // Каждую минуту — проверяем уроки через 5мин, 1ч и 24ч, оплаты
   cron.schedule('* * * * *', async () => {
-    await Promise.allSettled([remind1h(), remind24h(), remindPayment()])
+    await Promise.allSettled([remind5min(), remind1h(), remind24h(), remindPayment()])
   })
 
   // Раз в день в 03:00 — помечаем просроченные, чистим токены, проверяем планы

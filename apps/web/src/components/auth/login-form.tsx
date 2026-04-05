@@ -50,7 +50,7 @@ export function LoginForm() {
           <GraduationCap size={28} className="text-white" />
         </div>
         <h1 className="text-xl font-bold text-foreground tracking-tight">Добро пожаловать</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Войдите в свой аккаунт TutorFlow</p>
+        <p className="text-muted-foreground mt-1 text-sm">Войдите в свой аккаунт Lessonify</p>
       </div>
 
       {/* Форма */}
