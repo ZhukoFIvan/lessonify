@@ -1,5 +1,5 @@
 import { prisma } from '../../lib/prisma'
-import { buildPaymentUrl, verifySignature } from './prodamus'
+import { buildPaymentUrl, verifyWebhook, type WebhookResult } from './robokassa'
 
 const FRONTEND_URL = () => process.env.FRONTEND_URL ?? 'http://localhost:3000'
 const FREE_STUDENT_LIMIT = 5
@@ -51,83 +51,59 @@ export const billingService = {
     const config = PLAN_CONFIG[period]
     if (!config) throw new BillingError('Неизвестный тариф')
 
-    const orderId = `pro_${userId}_${period}_${Date.now()}`
+    // InvId должен быть числом; используем timestamp чтобы быть уникальным
+    const invId = Math.floor(Date.now() / 1000) % 2000000000
 
     const url = buildPaymentUrl({
-      orderId,
       amount: config.price,
-      productName: `Lessonify ${config.label}`,
-      customerEmail: user.email,
-      urlSuccess: `${FRONTEND_URL()}/settings?payment=success`,
-      urlReturn: `${FRONTEND_URL()}/settings?payment=cancelled`,
+      invId,
+      description: `Lessonify ${config.label}`,
+      email: user.email,
+      userId,
+      period,
+      successUrl: `${FRONTEND_URL()}/settings?payment=success`,
+      failUrl: `${FRONTEND_URL()}/settings?payment=cancelled`,
     })
 
-    // Prodamus returns the payment link in response
-    const res = await fetch(url)
-    const text = await res.text()
-
-    let paymentUrl: string
-    try {
-      const json = JSON.parse(text)
-      paymentUrl = json.payment_link ?? json.link ?? text.trim()
-    } catch {
-      paymentUrl = text.trim()
-    }
-
-    if (!paymentUrl.startsWith('http')) {
-      console.error('[billing] Prodamus response:', text)
-      throw new BillingError('Не удалось создать платёжную ссылку', 502)
-    }
-
-    return { url: paymentUrl, orderId }
+    return { url, orderId: String(invId) }
   },
 
   // ── Webhook ─────────────────────────────────────────────────────────────────
 
-  async handleWebhook(body: Record<string, unknown>, sign: string) {
-    if (!verifySignature(body, sign)) {
+  async handleWebhook(body: Record<string, string>): Promise<WebhookResult & { handled: boolean; planExpiresAt?: Date }> {
+    const result = verifyWebhook(body)
+
+    if (!result.valid) {
       throw new BillingError('Неверная подпись', 403)
     }
 
-    const paymentStatus = String(body.payment_status ?? '')
-    if (paymentStatus !== 'success') {
-      return { handled: false, reason: `status=${paymentStatus}` }
-    }
-
-    const orderId = String(body.order_id ?? '')
-    const parts = orderId.split('_')
-    if (parts[0] !== 'pro' || parts.length < 4) {
-      return { handled: false, reason: 'not a billing order' }
-    }
-
-    const userId = parts[1]!
-    const period = parts[2] as PlanPeriod
-    const config = PLAN_CONFIG[period]
+    const { userId, period } = result
+    const config = PLAN_CONFIG[period as PlanPeriod]
     if (!config) {
-      return { handled: false, reason: `unknown period: ${period}` }
+      return { ...result, handled: false }
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
-      return { handled: false, reason: `user not found: ${userId}` }
+      return { ...result, handled: false }
     }
 
-    // Extend from current expiry if still active
+    // Продлеваем от текущей даты истечения если PRO ещё активен
     const base =
       user.plan === 'PRO' && user.planExpiresAt && user.planExpiresAt > new Date()
         ? user.planExpiresAt
         : new Date()
 
-    const newExpiry = new Date(base)
-    newExpiry.setDate(newExpiry.getDate() + config.days)
+    const planExpiresAt = new Date(base)
+    planExpiresAt.setDate(planExpiresAt.getDate() + config.days)
 
     await prisma.user.update({
       where: { id: userId },
-      data: { plan: 'PRO', planExpiresAt: newExpiry },
+      data: { plan: 'PRO', planExpiresAt },
     })
 
-    console.log(`[billing] PRO activated for ${userId}, expires ${newExpiry.toISOString()}`)
-    return { handled: true, userId, plan: 'PRO', planExpiresAt: newExpiry }
+    console.log(`[billing] PRO activated for ${userId}, expires ${planExpiresAt.toISOString()}`)
+    return { ...result, handled: true, planExpiresAt }
   },
 
   // ── Student limit ───────────────────────────────────────────────────────────
