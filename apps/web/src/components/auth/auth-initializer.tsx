@@ -33,9 +33,9 @@ export function AuthInitializer() {
         setAccessToken(data.data.accessToken)
       })
       .catch(() => {
-        // Refresh провалился — чистим cookie и store, редиректим на логин
-        logout()
+        // Refresh провалился — чистим cookie и редиректим, store чистим в последний момент
         axios.post('/api/auth/logout', {}, { withCredentials: true }).finally(() => {
+          logout()
           window.location.href = '/auth/login'
         })
       })
