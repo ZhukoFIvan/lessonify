@@ -161,7 +161,7 @@ export function TariffSection() {
         <button
           onClick={handleTrial}
           disabled={billingLoading}
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-sm font-semibold hover:bg-amber-500/20 transition-colors disabled:opacity-50"
         >
           <Sparkles size={15} />
           {billingLoading ? 'Активация...' : 'Попробовать PRO бесплатно — 30 дней'}

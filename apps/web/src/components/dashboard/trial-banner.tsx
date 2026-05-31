@@ -25,7 +25,7 @@ export function TrialBanner() {
     }
 
     return (
-      <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl border bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/20">
+      <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl border bg-amber-500/10 border-amber-500/20">
         <Sparkles size={16} className="text-amber-500 shrink-0" />
         <p className="text-xs font-medium flex-1 text-amber-700 dark:text-amber-400">
           Попробуйте PRO бесплатно — 30 дней без ограничений
@@ -33,7 +33,7 @@ export function TrialBanner() {
         <button
           onClick={handleTrial}
           disabled={loading}
-          className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors disabled:opacity-50"
+          className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-colors disabled:opacity-50"
         >
           {loading ? '...' : 'Активировать'}
         </button>
