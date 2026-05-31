@@ -11,6 +11,7 @@ import { StudentDashboard } from '@/components/dashboard/student-dashboard'
 import { TrialBanner } from '@/components/dashboard/trial-banner'
 import { QuickStats } from '@/components/dashboard/quick-stats'
 import { QuickActions } from '@/components/dashboard/quick-actions'
+import { ActionCards } from '@/components/dashboard/action-cards'
 import { HomeworkOverview } from '@/components/dashboard/homework-overview'
 import { AddLessonModal } from '@/components/lesson/add-lesson-modal'
 import { AddStudentModal } from '@/components/students/add-student-modal'
@@ -73,6 +74,11 @@ export default function DashboardPage() {
       {/* Debtors — full width below */}
       <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.36 }} className="mt-5">
         <DebtorsStrip />
+      </motion.div>
+
+      {/* Quick action cards — anchor the lower zone */}
+      <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.42 }} className="mt-6">
+        <ActionCards onAction={handleQuickAction} />
       </motion.div>
 
       {/* Modals triggered by quick actions */}
