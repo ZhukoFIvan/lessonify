@@ -57,7 +57,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
 
   return (
     <Card className={cn(isOverdue && item.status === 'ASSIGNED' && 'border-danger/40')}>
-      <CardContent className="p-4">
+      <CardContent className="p-3.5">
         <div className="flex items-start gap-3">
           {/* Цветная полоска + аватар ученика */}
           <div

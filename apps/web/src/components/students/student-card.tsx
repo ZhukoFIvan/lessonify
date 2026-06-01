@@ -21,7 +21,7 @@ export function StudentCard({ student, onClick }: StudentCardProps) {
       className={cn('card-hover cursor-pointer active:scale-[0.99] transition-transform')}
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      <CardContent className="px-4 py-3">
         <div className="flex items-center gap-3">
           {/* Цветной индикатор */}
           <div
