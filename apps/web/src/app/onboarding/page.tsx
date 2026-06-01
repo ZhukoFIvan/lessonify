@@ -52,7 +52,7 @@ export default function OnboardingPage() {
   const [data, setData] = useState<OnboardingData>({
     name: user?.name ?? '',
     gender: (user?.gender as OnboardingData['gender']) ?? null,
-    avatarUrl: user?.avatarUrl ?? `https://api.dicebear.com/8.x/avataaars/svg?seed=${encodeURIComponent(user?.name ?? 'User')}&backgroundColor=b6e3f4&radius=50`,
+    avatarUrl: user?.avatarUrl ?? '',
     subjects: [],
     hourlyRate: null,
     studentAdded: false,

@@ -66,7 +66,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
             if (data.avatarUrl.includes('api.dicebear.com')) {
               onChange({
                 name: e.target.value,
-                avatarUrl: `https://api.dicebear.com/8.x/avataaars/svg?seed=${encodeURIComponent(e.target.value)}&backgroundColor=b6e3f4&radius=50`,
+                avatarUrl: `https://api.dicebear.com/8.x/shapes/svg?seed=${encodeURIComponent(e.target.value)}&backgroundColor=b6e3f4&radius=50`,
               })
             }
           }}

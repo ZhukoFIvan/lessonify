@@ -14,7 +14,7 @@ function AvatarImg({ src, alt, size }: { src: string; alt: string; size: number 
   return <NextImage src={src} alt={alt} width={size} height={size} className="w-full h-full object-cover" />
 }
 
-// 4 варианта аватарок DiceBear (avataaars стиль)
+// 4 варианта аватарок DiceBear (нейтральный стиль shapes — без лиц)
 const DICEBEAR_PRESETS = [
   'Felix',
   'Mia',
@@ -23,7 +23,7 @@ const DICEBEAR_PRESETS = [
 ] as const
 
 function dicebearUrl(seed: string) {
-  return `https://api.dicebear.com/8.x/avataaars/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc&radius=50`
+  return `https://api.dicebear.com/8.x/shapes/svg?seed=${seed}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc&radius=50`
 }
 
 interface AvatarPickerProps {
