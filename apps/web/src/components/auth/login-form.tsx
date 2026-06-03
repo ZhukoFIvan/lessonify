@@ -3,8 +3,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Eye, EyeOff, GraduationCap } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,9 +47,13 @@ export function LoginForm() {
     <div className="flex flex-col gap-6">
       {/* Заголовок */}
       <div className="text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <GraduationCap size={28} className="text-white" />
-        </div>
+        <Image
+          src="/logo.png"
+          alt="Lessonify"
+          width={56}
+          height={56}
+          className="rounded-2xl mx-auto mb-3 shadow-lg"
+        />
         <h1 className="text-xl font-bold text-foreground tracking-tight">Добро пожаловать</h1>
         <p className="text-muted-foreground mt-1 text-sm">Войдите в свой аккаунт Lessonify</p>
       </div>

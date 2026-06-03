@@ -9,9 +9,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type,
       type={type}
       className={cn(
         'flex h-12 w-full rounded-2xl border border-input bg-secondary/50 px-4 py-3 text-base text-foreground placeholder:text-muted-foreground',
-        'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-secondary',
+        'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0 focus:border-transparent focus:bg-secondary',
         'disabled:cursor-not-allowed disabled:opacity-50',
-        'transition-all duration-150',
+        'transition-[background-color,border-color,color,opacity] duration-150',
         (type === 'date' || type === 'time') && 'max-w-full overflow-hidden appearance-none',
         className,
       )}
