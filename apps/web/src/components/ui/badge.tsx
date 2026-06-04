@@ -7,12 +7,15 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary/10 text-primary',
-        success: 'bg-emerald-50 text-emerald-600',
-        warning: 'bg-amber-50 text-amber-600',
-        danger: 'bg-red-50 text-red-500',
-        secondary: 'bg-secondary text-secondary-foreground',
-        outline: 'border border-border text-foreground',
+        default: 'bg-primary/12 text-primary ring-1 ring-inset ring-primary/20',
+        success:
+          'bg-[hsl(var(--success)/0.14)] text-[hsl(var(--success))] ring-1 ring-inset ring-[hsl(var(--success)/0.25)]',
+        warning:
+          'bg-[hsl(var(--warning)/0.16)] text-[hsl(var(--warning))] ring-1 ring-inset ring-[hsl(var(--warning)/0.28)]',
+        danger:
+          'bg-[hsl(var(--danger)/0.14)] text-[hsl(var(--danger))] ring-1 ring-inset ring-[hsl(var(--danger)/0.25)]',
+        secondary: 'bg-surface-2 text-secondary-foreground ring-1 ring-inset ring-[var(--border-subtle)]',
+        outline: 'border border-[var(--border-strong)] text-foreground',
       },
     },
     defaultVariants: { variant: 'default' },

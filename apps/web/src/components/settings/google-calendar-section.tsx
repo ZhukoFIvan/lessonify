@@ -57,9 +57,9 @@ export function GoogleCalendarSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="surface-1 rounded-lg p-5">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#4285F4]/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-md bg-[#4285F4]/12 flex items-center justify-center shrink-0">
           <CalendarDays size={20} className="text-[#4285F4]" />
         </div>
 

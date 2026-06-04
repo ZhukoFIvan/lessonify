@@ -37,9 +37,9 @@ export function BookingRequestsSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="surface-1 rounded-lg p-5">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-md bg-warning/12 flex items-center justify-center shrink-0">
           <CalendarCheck size={20} className="text-warning" />
         </div>
         <div className="flex-1">
@@ -61,7 +61,7 @@ export function BookingRequestsSection() {
       ) : (
         <div className="space-y-3">
           {bookings.map((booking) => (
-            <div key={booking.id} className="rounded-xl border border-border p-3">
+            <div key={booking.id} className="rounded-md border border-subtle bg-surface-0 p-3">
               <div className="flex items-center gap-2.5 mb-2">
                 <Avatar className="w-8 h-8 shrink-0">
                   <AvatarImage src={booking.student?.user?.avatarUrl ?? undefined} />
@@ -78,7 +78,7 @@ export function BookingRequestsSection() {
               </div>
 
               {booking.note && (
-                <p className="text-xs text-muted-foreground bg-secondary/50 rounded-lg px-2.5 py-1.5 mb-2">
+                <p className="text-xs text-muted-foreground bg-surface-2 rounded-md px-2.5 py-1.5 mb-2">
                   {booking.note}
                 </p>
               )}
@@ -89,7 +89,7 @@ export function BookingRequestsSection() {
                   placeholder="Цена (₽)"
                   value={priceMap[booking.id] ?? ''}
                   onChange={(e) => setPriceMap((p) => ({ ...p, [booking.id]: e.target.value }))}
-                  className="flex-1 text-xs border border-border rounded-lg px-2.5 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="tnum flex-1 text-xs border border-subtle rounded-md px-2.5 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60"
                 />
                 <Button
                   size="sm"

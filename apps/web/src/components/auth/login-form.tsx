@@ -46,16 +46,16 @@ export function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       {/* Заголовок */}
-      <div className="text-center">
+      <div>
         <Image
           src="/logo.png"
           alt="Lessonify"
-          width={56}
-          height={56}
-          className="rounded-2xl mx-auto mb-3 shadow-lg"
+          width={48}
+          height={48}
+          className="mb-4 rounded-lg shadow-elevation-2 lg:hidden"
         />
-        <h1 className="text-xl font-bold text-foreground tracking-tight">Добро пожаловать</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Войдите в свой аккаунт Lessonify</p>
+        <h1 className="text-h1 text-foreground">Добро пожаловать</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">Войдите в свой аккаунт Lessonify</p>
       </div>
 
       {/* Форма */}
@@ -91,7 +91,7 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -99,16 +99,16 @@ export function LoginForm() {
           {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
 
-        <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+        <Button type="submit" className="mt-2 w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Вход...' : 'Войти'}
         </Button>
       </form>
 
       {/* Разделитель */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-border" />
+        <div className="h-px flex-1 bg-[var(--border-subtle)]" />
         <span className="text-xs text-muted-foreground">или</span>
-        <div className="flex-1 h-px bg-border" />
+        <div className="h-px flex-1 bg-[var(--border-subtle)]" />
       </div>
 
       <GoogleButton />
@@ -116,7 +116,7 @@ export function LoginForm() {
       {/* Ссылка на регистрацию */}
       <p className="text-center text-sm text-muted-foreground">
         Нет аккаунта?{' '}
-        <Link href="/auth/register" className="text-primary font-semibold">
+        <Link href="/auth/register" className="font-semibold text-primary hover:underline">
           Зарегистрироваться
         </Link>
       </p>

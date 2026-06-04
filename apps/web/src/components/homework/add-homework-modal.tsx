@@ -105,7 +105,7 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
               {...register('description')}
               placeholder="Опишите задание для ученика..."
               rows={4}
-              className="w-full rounded-2xl border border-input bg-secondary/50 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary resize-none"
+              className="w-full rounded-md border border-[var(--border-subtle)] bg-surface-0 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-colors"
             />
             {errors.description && (
               <p className="text-xs text-destructive">{errors.description.message}</p>
@@ -130,13 +130,13 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
             {files.length > 0 && (
               <div className="flex flex-col gap-1">
                 {files.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 rounded-xl bg-secondary px-3 py-2">
+                  <div key={i} className="flex items-center gap-2 rounded-md bg-surface-2 border border-[var(--border-subtle)] px-3 py-2">
                     <Paperclip size={13} className="text-muted-foreground shrink-0" />
                     <span className="text-xs text-foreground flex-1 truncate">{f.name}</span>
                     <button
                       type="button"
                       onClick={() => removeFile(i)}
-                      className="text-muted-foreground hover:text-danger"
+                      className="text-muted-foreground hover:text-danger transition-colors"
                     >
                       <X size={14} />
                     </button>
@@ -158,7 +158,7 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 rounded-xl border-2 border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                  className="flex items-center gap-2 rounded-md border-2 border-dashed border-[var(--border-strong)] px-4 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                 >
                   <Paperclip size={15} />
                   Прикрепить файл

@@ -4,16 +4,20 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-95 select-none',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-[-0.01em] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97] select-none',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        secondary: 'bg-secondary border border-border text-foreground hover:bg-secondary/80',
+        default:
+          'brand-gradient text-primary-foreground shadow-[0_4px_14px_-4px_rgba(108,99,255,0.5)] hover:brightness-110 hover:shadow-[0_6px_20px_-4px_rgba(108,99,255,0.6)]',
+        secondary:
+          'bg-surface-2 border border-[var(--border-subtle)] text-foreground shadow-elevation-1 hover:bg-surface-3 hover:border-[var(--border-strong)]',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent',
+        destructive:
+          'bg-destructive text-destructive-foreground shadow-[0_4px_14px_-4px_rgba(239,68,68,0.45)] hover:brightness-110',
+        outline:
+          'border border-[var(--border-strong)] bg-transparent hover:bg-accent hover:border-primary/40',
       },
       size: {
         default: 'h-12 rounded-full px-6 py-3 text-base',

@@ -42,17 +42,19 @@ export function NextLessonCard() {
   const { lesson, loading } = useNextLesson()
   const countdown = useCountdown(lesson?.startTime ?? null)
 
-  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-2xl" />
+  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-lg" />
 
   if (!lesson) {
+    // Компактное «отдыхай»-состояние. НЕ дублирует CTA «Запланировать урок»
+    // из TodayLessons — это просто статус, без кнопки добавления.
     return (
-      <div className="h-full rounded-2xl bg-secondary/50 border border-border px-4 py-4 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <PartyPopper size={17} className="text-primary" />
+      <div className="h-full rounded-lg brand-wash border border-primary/20 px-4 py-4 flex items-center gap-3 shadow-elevation-1">
+        <div className="w-10 h-10 rounded-md bg-primary/15 flex items-center justify-center shrink-0">
+          <PartyPopper size={18} className="text-primary" />
         </div>
-        <div>
-          <p className="font-semibold text-foreground text-sm">Уроков на сегодня больше нет</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Хорошего отдыха!</p>
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground text-sm">Ближайших уроков нет</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Свободное окно — можно выдохнуть</p>
         </div>
       </div>
     )
@@ -63,16 +65,16 @@ export function NextLessonCard() {
 
   return (
     <Link href={`/calendar`} className="block h-full">
-      <Card className="h-full bg-gradient-to-r from-primary to-purple-500 text-white card-hover">
+      <Card className="h-full brand-gradient text-white border-transparent card-hover shadow-glow">
         <CardContent className="p-4 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5 text-white/80 text-xs font-medium">
               <Clock size={13} />
               <span>Ближайший урок</span>
             </div>
-            {/* Живой таймер */}
-            <div className={`text-xs font-bold px-2.5 py-1 rounded-full ${isImminent ? 'bg-amber-400 text-amber-900' : 'bg-white/20 text-white'}`}>
-              <Timer size={11} className="inline mr-0.5" />{countdown}
+            {/* Живой таймер — hero-treatment для ключевого числа */}
+            <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full tnum ${isImminent ? 'bg-amber-400 text-amber-900' : 'bg-white/20 text-white'}`}>
+              <Timer size={11} />{countdown}
             </div>
           </div>
 
@@ -86,7 +88,7 @@ export function NextLessonCard() {
 
             <div className="flex-1 min-w-0">
               <p className="font-bold text-white truncate">{lesson.student.name}</p>
-              <p className="text-white/80 text-sm">
+              <p className="text-white/80 text-sm truncate">
                 {lesson.subject} · {getLessonTimeRange(lesson.startTime, lesson.durationMinutes)}
               </p>
             </div>

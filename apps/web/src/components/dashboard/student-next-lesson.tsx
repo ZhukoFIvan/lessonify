@@ -28,7 +28,7 @@ export function StudentNextLesson() {
     return () => clearInterval(interval)
   }, [lesson])
 
-  if (loading) return <Skeleton className="mx-4 h-24 rounded-2xl" />
+  if (loading) return <Skeleton className="mx-4 h-24 rounded-lg" />
   if (!lesson) return null
 
   const minutesUntil = (new Date(lesson.startTime).getTime() - Date.now()) / 60_000
@@ -55,7 +55,7 @@ export function StudentNextLesson() {
             <div className="text-right shrink-0">
               <div className="flex items-center gap-1 justify-end">
                 <Clock size={12} className={isNear ? 'text-warning' : 'text-muted-foreground'} />
-                <span className={`text-xs font-semibold ${isNear ? 'text-warning' : 'text-muted-foreground'}`}>
+                <span className={`text-xs font-semibold tnum ${isNear ? 'text-warning' : 'text-muted-foreground'}`}>
                   {countdown}
                 </span>
               </div>

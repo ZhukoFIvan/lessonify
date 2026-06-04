@@ -12,7 +12,7 @@ import { GenderPicker } from '@/components/onboarding/gender-picker'
 import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/use-auth'
 import { toast } from '@/components/ui/use-toast'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, User } from 'lucide-react'
 
 const schema = z.object({
   name: z.string().min(2, 'Минимум 2 символа').max(100),
@@ -49,21 +49,27 @@ export function ProfileSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden">
+    <div className="surface-1 rounded-lg overflow-hidden">
       {/* Заголовок секции */}
       <button
-        className="w-full flex items-center justify-between px-5 py-4"
+        className="group w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-2"
         onClick={() => setExpanded((v) => !v)}
       >
-        <div className="text-left">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/12 text-primary">
+          <User size={18} />
+        </span>
+        <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">Профиль</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{user?.name}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{user?.name}</p>
         </div>
-        {expanded ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+        <ChevronDown
+          size={18}
+          className={`shrink-0 text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {expanded && (
-        <form onSubmit={handleSubmit(onSubmit)} className="px-5 pb-5 flex flex-col gap-5 border-t border-border pt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-5 pb-5 flex flex-col gap-5 border-t border-subtle pt-5">
           {/* Аватарка */}
           <AvatarPicker value={avatar} onChange={setAvatar} userName={user?.name} />
 

@@ -90,85 +90,93 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
   }
 
   const isBusy = uploading || submitLoading
+  const isOverdueAssigned = isOverdue && isAssigned
 
   return (
-    <Card className={cn(isOverdue && isAssigned && 'border-danger/40')}>
+    <Card
+      className={cn(
+        'card-hover overflow-hidden h-full',
+        isOverdueAssigned
+          ? 'ring-1 ring-inset ring-danger/30'
+          : isAssigned && 'ring-1 ring-inset ring-primary/25',
+      )}
+    >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <Avatar className="w-9 h-9 shrink-0 mt-0.5">
+          <Avatar className="w-9 h-9 shrink-0">
             <AvatarImage src={item.tutor.user.avatarUrl ?? undefined} />
             <AvatarFallback className="text-xs">{getInitials(item.tutor.user.name)}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center justify-between gap-2 mb-0.5">
               <p className="text-sm font-semibold text-foreground truncate">{item.lesson.subject}</p>
               <Badge variant={config.variant} className="shrink-0">{config.label}</Badge>
             </div>
 
-            <p className="text-xs text-muted-foreground mb-2">{item.tutor.user.name}</p>
-            <p className="text-sm text-foreground leading-snug mb-2">{item.description}</p>
-
-            {/* Материалы от репетитора */}
-            {item.attachmentUrls.length > 0 && (
-              <div className="flex flex-col gap-1 mb-3">
-                {item.attachmentUrls.map((url) => (
-                  <a key={url} href={url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-primary hover:underline">
-                    <Paperclip size={11} />
-                    {getFileName(url)}
-                  </a>
-                ))}
-              </div>
-            )}
+            <p className="text-xs text-muted-foreground truncate">{item.tutor.user.name}</p>
 
             {hasDeadline && (
-              <div className="flex items-center gap-1.5 mb-3">
-                <Clock size={12} className={cn(isOverdue && isAssigned ? 'text-danger' : 'text-muted-foreground')} />
-                <span className={cn('text-xs', isOverdue && isAssigned ? 'text-danger font-medium' : 'text-muted-foreground')}>
+              <div className="mt-2 inline-flex items-center gap-1.5">
+                <Clock size={12} className={cn(isOverdueAssigned ? 'text-danger' : 'text-muted-foreground')} />
+                <span className={cn('text-xs', isOverdueAssigned ? 'text-danger font-semibold' : 'text-muted-foreground')}>
                   {deadlineLabel()}
                 </span>
               </div>
             )}
-
-            {isReviewed && item.feedback && (
-              <div className="rounded-xl bg-success/5 border border-success/20 p-3 mb-3">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <MessageSquare size={12} className="text-success" />
-                  <span className="text-xs font-semibold text-success">Обратная связь</span>
-                </div>
-                <p className="text-xs text-foreground">{item.feedback}</p>
-              </div>
-            )}
-
-            {isAssigned && onSubmit && (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="w-full gap-1.5 border-primary/20 text-primary hover:bg-primary/5"
-                onClick={() => setSubmitOpen(true)}
-                disabled={submitLoading}
-              >
-                <CheckCircle2 size={14} />
-                {submitLoading ? 'Отправка...' : 'Сдать задание'}
-              </Button>
-            )}
-
-            {item.status !== 'ASSIGNED' && (item.submissionText || item.fileUrls.length > 0) && (
-              <div className="rounded-xl bg-secondary p-3 mt-1 space-y-1">
-                <p className="text-xs text-muted-foreground font-medium">Ваш ответ</p>
-                {item.submissionText && <p className="text-xs text-foreground">{item.submissionText}</p>}
-                {item.fileUrls.map((url) => (
-                  <a key={url} href={url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-primary hover:underline">
-                    <Paperclip size={11} />
-                    {getFileName(url)}
-                  </a>
-                ))}
-              </div>
-            )}
           </div>
         </div>
+
+        <p className="text-sm text-foreground leading-snug mt-3">{item.description}</p>
+
+        {/* Материалы от репетитора */}
+        {item.attachmentUrls.length > 0 && (
+          <div className="flex flex-col gap-1 mt-2.5">
+            {item.attachmentUrls.map((url) => (
+              <a key={url} href={url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                <Paperclip size={11} className="shrink-0" />
+                <span className="truncate">{getFileName(url)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {isReviewed && item.feedback && (
+          <div className="rounded-md bg-success/[0.07] border border-success/20 p-3 mt-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <MessageSquare size={12} className="text-success" />
+              <span className="text-xs font-semibold text-success">Обратная связь</span>
+            </div>
+            <p className="text-xs text-foreground leading-snug">{item.feedback}</p>
+          </div>
+        )}
+
+        {item.status !== 'ASSIGNED' && (item.submissionText || item.fileUrls.length > 0) && (
+          <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3 mt-3 space-y-1.5">
+            <p className="text-xs text-muted-foreground font-semibold">Ваш ответ</p>
+            {item.submissionText && <p className="text-xs text-foreground leading-snug">{item.submissionText}</p>}
+            {item.fileUrls.map((url) => (
+              <a key={url} href={url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                <Paperclip size={11} className="shrink-0" />
+                <span className="truncate">{getFileName(url)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {isAssigned && onSubmit && (
+          <Button
+            size="sm"
+            className="w-full gap-1.5 mt-3"
+            onClick={() => setSubmitOpen(true)}
+            disabled={submitLoading}
+          >
+            <CheckCircle2 size={14} />
+            {submitLoading ? 'Отправка...' : 'Сдать задание'}
+          </Button>
+        )}
       </CardContent>
 
       <Dialog open={submitOpen} onOpenChange={(v) => !v && handleClose()}>
@@ -177,9 +185,9 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
             <DialogTitle>Сдать задание</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
-            <div className="rounded-xl bg-secondary p-3">
-              <p className="text-xs text-muted-foreground font-medium mb-1">Задание</p>
-              <p className="text-sm text-foreground line-clamp-3">{item.description}</p>
+            <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Задание</p>
+              <p className="text-sm text-foreground line-clamp-3 leading-snug">{item.description}</p>
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -189,7 +197,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Напишите комментарий к выполненному заданию..."
                 rows={3}
-                className="w-full rounded-2xl border border-input bg-secondary/50 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary resize-none"
+                className="w-full rounded-md border border-[var(--border-subtle)] bg-surface-0 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-colors"
               />
             </div>
 
@@ -200,10 +208,10 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
               {files.length > 0 && (
                 <div className="flex flex-col gap-1">
                   {files.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 rounded-xl bg-secondary px-3 py-2">
+                    <div key={i} className="flex items-center gap-2 rounded-md bg-surface-2 border border-[var(--border-subtle)] px-3 py-2">
                       <Paperclip size={13} className="text-muted-foreground shrink-0" />
                       <span className="text-xs text-foreground flex-1 truncate">{f.name}</span>
-                      <button onClick={() => removeFile(i)} className="text-muted-foreground hover:text-danger">
+                      <button onClick={() => removeFile(i)} className="text-muted-foreground hover:text-danger transition-colors">
                         <X size={14} />
                       </button>
                     </div>
@@ -224,7 +232,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 rounded-xl border-2 border-dashed border-border px-4 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    className="flex items-center gap-2 rounded-md border-2 border-dashed border-[var(--border-strong)] px-4 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   >
                     <Paperclip size={15} />
                     Прикрепить файл

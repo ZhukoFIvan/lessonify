@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/use-toast'
+import { cn } from '@/lib/utils'
 
 // ── Схемы ──────────────────────────────────────────────────────────────────────
 
@@ -96,16 +97,16 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Заголовок */}
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <KeyRound size={26} className="text-white" />
+      <div>
+        <div className="brand-gradient mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-white shadow-elevation-2">
+          <KeyRound size={24} />
         </div>
-        <h1 className="text-xl font-bold text-foreground tracking-tight">
+        <h1 className="text-h1 text-foreground">
           {step === 1 && 'Сброс пароля'}
           {step === 2 && 'Введите код'}
           {step === 3 && 'Новый пароль'}
         </h1>
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           {step === 1 && 'Введите email — отправим код на почту'}
           {step === 2 && `Код отправлен на ${email}`}
           {step === 3 && 'Придумайте новый пароль'}
@@ -113,13 +114,14 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Индикатор шагов */}
-      <div className="flex items-center gap-2 justify-center">
+      <div className="flex items-center gap-2">
         {([1, 2, 3] as const).map((s) => (
           <div
             key={s}
-            className={`h-1.5 rounded-full transition-all ${
-              s <= step ? 'bg-primary w-8' : 'bg-border w-4'
-            }`}
+            className={cn(
+              'h-1.5 rounded-full transition-all duration-300',
+              s <= step ? 'brand-gradient w-10' : 'w-5 bg-[var(--border-strong)]',
+            )}
           />
         ))}
       </div>
@@ -170,7 +172,7 @@ export default function ForgotPasswordPage() {
           <button
             type="button"
             onClick={() => emailForm.handleSubmit(onEmailSubmit)()}
-            className="text-sm text-center text-muted-foreground hover:text-primary transition-colors"
+            className="text-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Отправить код повторно
           </button>
@@ -194,7 +196,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -218,7 +220,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirm((v) => !v)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
               >
                 {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>

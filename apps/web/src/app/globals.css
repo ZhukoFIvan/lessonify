@@ -4,67 +4,142 @@
 
 @layer base {
   :root {
-    /* Light theme (HSL format) */
-    --background: 0 0% 100%;       /* White */
-    --foreground: 240 10% 10%;     /* Dark text */
+    /* ============================================================
+       LIGHT THEME (HSL format for shadcn tokens)
+       Layered, crafted surfaces: page is faintly tinted, cards sit
+       ABOVE it and get progressively lighter with elevation.
+       ============================================================ */
 
-    --card: 0 0% 100%;             /* White card */
-    --card-foreground: 240 10% 10%;
+    /* Page base — very light cool gray, not pure white */
+    --background: 240 24% 98%;     /* ~#F7F8FB */
+    --foreground: 240 18% 12%;     /* near-black ink */
+
+    /* Card == surface-1 (the default raised plane) */
+    --card: 0 0% 100%;             /* pure white card on tinted bg */
+    --card-foreground: 240 18% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 240 18% 12%;
 
-    --primary: 246 95% 65%;        /* #6C63FF - purple */
+    --primary: 246 100% 69%;       /* #6C63FF brand indigo */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 10% 96%;      /* Light gray */
-    --secondary-foreground: 240 10% 10%;
+    --secondary: 240 22% 95%;      /* soft control fill */
+    --secondary-foreground: 240 16% 16%;
 
-    --muted: 240 10% 96%;
-    --muted-foreground: 240 5% 45%; /* Muted gray */
+    --muted: 240 22% 95%;
+    --muted-foreground: 240 8% 46%;
 
-    --accent: 240 10% 96%;
-    --accent-foreground: 246 95% 65%;
+    --accent: 240 22% 95%;
+    --accent-foreground: 246 100% 64%;
 
-    --destructive: 0 84% 60%;      /* Red */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 10% 90%;         /* Light border */
-    --input: 240 10% 90%;
-    --ring: 246 95% 65%;
+    --border: 240 16% 90%;
+    --input: 240 16% 90%;
+    --ring: 246 100% 69%;
 
-    --radius: 1rem;
+    /* ---- Layered surface tokens (raw colors, not HSL triplets) ---- */
+    --surface-0: #F2F3F8;          /* recessed / page tint */
+    --surface-1: #FFFFFF;          /* default card */
+    --surface-2: #FFFFFF;          /* raised / hover */
+    --surface-3: #FFFFFF;          /* popover / overlay top */
+
+    /* Hairline borders that read as "edge of light", not boxes */
+    --border-subtle: rgba(15, 18, 38, 0.07);
+    --border-strong: rgba(15, 18, 38, 0.12);
+
+    /* Semantic accents (foreground-on-surface variants) */
+    --success: 152 62% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 48%;
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 84% 58%;
+    --danger-foreground: 0 0% 100%;
+
+    /* Brand glow tint (used for focus glow / accent halos) */
+    --brand-glow: 108 99 255;
+
+    /* ---- Unified radius scale ---- */
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    /* shadcn compat: components map md/sm off of --radius */
+    --radius: var(--radius-lg);
+
+    /* ---- Elevation shadows (soft, multi-layer) ---- */
+    --shadow-1: 0 1px 2px rgba(15, 18, 38, 0.06), 0 1px 3px rgba(15, 18, 38, 0.05);
+    --shadow-2: 0 4px 12px rgba(15, 18, 38, 0.08), 0 2px 6px rgba(15, 18, 38, 0.04);
+    --shadow-3: 0 12px 32px rgba(15, 18, 38, 0.12), 0 6px 14px rgba(15, 18, 38, 0.06);
   }
 
   .dark {
-    /* Dark theme (HSL format) */
-    --background: 240 20% 8%;      /* Deep dark blue-gray */
-    --foreground: 240 10% 98%;     /* Light text */
+    /* ============================================================
+       DARK THEME — primary. Crafted layered elevation:
+       base ~#0B0D14 → surface-1 #141826 → surface-2 #1C2030 →
+       surface-3 #242838. Surfaces LIGHTEN as they rise.
+       ============================================================ */
 
-    --card: 240 15% 12%;           /* Dark card */
-    --card-foreground: 240 10% 98%;
+    --background: 228 28% 6%;      /* ~#0B0D14 deep base */
+    --foreground: 228 24% 96%;     /* soft off-white ink */
 
-    --popover: 240 15% 12%;
-    --popover-foreground: 240 10% 98%;
+    /* Card == surface-1 */
+    --card: 228 24% 12%;           /* ~#141826 */
+    --card-foreground: 228 24% 96%;
 
-    --primary: 246 95% 70%;        /* #6C63FF - purple accent */
+    /* Popover == surface-3 (sits highest, lightest) */
+    --popover: 228 22% 18%;        /* ~#242838 */
+    --popover-foreground: 228 24% 96%;
+
+    --primary: 246 100% 70%;       /* brand indigo, slightly brighter on dark */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 15% 18%;      /* Darker secondary */
-    --secondary-foreground: 240 10% 98%;
+    /* secondary == surface-2 (raised control fill / hover plane) */
+    --secondary: 228 22% 15%;      /* ~#1C2030 */
+    --secondary-foreground: 228 24% 96%;
 
-    --muted: 240 15% 18%;
-    --muted-foreground: 220 9% 65%; /* Muted gray */
+    --muted: 228 22% 15%;
+    --muted-foreground: 225 12% 64%;
 
-    --accent: 240 15% 18%;
-    --accent-foreground: 246 95% 70%;
+    --accent: 228 22% 15%;
+    --accent-foreground: 246 100% 76%;
 
-    --destructive: 0 84% 60%;      /* Red */
+    --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 12% 22%;         /* Subtle border */
-    --input: 240 12% 22%;
-    --ring: 246 95% 70%;
+    /* Borders are light-on-dark hairlines */
+    --border: 228 18% 22%;
+    --input: 228 18% 22%;
+    --ring: 246 100% 70%;
+
+    /* ---- Layered surface tokens ---- */
+    --surface-0: #0B0D14;          /* recessed wells / page */
+    --surface-1: #141826;          /* default card */
+    --surface-2: #1C2030;          /* raised / hover */
+    --surface-3: #242838;          /* popover / overlay top */
+
+    /* Hairline borders — edge of light catching the top of a surface */
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.10);
+
+    /* Semantic accents tuned for dark */
+    --success: 152 58% 52%;
+    --success-foreground: 152 50% 8%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 38 60% 10%;
+    --danger: 0 78% 64%;
+    --danger-foreground: 0 60% 10%;
+
+    --brand-glow: 124 116 255;
+
+    /* radii inherit from :root; only override if needed */
+
+    /* ---- Elevation shadows for dark (deeper, with brand-free neutrals) ---- */
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.30);
+    --shadow-2: 0 6px 16px rgba(0, 0, 0, 0.50), 0 2px 6px rgba(0, 0, 0, 0.35);
+    --shadow-3: 0 16px 40px rgba(0, 0, 0, 0.58), 0 8px 18px rgba(0, 0, 0, 0.40);
   }
 }
 
@@ -84,6 +159,9 @@
     height: 100%;
     overflow-y: auto;
     overflow-x: clip;
+    /* Tighter, more modern type rendering */
+    font-feature-settings: 'cv01', 'cv02', 'cv03', 'ss01';
+    letter-spacing: -0.011em;
     /* Safe area для iPhone notch и home indicator */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -95,9 +173,116 @@
   body::-webkit-scrollbar {
     display: none;
   }
+
+  /* Headings get tight, crafted tracking by default */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+  }
 }
 
 @layer utilities {
+  /* ============================================================
+     LAYERED SURFACES — apply these to get real elevation.
+     Each surface = fill + hairline top-edge border + matching shadow.
+     ============================================================ */
+  .surface-0 {
+    background-color: var(--surface-0);
+  }
+  .surface-1 {
+    background-color: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-1);
+  }
+  .surface-2 {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-2);
+  }
+  .surface-3 {
+    background-color: var(--surface-3);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-3);
+  }
+  /* Bare fills (no border/shadow) for nested wells & chips */
+  .bg-surface-0 { background-color: var(--surface-0); }
+  .bg-surface-1 { background-color: var(--surface-1); }
+  .bg-surface-2 { background-color: var(--surface-2); }
+  .bg-surface-3 { background-color: var(--surface-3); }
+
+  /* Hairline border helpers (use when you want the light edge alone) */
+  .border-subtle { border-color: var(--border-subtle); }
+  .border-strong { border-color: var(--border-strong); }
+
+  /* Elevation shadow helpers (decoupled from background) */
+  .elevation-1 { box-shadow: var(--shadow-1); }
+  .elevation-2 { box-shadow: var(--shadow-2); }
+  .elevation-3 { box-shadow: var(--shadow-3); }
+
+  /* ============================================================
+     NUMERICS — tabular figures so columns of numbers align.
+     ============================================================ */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'cv01' 1;
+  }
+
+  /* Hero number treatment: big, bold, tight, tabular.
+     Use for the primary money/stat on a card or screen. */
+  .hero-number {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'cv01' 1;
+    font-weight: 800;
+    font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  /* Smaller hero variant for stat-card grids */
+  .stat-number {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'cv01' 1;
+    font-weight: 700;
+    font-size: 1.375rem;   /* ~22px */
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  /* Currency / unit suffix paired with a hero number */
+  .hero-unit {
+    font-weight: 600;
+    font-size: 0.55em;
+    letter-spacing: -0.01em;
+    opacity: 0.65;
+  }
+
+  /* ============================================================
+     ACCENT TREATMENTS — brand glow & gradient for hero elements.
+     ============================================================ */
+  /* Subtle indigo halo behind focused/active accent elements */
+  .brand-glow {
+    box-shadow: 0 0 0 1px rgba(var(--brand-glow), 0.35),
+                0 8px 24px -6px rgba(var(--brand-glow), 0.45);
+  }
+  /* Filled brand gradient for primary CTAs / hero panels */
+  .brand-gradient {
+    background-image: linear-gradient(135deg, #7A73FF 0%, #6C63FF 55%, #5B52F0 100%);
+  }
+  /* Faint brand wash for accent surfaces (cards, banners) */
+  .brand-wash {
+    background-image: linear-gradient(
+      135deg,
+      rgba(var(--brand-glow), 0.14) 0%,
+      rgba(var(--brand-glow), 0.04) 100%
+    );
+  }
+  /* Thin animated/static accent ring for focus on accent elements */
+  .accent-ring {
+    box-shadow: 0 0 0 1px rgba(var(--brand-glow), 0.4),
+                0 0 0 4px rgba(var(--brand-glow), 0.12);
+  }
+
+  /* ============================================================
+     LEGACY / SHARED HELPERS (kept — screens depend on these)
+     ============================================================ */
+
   /* Центрирование мобильного контейнера */
   .mobile-container {
     @apply w-full max-w-[430px] mx-auto;
@@ -113,7 +298,7 @@
     display: none;
   }
 
-  /* Карточка с hover lift */
+  /* Карточка с hover lift — now rises a surface level via shadow-2 */
   .card-hover {
     @apply transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5;
   }

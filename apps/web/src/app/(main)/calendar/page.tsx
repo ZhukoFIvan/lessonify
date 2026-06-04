@@ -10,6 +10,7 @@ import { MonthGrid } from '@/components/calendar/month-grid'
 import { DayView } from '@/components/calendar/day-view'
 import { MonthYearPicker } from '@/components/calendar/month-year-picker'
 import { useCalendarDots, useDayView } from '@/hooks/use-calendar'
+import { cn } from '@/lib/utils'
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 18 },
@@ -47,6 +48,10 @@ export default function CalendarPage() {
     .filter(([k]) => k.startsWith(monthKey))
     .reduce((sum, [, v]) => sum + v.length, 0)
 
+  // Дни месяца, в которых есть уроки (для счётчика "активных дней")
+  const activeDaysCount = Array.from(counts.entries())
+    .filter(([k, v]) => k.startsWith(monthKey) && v.length > 0).length
+
   function handlePrevMonth() {
     const newMonth = subMonths(viewMonth, 1)
     setViewMonth(newMonth)
@@ -65,94 +70,143 @@ export default function CalendarPage() {
     setSelectedDate(today)
   }
 
-  return (
-    <div className="flex flex-col min-h-full lg:p-8">
-      <motion.div {...fadeUp(0)} className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-1">
-        <div className="flex items-center gap-3">
-          {/* Навигация по месяцам */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handlePrevMonth}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
-              aria-label="Предыдущий месяц"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={handleNextMonth}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
-              aria-label="Следующий месяц"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
+  const monthSubtitle =
+    monthLessonsCount > 0
+      ? `${monthLessonsCount} ${monthLessonsCount === 1 ? 'урок' : 'урока/уроков'}`
+      : 'Нет уроков'
 
-          {/* Название месяца с picker */}
-          <MonthYearPicker
-            value={viewMonth}
-            onChange={(newDate) => {
-              setViewMonth(newDate)
-              setSelectedDate(newDate)
-            }}
-          >
-            <button className="text-left hover:opacity-80 transition-opacity">
-              <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight capitalize">
-                {format(viewMonth, 'LLLL yyyy', { locale: ru })}
-              </h1>
-              <p className="text-xs lg:text-sm text-muted-foreground mt-0.5">
-                {monthLessonsCount > 0
-                  ? `${monthLessonsCount} ${monthLessonsCount === 1 ? 'урок' : 'урока/уроков'}`
-                  : 'Нет уроков'}
-              </p>
-            </button>
-          </MonthYearPicker>
-
-          {/* Переключатель режима — только на десктопе */}
+  // ── Шапка (общая для мобилы и десктопа) ──────────────────────────────────
+  const header = (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 lg:gap-3 min-w-0">
+        {/* Навигация по месяцам */}
+        <div className="flex items-center gap-0.5">
           <button
-            onClick={() => setViewMode(viewMode === 'strip' ? 'grid' : 'strip')}
-            className="hidden lg:flex p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-            aria-label={viewMode === 'strip' ? 'Показать календарь' : 'Показать список'}
+            onClick={handlePrevMonth}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+            aria-label="Предыдущий месяц"
           >
-            {viewMode === 'strip' ? <CalendarDays size={18} /> : <LayoutList size={18} />}
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={handleNextMonth}
+            className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+            aria-label="Следующий месяц"
+          >
+            <ChevronRight size={20} />
           </button>
         </div>
 
+        {/* Название месяца с picker */}
+        <MonthYearPicker
+          value={viewMonth}
+          onChange={(newDate) => {
+            setViewMonth(newDate)
+            setSelectedDate(newDate)
+          }}
+        >
+          <button className="min-w-0 text-left transition-opacity hover:opacity-80">
+            <h1 className="truncate text-xl font-bold capitalize tracking-tight text-foreground lg:text-h2">
+              {format(viewMonth, 'LLLL yyyy', { locale: ru })}
+            </h1>
+            <p className="mt-0.5 text-xs text-muted-foreground lg:text-sm">{monthSubtitle}</p>
+          </button>
+        </MonthYearPicker>
+      </div>
+
+      <div className="flex items-center gap-2 shrink-0">
         {!isToday(selectedDate) && (
           <button
             onClick={handleToday}
-            className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors"
+            className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
           >
             Сегодня
           </button>
         )}
-      </motion.div>
 
-      <motion.div {...fadeUp(0.08)} className={viewMode === 'strip' ? 'sticky top-0 bg-background z-10 border-b border-border/60 pb-1 shadow-sm lg:mt-4 overflow-hidden' : 'border-b border-border/60 pb-2 lg:mt-4 overflow-hidden'}>
-        {viewMode === 'strip' ? (
-          <DateStrip
-            days={monthDays}
-            selected={selectedDate}
-            lessonCounts={counts}
-            onSelect={setSelectedDate}
-          />
-        ) : (
-          <MonthGrid
-            days={monthDays}
-            selected={selectedDate}
-            lessonCounts={counts}
-            onSelect={setSelectedDate}
-          />
-        )}
-      </motion.div>
+        {/* Переключатель режима — только на десктопе */}
+        <button
+          onClick={() => setViewMode(viewMode === 'strip' ? 'grid' : 'strip')}
+          className="hidden lg:flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+          aria-label={viewMode === 'strip' ? 'Показать календарь' : 'Показать список'}
+        >
+          {viewMode === 'strip' ? <CalendarDays size={18} /> : <LayoutList size={18} />}
+        </button>
+      </div>
+    </div>
+  )
 
-      <motion.div {...fadeUp(0.16)} className="flex-1 pt-3 lg:max-w-4xl lg:mx-auto lg:w-full">
-        <DayView
-          date={selectedDate}
-          lessons={dayLessons}
-          loading={loading}
-          onRefetch={refetch}
-        />
-      </motion.div>
+  // ── Выбор отображения сетки/полоски ──────────────────────────────────────
+  const picker =
+    viewMode === 'strip' ? (
+      <DateStrip days={monthDays} selected={selectedDate} lessonCounts={counts} onSelect={setSelectedDate} />
+    ) : (
+      <MonthGrid days={monthDays} selected={selectedDate} lessonCounts={counts} onSelect={setSelectedDate} />
+    )
+
+  return (
+    <div className="flex min-h-full flex-col lg:p-6 xl:p-8">
+      {/* ───────────────── МОБИЛЬНАЯ РАСКЛАДКА (< lg) ───────────────── */}
+      <div className="flex flex-col lg:hidden">
+        <motion.div {...fadeUp(0)} className="px-4 pb-1 pt-5">
+          {header}
+        </motion.div>
+
+        <motion.div
+          {...fadeUp(0.08)}
+          className={cn(
+            'overflow-hidden border-b border-border/60',
+            viewMode === 'strip'
+              ? 'sticky top-0 z-10 bg-background pb-1 shadow-sm'
+              : 'pb-2',
+          )}
+        >
+          {picker}
+        </motion.div>
+
+        <motion.div {...fadeUp(0.16)} className="flex-1 pt-3">
+          <DayView date={selectedDate} lessons={dayLessons} loading={loading} onRefetch={refetch} />
+        </motion.div>
+      </div>
+
+      {/* ───────────────── ДЕСКТОПНАЯ РАСКЛАДКА (lg+) ───────────────── */}
+      <div className="hidden lg:flex lg:flex-col lg:flex-1 lg:gap-6">
+        <motion.div {...fadeUp(0)}>{header}</motion.div>
+
+        <div className="grid flex-1 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,440px)] 2xl:grid-cols-[minmax(0,1fr)_480px]">
+          {/* Календарь / список дат */}
+          <motion.div
+            {...fadeUp(0.08)}
+            className="surface-1 flex h-fit flex-col gap-3 rounded-xl p-5"
+          >
+            {picker}
+
+            {/* Сводка по месяцу — заполняет низ карточки полезной плотностью */}
+            <div className="mt-1 grid grid-cols-2 gap-3 border-t border-border/60 pt-4">
+              <div className="rounded-md bg-surface-0 px-3 py-2.5">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Уроков в месяце
+                </p>
+                <p className="tnum mt-1 text-h3 text-foreground">{monthLessonsCount}</p>
+              </div>
+              <div className="rounded-md bg-surface-0 px-3 py-2.5">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Дней с уроками
+                </p>
+                <p className="tnum mt-1 text-h3 text-foreground">{activeDaysCount}</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Список выбранного дня */}
+          <motion.div
+            {...fadeUp(0.16)}
+            className="surface-1 flex h-fit min-h-full flex-col overflow-hidden rounded-xl"
+          >
+            <DayView date={selectedDate} lessons={dayLessons} loading={loading} onRefetch={refetch} dense />
+          </motion.div>
+        </div>
+      </div>
     </div>
   )
 }

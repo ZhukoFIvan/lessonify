@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, CalendarDays, Users, Wallet, Settings, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
 import { STUDENT_TABS, TUTOR_TABS } from './constants'
@@ -15,30 +14,39 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40">
+      {/* Плавное затухание контента под таб-баром */}
+      <div className="pointer-events-none h-3 bg-gradient-to-t from-background to-transparent" />
       <div
-        className="bg-card border-border flex items-stretch border-t"
+        className="flex items-stretch border-t border-[var(--border-subtle)] bg-surface-1/95 px-1 backdrop-blur-xl"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {tabs.map(({ href, icon: Icon, label }) => {
-          const active = pathname.startsWith(href)
+          const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
-              className={cn(
-                'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-2.5 transition-colors duration-150',
-                active ? 'text-primary' : 'text-muted-foreground',
-              )}
+              className="group flex min-w-0 flex-1 flex-col items-center justify-center gap-1 py-2"
             >
-              <Icon
-                size={22}
-                strokeWidth={active ? 2.5 : 1.8}
-                className="transition-transform duration-150 active:scale-90"
-              />
               <span
                 className={cn(
-                  'text-[10px] font-medium leading-none transition-all',
-                  active ? 'opacity-100' : 'h-0 overflow-hidden opacity-0',
+                  'flex h-8 w-full max-w-[60px] items-center justify-center rounded-full transition-colors duration-150',
+                  active ? 'bg-[hsl(var(--primary)/0.14)]' : 'group-active:bg-surface-2',
+                )}
+              >
+                <Icon
+                  size={21}
+                  strokeWidth={active ? 2.4 : 1.8}
+                  className={cn(
+                    'shrink-0 transition-transform duration-150 group-active:scale-90',
+                    active ? 'text-primary' : 'text-muted-foreground',
+                  )}
+                />
+              </span>
+              <span
+                className={cn(
+                  'max-w-full truncate px-0.5 text-[10px] font-semibold leading-none transition-colors duration-150',
+                  active ? 'text-primary' : 'text-muted-foreground',
                 )}
               >
                 {label}

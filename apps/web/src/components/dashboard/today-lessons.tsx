@@ -25,17 +25,17 @@ export function TodayLessons() {
   const { lessons, loading, refetch } = useDayLessons(new Date())
   const [addOpen, setAddOpen] = useState(false)
 
-  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-2xl" />
+  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-lg" />
 
   return (
-    <section className="h-full rounded-2xl bg-card border border-border p-4 flex flex-col">
+    <section className="h-full rounded-lg bg-card border border-[var(--border-subtle)] shadow-elevation-1 p-4 flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <CalendarDays size={18} className="text-primary" />
           <h3 className="text-sm font-semibold text-foreground">Уроки сегодня</h3>
         </div>
         {lessons.length > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground tnum">
             {pluralize(lessons.length, ['урок', 'урока', 'уроков'])}
           </span>
         )}
@@ -44,10 +44,10 @@ export function TodayLessons() {
       {lessons.length === 0 ? (
         <button
           onClick={() => setAddOpen(true)}
-          className="flex-1 rounded-xl border-2 border-dashed border-border py-4 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          className="flex-1 rounded-md border-2 border-dashed border-[var(--border-strong)] py-4 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
         >
           <Plus size={20} />
-          <span className="text-xs">Запланировать урок</span>
+          <span className="text-xs font-medium">Запланировать урок</span>
         </button>
       ) : (
         <div className="flex flex-col gap-2 flex-1">
@@ -55,9 +55,9 @@ export function TodayLessons() {
             <Link
               key={lesson.id}
               href="/calendar"
-              className="flex items-center gap-2.5 py-1.5 rounded-lg hover:bg-secondary/50 transition-colors px-1 -mx-1"
+              className="flex items-center gap-2.5 py-1.5 rounded-md hover:bg-surface-2 transition-colors px-1 -mx-1"
             >
-              <span className="text-xs font-mono text-muted-foreground w-10 shrink-0">
+              <span className="text-xs font-mono tnum text-muted-foreground w-10 shrink-0">
                 {new Date(lesson.startTime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               </span>
               <div

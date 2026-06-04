@@ -42,7 +42,7 @@ export function GreetingHeader() {
       <div>
         <p className="text-sm text-muted-foreground">{today}</p>
         <div className="flex items-center gap-2 mt-0.5">
-          <h1 className="text-xl font-bold text-foreground tracking-tight">
+          <h1 className="text-h2 text-foreground">
             {greeting}, {firstName}
           </h1>
           <Link

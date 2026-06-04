@@ -43,24 +43,59 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        success: '#10B981',
-        warning: '#F59E0B',
-        danger: '#EF4444',
+        /* Layered surface fills (raw colors, theme-aware via CSS vars) */
+        surface: {
+          0: 'var(--surface-0)',
+          1: 'var(--surface-1)',
+          2: 'var(--surface-2)',
+          3: 'var(--surface-3)',
+        },
+        /* Semantic colors — now theme-aware with foreground pairs.
+           Keep legacy single-value access via DEFAULT for back-compat. */
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+        danger: {
+          DEFAULT: 'hsl(var(--danger))',
+          foreground: 'hsl(var(--danger-foreground))',
+        },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-        '2xl': '1rem',
-        '3xl': '1.5rem',
+        /* Unified scale: sm 10 / md 14 / lg 18 / xl 24 */
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        /* Legacy aliases kept so existing screens don't break */
+        '2xl': 'var(--radius-xl)',
+        '3xl': '28px',
         full: '9999px',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      fontSize: {
+        /* Crafted type scale (size / line-height / tracking) */
+        'display': ['2.5rem', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '800' }],
+        'h1': ['1.75rem', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'h2': ['1.375rem', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'h3': ['1.125rem', { lineHeight: '1.3', letterSpacing: '-0.015em', fontWeight: '600' }],
+      },
       boxShadow: {
-        card: '0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06)',
-        'card-hover': '0 4px 12px 0 rgba(108,99,255,0.12)',
+        /* Layered elevation, theme-aware */
+        'elevation-1': 'var(--shadow-1)',
+        'elevation-2': 'var(--shadow-2)',
+        'elevation-3': 'var(--shadow-3)',
+        /* Legacy names remapped onto the new elevation scale */
+        card: 'var(--shadow-1)',
+        'card-hover': 'var(--shadow-2)',
+        /* Brand glow for accent elements */
+        glow: '0 8px 24px -6px rgba(108,99,255,0.45)',
       },
       maxWidth: {
         mobile: '430px',

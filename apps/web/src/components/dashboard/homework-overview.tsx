@@ -24,7 +24,7 @@ export function HomeworkOverview() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-2xl" />
+  if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-lg" />
 
   const total = stats.assigned + stats.submitted + stats.overdue
 
@@ -37,7 +37,7 @@ export function HomeworkOverview() {
   return (
     <Link
       href="/homework"
-      className="block h-full p-4 rounded-2xl bg-card border border-border hover:border-primary/20 transition-colors"
+      className="block h-full p-4 rounded-lg bg-card border border-[var(--border-subtle)] shadow-elevation-1 hover:bg-surface-2 hover:shadow-elevation-2 transition-all"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -45,7 +45,7 @@ export function HomeworkOverview() {
           <h3 className="text-sm font-semibold text-foreground">Домашние задания</h3>
         </div>
         {total > 0 && (
-          <span className="text-xs text-muted-foreground">Всего: {total}</span>
+          <span className="text-xs text-muted-foreground tnum">Всего: {total}</span>
         )}
       </div>
 
@@ -59,11 +59,11 @@ export function HomeworkOverview() {
           {items.map((it) => {
             const Icon = it.icon
             return (
-              <div key={it.label} className="flex flex-col items-center gap-1 py-2 rounded-xl bg-background/50">
-                <div className={`w-8 h-8 rounded-lg ${it.bg} flex items-center justify-center`}>
+              <div key={it.label} className="flex flex-col items-center gap-1 py-2.5 rounded-md bg-surface-0 border border-[var(--border-subtle)]">
+                <div className={`w-8 h-8 rounded-md ${it.bg} flex items-center justify-center`}>
                   <Icon size={16} className={it.color} />
                 </div>
-                <span className="text-lg font-bold text-foreground">{it.value}</span>
+                <span className="stat-number text-foreground">{it.value}</span>
                 <span className="text-[10px] text-muted-foreground">{it.label}</span>
               </div>
             )

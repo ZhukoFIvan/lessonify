@@ -55,16 +55,24 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
     return decodeURIComponent(url.split('/').pop() ?? url).replace(/^[a-f0-9]{32}/, '').replace(/^[-_]/, '') || 'Файл'
   }
 
+  const isOverdueAssigned = isOverdue && item.status === 'ASSIGNED'
+
   return (
-    <Card className={cn(isOverdue && item.status === 'ASSIGNED' && 'border-danger/40')}>
-      <CardContent className="p-3.5">
+    <Card
+      className={cn(
+        'card-hover overflow-hidden h-full',
+        isOverdueAssigned && 'ring-1 ring-inset ring-danger/30',
+        isSubmitted && 'ring-1 ring-inset ring-primary/25',
+      )}
+    >
+      <CardContent className="p-4">
         <div className="flex items-start gap-3">
           {/* Цветная полоска + аватар ученика */}
           <div
-            className="w-1 self-stretch rounded-full shrink-0 mt-0.5"
+            className="w-1 self-stretch rounded-full shrink-0"
             style={{ backgroundColor: item.student.color ?? '#6C63FF' }}
           />
-          <Avatar className="w-9 h-9 shrink-0 mt-0.5">
+          <Avatar className="w-9 h-9 shrink-0">
             <AvatarImage src={item.student.user?.avatarUrl ?? undefined} />
             <AvatarFallback className="text-xs">{getInitials(item.student.name)}</AvatarFallback>
           </Avatar>
@@ -77,91 +85,91 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
             </div>
 
             {/* Предмет + дата урока */}
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-xs text-muted-foreground tnum">
               {item.lesson.subject} · {format(new Date(item.lesson.startTime), 'd MMM', { locale: ru })}
             </p>
 
-            {/* Описание задания */}
-            <p className="text-sm text-foreground leading-snug mb-2">{item.description}</p>
-
-            {/* Прикреплённые материалы репетитора */}
-            {item.attachmentUrls.length > 0 && (
-              <div className="flex flex-col gap-1 mb-3">
-                {item.attachmentUrls.map((url) => (
-                  <a key={url} href={url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-primary hover:underline">
-                    <Paperclip size={11} />
-                    {getFileName(url)}
-                  </a>
-                ))}
-              </div>
-            )}
-
             {/* Дедлайн */}
             {deadlineDate && (
-              <div className="flex items-center gap-1.5 mb-3">
+              <div className="mt-2 inline-flex items-center gap-1.5">
                 <Clock
                   size={12}
-                  className={cn(isOverdue && item.status === 'ASSIGNED' ? 'text-danger' : 'text-muted-foreground')}
+                  className={cn(isOverdueAssigned ? 'text-danger' : 'text-muted-foreground')}
                 />
-                <span className={cn('text-xs', isOverdue && item.status === 'ASSIGNED' ? 'text-danger font-medium' : 'text-muted-foreground')}>
+                <span className={cn('text-xs', isOverdueAssigned ? 'text-danger font-semibold' : 'text-muted-foreground')}>
                   {deadlineLabel()}
                 </span>
               </div>
             )}
-
-            {/* Ответ ученика */}
-            {(isSubmitted || isReviewed) && (item.submissionText || item.fileUrls.length > 0) && (
-              <div className="rounded-xl bg-secondary p-3 mb-3 space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Ответ ученика</p>
-                {item.submissionText && (
-                  <p className="text-sm text-foreground">{item.submissionText}</p>
-                )}
-                {item.fileUrls.length > 0 && (
-                  <div className="flex flex-col gap-1">
-                    {item.fileUrls.map((url) => (
-                      <a
-                        key={url}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-                      >
-                        <FileText size={12} />
-                        {getFileName(url)}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Фидбек репетитора */}
-            {isReviewed && item.feedback && (
-              <div className="rounded-xl bg-success/5 border border-success/20 p-3 mb-3">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <MessageSquare size={12} className="text-success" />
-                  <span className="text-xs font-semibold text-success">Ваш отзыв</span>
-                </div>
-                <p className="text-xs text-foreground">{item.feedback}</p>
-              </div>
-            )}
-
-            {/* Кнопка проверки */}
-            {isSubmitted && onReview && (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="w-full gap-1.5 border-success/30 text-success hover:bg-success/10"
-                onClick={() => setReviewOpen(true)}
-                disabled={reviewLoading}
-              >
-                <CheckCircle2 size={14} />
-                Проверить задание
-              </Button>
-            )}
           </div>
         </div>
+
+        {/* Описание задания */}
+        <p className="text-sm text-foreground leading-snug mt-3">{item.description}</p>
+
+        {/* Прикреплённые материалы репетитора */}
+        {item.attachmentUrls.length > 0 && (
+          <div className="flex flex-col gap-1 mt-2.5">
+            {item.attachmentUrls.map((url) => (
+              <a key={url} href={url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                <Paperclip size={11} className="shrink-0" />
+                <span className="truncate">{getFileName(url)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* Ответ ученика */}
+        {(isSubmitted || isReviewed) && (item.submissionText || item.fileUrls.length > 0) && (
+          <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3 mt-3 space-y-2">
+            <p className="text-xs text-muted-foreground font-semibold">Ответ ученика</p>
+            {item.submissionText && (
+              <p className="text-sm text-foreground leading-snug">{item.submissionText}</p>
+            )}
+            {item.fileUrls.length > 0 && (
+              <div className="flex flex-col gap-1">
+                {item.fileUrls.map((url) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                  >
+                    <FileText size={12} className="shrink-0" />
+                    <span className="truncate">{getFileName(url)}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Фидбек репетитора */}
+        {isReviewed && item.feedback && (
+          <div className="rounded-md bg-success/[0.07] border border-success/20 p-3 mt-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <MessageSquare size={12} className="text-success" />
+              <span className="text-xs font-semibold text-success">Ваш отзыв</span>
+            </div>
+            <p className="text-xs text-foreground leading-snug">{item.feedback}</p>
+          </div>
+        )}
+
+        {/* Кнопка проверки */}
+        {isSubmitted && onReview && (
+          <Button
+            size="sm"
+            variant="secondary"
+            className="w-full gap-1.5 mt-3"
+            onClick={() => setReviewOpen(true)}
+            disabled={reviewLoading}
+          >
+            <CheckCircle2 size={14} />
+            Проверить задание
+          </Button>
+        )}
       </CardContent>
 
       {/* Модалка ревью */}
@@ -171,10 +179,10 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
             <DialogTitle>Проверка задания</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
-            <div className="rounded-xl bg-secondary p-3">
-              <p className="text-xs text-muted-foreground font-medium mb-1">Ответ ученика</p>
+            <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3">
+              <p className="text-xs text-muted-foreground font-semibold mb-1">Ответ ученика</p>
               {item.submissionText
-                ? <p className="text-sm text-foreground">{item.submissionText}</p>
+                ? <p className="text-sm text-foreground leading-snug">{item.submissionText}</p>
                 : (!item.fileUrls.length && <p className="text-xs text-muted-foreground italic">Без комментария</p>)
               }
               {item.fileUrls.length > 0 && (
@@ -187,8 +195,8 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
                       rel="noopener noreferrer"
                       className="flex items-center gap-1.5 text-xs text-primary hover:underline"
                     >
-                      <Paperclip size={12} />
-                      {getFileName(url)}
+                      <Paperclip size={12} className="shrink-0" />
+                      <span className="truncate">{getFileName(url)}</span>
                     </a>
                   ))}
                 </div>
@@ -204,7 +212,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Напишите комментарий к работе ученика..."
                 rows={3}
-                className="w-full rounded-2xl border border-input bg-secondary/50 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary resize-none"
+                className="w-full rounded-md border border-[var(--border-subtle)] bg-surface-0 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-colors"
               />
             </div>
 

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Users, BookOpen, Wallet, ClipboardCheck } from 'lucide-react'
+import { Users, BookOpen, Wallet, ClipboardCheck, type LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import api from '@/lib/api'
 
 interface Stats {
@@ -45,7 +46,29 @@ function AnimatedNumber({ value }: { value: number }) {
   return <>{display.toLocaleString('ru-RU')}</>
 }
 
-const CARDS = [
+interface CardDef {
+  key: string
+  label: string
+  icon: LucideIcon
+  color: string
+  bg: string
+  getValue: (s: Stats) => number
+  unit?: string
+  /** accent — главная метрика, выделяется brand-вошем и hero-числом */
+  accent?: boolean
+}
+
+const CARDS: CardDef[] = [
+  {
+    key: 'income',
+    label: 'Доход за месяц',
+    icon: Wallet,
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
+    getValue: (s: Stats) => s.monthIncome,
+    unit: '₽',
+    accent: true,
+  },
   {
     key: 'students',
     label: 'Учеников',
@@ -53,7 +76,6 @@ const CARDS = [
     color: 'text-violet-400',
     bg: 'bg-violet-500/10',
     getValue: (s: Stats) => s.studentsCount,
-    suffix: '',
   },
   {
     key: 'lessons',
@@ -62,16 +84,6 @@ const CARDS = [
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
     getValue: (s: Stats) => s.weekLessons,
-    suffix: '',
-  },
-  {
-    key: 'income',
-    label: 'Доход за месяц',
-    icon: Wallet,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10',
-    getValue: (s: Stats) => s.monthIncome,
-    suffix: ' ₽',
   },
   {
     key: 'homework',
@@ -80,7 +92,6 @@ const CARDS = [
     color: 'text-amber-400',
     bg: 'bg-amber-500/10',
     getValue: (s: Stats) => s.pendingHomework,
-    suffix: '',
   },
 ]
 
@@ -142,16 +153,30 @@ export function QuickStats() {
           <motion.div
             key={card.key}
             variants={item}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/20 transition-colors"
+            className={cn(
+              'relative flex flex-col gap-3 p-4 rounded-lg transition-all duration-200',
+              card.accent
+                ? 'brand-wash border border-primary/25 shadow-elevation-1'
+                : 'bg-card border border-[var(--border-subtle)] shadow-elevation-1 hover:bg-surface-2 hover:shadow-elevation-2 hover:-translate-y-0.5',
+            )}
           >
-            <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center shrink-0`}>
-              <Icon size={20} className={card.color} />
+            <div className={cn(
+              'w-9 h-9 rounded-md flex items-center justify-center shrink-0',
+              card.accent ? 'bg-primary/15 text-primary' : card.bg,
+            )}>
+              <Icon size={18} className={card.accent ? 'text-primary' : card.color} />
             </div>
-            <div className="min-w-0">
-              <p className="text-lg font-bold text-foreground leading-tight">
-                <AnimatedNumber value={value} />{card.suffix}
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <p className="inline-flex items-baseline gap-1 stat-number text-foreground">
+                <span className="truncate">
+                  <AnimatedNumber value={value} />
+                </span>
+                {card.unit && <span className="hero-unit shrink-0">{card.unit}</span>}
               </p>
-              <p className="text-xs text-muted-foreground truncate">{card.label}</p>
+              {/* Полная подпись: переносится на 2 строки вместо обрезки */}
+              <p className="text-xs font-medium text-muted-foreground leading-snug">
+                {card.label}
+              </p>
             </div>
           </motion.div>
         )

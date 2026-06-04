@@ -2,6 +2,7 @@
 
 import { TrendingUp, Clock, BookOpen } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { StatNumber } from '@/components/ui/stat'
 import { formatRub, pluralize } from '@tutorflow/utils'
 import type { PaymentSummary } from '@tutorflow/types'
 
@@ -11,7 +12,7 @@ interface SummaryCardProps {
 }
 
 export function SummaryCard({ summary, loading }: SummaryCardProps) {
-  if (loading) return <Skeleton className="h-[140px] rounded-2xl" />
+  if (loading) return <Skeleton className="h-[176px] rounded-xl" />
 
   const total = (summary?.totalEarned ?? 0) + (summary?.totalPending ?? 0)
   const earned = summary?.totalEarned ?? 0
@@ -23,36 +24,62 @@ export function SummaryCard({ summary, loading }: SummaryCardProps) {
   const progress = total > 0 ? Math.round((earned / total) * 100) : 0
 
   return (
-    <div className="rounded-2xl bg-primary p-5 text-white shadow-lg shadow-primary/30">
-      {/* Заголовок */}
-      <div className="flex items-center gap-2 mb-1">
-        <TrendingUp size={16} className="opacity-80" />
-        <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Этот месяц</p>
-      </div>
+    <div className="relative overflow-hidden rounded-xl brand-gradient p-5 text-white shadow-elevation-2 lg:p-6">
+      {/* Декоративное свечение */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-white/15 blur-2xl"
+      />
 
-      {/* Основная сумма */}
-      <p className="text-3xl font-bold tracking-tight mb-0.5">{formatRub(earned)}</p>
-      <p className="text-xs opacity-70">получено из {formatRub(total)}</p>
-
-      {/* Прогресс-бар */}
-      <div className="mt-4 mb-3 h-1.5 rounded-full bg-white/20">
-        <div
-          className="h-full rounded-full bg-white transition-all duration-700"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* Нижняя строка */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5">
-          <Clock size={13} className="opacity-70" />
-          <span className="text-xs opacity-80">{formatRub(pending)} ожидает</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <BookOpen size={13} className="opacity-70" />
-          <span className="text-xs opacity-80">
-            {paidCount}/{lessonsCount} {pluralize(lessonsCount, ['урок', 'урока', 'уроков'])}
+      <div className="relative">
+        {/* Заголовок */}
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/15">
+            <TrendingUp size={15} />
           </span>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/80">
+            Доход за месяц
+          </p>
+        </div>
+
+        {/* Основная сумма — hero-число */}
+        <div className="mt-3">
+          <StatNumber
+            value={new Intl.NumberFormat('ru-RU').format(earned)}
+            unit="₽"
+            size="hero"
+            className="text-white [&_.hero-unit]:text-white/70"
+          />
+          <p className="mt-1 text-xs text-white/70">
+            получено из <span className="tnum font-medium text-white/90">{formatRub(total)}</span>
+          </p>
+        </div>
+
+        {/* Прогресс-бар */}
+        <div className="mt-4 mb-4 h-2 overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-full rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-all duration-700"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {/* Нижняя строка */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <div className="flex items-center gap-1.5">
+            <Clock size={13} className="text-white/70" />
+            <span className="text-xs text-white/85">
+              <span className="tnum font-semibold text-white">{formatRub(pending)}</span> ожидает
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <BookOpen size={13} className="text-white/70" />
+            <span className="text-xs text-white/85">
+              <span className="tnum font-semibold text-white">
+                {paidCount}/{lessonsCount}
+              </span>{' '}
+              {pluralize(lessonsCount, ['урок', 'урока', 'уроков'])}
+            </span>
+          </div>
         </div>
       </div>
     </div>

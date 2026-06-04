@@ -33,8 +33,8 @@ export function StudentDashboard() {
   if (loading) {
     return (
       <div className="flex flex-col gap-4 px-4 mt-5">
-        <Skeleton className="h-24 rounded-2xl" />
-        <Skeleton className="h-32 rounded-2xl" />
+        <Skeleton className="h-24 rounded-lg" />
+        <Skeleton className="h-32 rounded-lg" />
       </div>
     )
   }
@@ -52,7 +52,7 @@ export function StudentDashboard() {
 
     return (
       <div className="px-4 mt-5">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-6">
+        <div className="relative overflow-hidden rounded-xl brand-wash border border-primary/15 shadow-elevation-1 p-6">
           {/* Декоративные круги */}
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-primary/8 blur-2xl" />
           <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-primary/6 blur-xl" />
@@ -62,17 +62,17 @@ export function StudentDashboard() {
               <RestIcon size={32} className="text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground tracking-tight">{title}</h2>
+              <h2 className="text-h2 text-foreground">{title}</h2>
               <p className="text-sm text-muted-foreground mt-1">{sub}</p>
             </div>
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-5 mt-2">
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-primary">0</span>
+                <span className="stat-number text-primary">0</span>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wide">уроков</span>
               </div>
-              <div className="w-px h-8 bg-border" />
+              <div className="w-px h-8 bg-[var(--border-strong)]" />
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-primary">0</span>
+                <span className="stat-number text-primary">0</span>
                 <span className="text-[10px] text-muted-foreground uppercase tracking-wide">заданий</span>
               </div>
             </div>

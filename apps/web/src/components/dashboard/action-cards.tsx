@@ -45,9 +45,9 @@ export function ActionCards({ onAction }: ActionCardsProps) {
               key={a.key}
               variants={item}
               onClick={() => onAction(a.key)}
-              className="group text-left card-hover rounded-2xl bg-card border border-border p-5 flex flex-col gap-3"
+              className="group text-left card-hover rounded-lg bg-card border border-[var(--border-subtle)] shadow-elevation-1 p-5 flex flex-col gap-3"
             >
-              <div className={`w-11 h-11 rounded-xl ${a.bg} flex items-center justify-center`}>
+              <div className={`w-11 h-11 rounded-md ${a.bg} flex items-center justify-center`}>
                 <Icon size={22} className={a.color} />
               </div>
               <div className="min-w-0">

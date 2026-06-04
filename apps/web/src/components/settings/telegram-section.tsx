@@ -40,9 +40,9 @@ export function TelegramSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="surface-1 rounded-lg p-5">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#229ED9]/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-md bg-[#229ED9]/12 flex items-center justify-center shrink-0">
           <MessageCircle size={20} className="text-[#229ED9]" />
         </div>
 

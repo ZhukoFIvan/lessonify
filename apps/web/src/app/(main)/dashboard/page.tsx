@@ -43,43 +43,46 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 lg:p-8">
-      {/* Header row — stacks vertically on mobile */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <GreetingHeader />
-        <QuickActions onAction={handleQuickAction} />
+      {/* Ограничиваем ширину контента — на больших мониторах не растягиваем в пустоту */}
+      <div className="mx-auto w-full max-w-screen-xl">
+        {/* Header row — stacks vertically on mobile */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <GreetingHeader />
+          <QuickActions onAction={handleQuickAction} />
+        </div>
+
+        <TrialBanner />
+
+        {/* Stats */}
+        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.05 }} className="mt-4">
+          <QuickStats />
+        </motion.div>
+
+        {/* Main row — 3 equal cards */}
+        <div className="mt-6 grid gap-5 lg:grid-cols-3 items-stretch">
+          <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.12 }} className="h-full">
+            <NextLessonCard />
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.2 }} className="h-full">
+            <TodayLessons />
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.28 }} className="h-full">
+            <HomeworkOverview />
+          </motion.div>
+        </div>
+
+        {/* Должники — во всю ширину, внутри раскладываются в несколько колонок */}
+        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.36 }} className="mt-6">
+          <DebtorsStrip />
+        </motion.div>
+
+        {/* Быстрые действия — якорят нижнюю зону, 3-колоночная сетка на десктопе */}
+        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.42 }} className="mt-6">
+          <ActionCards onAction={handleQuickAction} />
+        </motion.div>
       </div>
-
-      <TrialBanner />
-
-      {/* Stats */}
-      <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.05 }} className="mt-4">
-        <QuickStats />
-      </motion.div>
-
-      {/* Main row — 3 equal cards */}
-      <div className="mt-6 grid gap-5 lg:grid-cols-3">
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.12 }}>
-          <NextLessonCard />
-        </motion.div>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.2 }}>
-          <TodayLessons />
-        </motion.div>
-
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.28 }}>
-          <HomeworkOverview />
-        </motion.div>
-      </div>
-
-      {/* Debtors — full width below */}
-      <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.36 }} className="mt-5">
-        <DebtorsStrip />
-      </motion.div>
-
-      {/* Quick action cards — anchor the lower zone */}
-      <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.42 }} className="mt-6">
-        <ActionCards onAction={handleQuickAction} />
-      </motion.div>
 
       {/* Modals triggered by quick actions */}
       <AddLessonModal

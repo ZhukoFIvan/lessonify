@@ -1,6 +1,6 @@
 'use client'
 
-import { format, isToday, isSameDay, getDay } from 'date-fns'
+import { format, isToday, isSameDay, getDay, isSameMonth } from 'date-fns'
 import { cn } from '@/lib/utils'
 import type { LessonWithStudent } from '@tutorflow/types'
 
@@ -20,13 +20,16 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
   const offset = (getDay(firstDay) + 6) % 7
 
   return (
-    <div className="px-3 lg:px-8 py-2">
+    <div className="px-3 lg:px-0 py-1">
       {/* Заголовки дней недели */}
-      <div className="grid grid-cols-7 mb-1">
-        {WEEK_DAYS.map((d) => (
+      <div className="grid grid-cols-7 mb-1.5">
+        {WEEK_DAYS.map((d, i) => (
           <div
             key={d}
-            className="text-center text-[10px] font-semibold uppercase tracking-wide text-muted-foreground py-1"
+            className={cn(
+              'text-center text-[10px] font-semibold uppercase tracking-wider py-1',
+              i >= 5 ? 'text-muted-foreground/60' : 'text-muted-foreground',
+            )}
           >
             {d}
           </div>
@@ -34,7 +37,7 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
       </div>
 
       {/* Сетка дней */}
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 gap-1 lg:gap-1.5">
         {/* Пустые ячейки до первого дня месяца */}
         {Array.from({ length: offset }).map((_, i) => (
           <div key={`empty-${i}`} />
@@ -44,8 +47,11 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
           const key = format(day, 'yyyy-MM-dd')
           const isSelected = isSameDay(day, selected)
           const _isToday = isToday(day)
+          const isWeekend = getDay(day) === 0 || getDay(day) === 6
           const lessons = lessonCounts.get(key) ?? []
-          const dotColors = lessons.slice(0, 3).map((l) => l.student?.color ?? '#6C63FF')
+          const hasLessons = lessons.length > 0
+          const dotColors = lessons.slice(0, 4).map((l) => l.student?.color ?? '#6C63FF')
+          const extra = lessons.length - dotColors.length
 
           return (
             <button
@@ -54,39 +60,59 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
               aria-pressed={isSelected}
               aria-label={format(day, 'd MMMM yyyy')}
               className={cn(
-                'flex flex-col items-center justify-center gap-0.5 h-9 lg:h-8 rounded-lg transition-colors active:scale-95',
+                'group relative flex aspect-square flex-col items-center justify-center gap-1 rounded-md transition-all duration-150 active:scale-[0.94] lg:aspect-[1/0.82]',
                 isSelected
-                  ? 'bg-primary shadow-sm shadow-primary/30'
+                  ? 'brand-gradient text-white shadow-elevation-2 shadow-glow'
                   : _isToday
-                    ? 'bg-primary/10'
-                    : 'hover:bg-secondary',
+                    ? 'bg-primary/10 ring-1 ring-inset ring-primary/25 hover:bg-primary/15'
+                    : 'hover:bg-surface-2 hover:shadow-elevation-1',
               )}
             >
               <span
                 className={cn(
-                  'text-xs font-semibold leading-none',
+                  'tnum text-[13px] font-bold leading-none lg:text-sm',
                   isSelected
                     ? 'text-white'
                     : _isToday
                       ? 'text-primary'
-                      : 'text-foreground',
+                      : isWeekend
+                        ? 'text-muted-foreground'
+                        : 'text-foreground',
                 )}
               >
                 {format(day, 'd')}
               </span>
 
-              {/* Точки уроков */}
-              <div className="flex gap-[3px] h-[4px] items-center">
-                {dotColors.map((color, i) => (
-                  <div
-                    key={i}
-                    className="w-[3px] h-[3px] rounded-full"
-                    style={{
-                      backgroundColor: isSelected ? 'rgba(255,255,255,0.75)' : color,
-                    }}
-                  />
-                ))}
-                {dotColors.length === 0 && <div className="w-[3px] h-[3px]" />}
+              {/* Индикаторы уроков */}
+              <div className="flex h-[6px] items-center justify-center gap-[3px]">
+                {hasLessons ? (
+                  <>
+                    {dotColors.map((color, i) => (
+                      <span
+                        key={i}
+                        className={cn(
+                          'h-[6px] w-[6px] rounded-full',
+                          isSelected && 'ring-1 ring-white/40',
+                        )}
+                        style={{
+                          backgroundColor: isSelected ? '#FFFFFF' : color,
+                        }}
+                      />
+                    ))}
+                    {extra > 0 && (
+                      <span
+                        className={cn(
+                          'text-[9px] font-bold leading-none tnum',
+                          isSelected ? 'text-white/80' : 'text-muted-foreground',
+                        )}
+                      >
+                        +{extra}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="h-[6px] w-[6px]" />
+                )}
               </div>
             </button>
           )

@@ -2,7 +2,9 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { StatNumber } from '@/components/ui/stat'
 import { useDebtors, usePayAllForStudent } from '@/hooks/use-payments'
 import { getInitials, formatRub, pluralize } from '@tutorflow/utils'
 import { format } from 'date-fns'
@@ -28,71 +30,113 @@ export function DebtorsList() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-3">
-        {[1, 2, 3].map((i) => <Skeleton key={i} className="h-[76px] rounded-2xl" />)}
-      </div>
-    )
-  }
-
-  if (debtors.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-10 text-muted-foreground">
-        <CheckCircle2 size={40} strokeWidth={1.5} className="text-success" />
-        <div className="text-center">
-          <p className="text-sm font-medium text-foreground">Долгов нет</p>
-          <p className="text-xs mt-0.5">Все уроки оплачены</p>
-        </div>
-      </div>
-    )
-  }
+  const totalDebt = debtors.reduce((sum, d) => sum + d.debtAmount, 0)
 
   return (
-    <div className="flex flex-col gap-3">
-      {debtors.map((debtor) => (
-        <div
-          key={debtor.studentId}
-          className="rounded-2xl border border-border bg-card p-4"
-        >
-          <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10 shrink-0">
-              <AvatarImage src={debtor.avatarUrl ?? undefined} />
-              <AvatarFallback className="text-xs">
-                {getInitials(debtor.studentName)}
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground truncate">{debtor.studentName}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {pluralize(debtor.unpaidLessonsCount, ['урок', 'урока', 'уроков'])}
-                {debtor.lastLessonDate && (
-                  <> · последний {format(new Date(debtor.lastLessonDate), 'd MMM', { locale: ru })}</>
-                )}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              <p className="text-sm font-bold text-warning">{formatRub(debtor.debtAmount)}</p>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-border">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-full border-success/30 text-success hover:bg-success/10"
-              onClick={() => handlePayAll(debtor.studentId, debtor.studentName)}
-              disabled={loadingId === debtor.studentId}
-            >
-              {loadingId === debtor.studentId
-                ? 'Проводим оплату...'
-                : <><Check size={13} className="mr-1.5 inline" />Принять оплату · {formatRub(debtor.debtAmount)}</>}
-            </Button>
+    <section className="surface-1 overflow-hidden rounded-xl shadow-elevation-1">
+      {/* Шапка-герой: общая задолженность */}
+      <header className="flex items-start justify-between gap-3 border-b border-[var(--border-subtle)] bg-surface-2/60 p-4 lg:p-5">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[hsl(var(--warning)/0.14)] text-warning ring-1 ring-inset ring-[hsl(var(--warning)/0.22)]">
+            <AlertCircle size={20} />
+          </span>
+          <div>
+            <h2 className="text-h3 font-bold text-foreground">Должны заплатить</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {loading
+                ? 'Загружаем…'
+                : debtors.length === 0
+                  ? 'Все уроки оплачены'
+                  : `${pluralize(debtors.length, ['ученик', 'ученика', 'учеников'])} с задолженностью`}
+            </p>
           </div>
         </div>
-      ))}
-    </div>
+
+        {!loading && debtors.length > 0 && (
+          <div className="text-right">
+            <StatNumber
+              value={new Intl.NumberFormat('ru-RU').format(totalDebt)}
+              unit="₽"
+              size="stat"
+              className="justify-end text-warning [&_.hero-unit]:text-warning/70"
+            />
+            <p className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              всего к оплате
+            </p>
+          </div>
+        )}
+      </header>
+
+      <div className="p-4 lg:p-5">
+        {loading ? (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-[124px] rounded-lg" />
+            ))}
+          </div>
+        ) : debtors.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(var(--success)/0.12)]">
+              <CheckCircle2 size={28} strokeWidth={1.75} className="text-success" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Долгов нет</p>
+              <p className="mt-0.5 text-xs">Все уроки оплачены — отличная работа</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {debtors.map((debtor) => (
+              <article
+                key={debtor.studentId}
+                className="group flex flex-col gap-3 rounded-lg border border-[var(--border-subtle)] bg-card p-4 shadow-elevation-1 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2 hover:shadow-elevation-2"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={debtor.avatarUrl ?? undefined} />
+                    <AvatarFallback className="text-xs">
+                      {getInitials(debtor.studentName)}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {debtor.studentName}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {pluralize(debtor.unpaidLessonsCount, ['урок', 'урока', 'уроков'])}
+                      {debtor.lastLessonDate && (
+                        <> · {format(new Date(debtor.lastLessonDate), 'd MMM', { locale: ru })}</>
+                      )}
+                    </p>
+                  </div>
+
+                  <Badge variant="warning" className="tnum shrink-0 tabular-nums">
+                    {formatRub(debtor.debtAmount)}
+                  </Badge>
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="w-full border border-success/30 text-success hover:bg-success/10"
+                  onClick={() => handlePayAll(debtor.studentId, debtor.studentName)}
+                  disabled={loadingId === debtor.studentId}
+                >
+                  {loadingId === debtor.studentId ? (
+                    'Проводим оплату…'
+                  ) : (
+                    <>
+                      <Check size={13} className="mr-1.5 inline" />
+                      Принять оплату
+                    </>
+                  )}
+                </Button>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   )
 }

@@ -54,10 +54,15 @@ export function RemindersSection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Bell size={16} className="text-primary" />
-        <p className="text-sm font-semibold text-foreground">Напоминания</p>
+    <div className="surface-1 rounded-lg p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/12 text-primary">
+          <Bell size={18} />
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-foreground">Напоминания</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Когда напоминать об уроках</p>
+        </div>
       </div>
 
       {loading ? (
@@ -78,8 +83,8 @@ export function RemindersSection() {
                   className={cn(
                     'rounded-full px-3 py-1.5 text-xs font-medium border transition-colors',
                     currentBefore === value
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-background text-foreground border-border',
+                      ? 'bg-primary text-primary-foreground border-primary shadow-[0_2px_8px_-2px_rgba(108,99,255,0.5)]'
+                      : 'bg-surface-0 text-foreground border-subtle hover:bg-surface-2 hover:border-strong',
                   )}
                 >
                   {label}
@@ -99,8 +104,8 @@ export function RemindersSection() {
                   className={cn(
                     'rounded-full px-3 py-1.5 text-xs font-medium border transition-colors',
                     currentAfter === value
-                      ? 'bg-primary text-white border-primary'
-                      : 'bg-background text-foreground border-border',
+                      ? 'bg-primary text-primary-foreground border-primary shadow-[0_2px_8px_-2px_rgba(108,99,255,0.5)]'
+                      : 'bg-surface-0 text-foreground border-subtle hover:bg-surface-2 hover:border-strong',
                   )}
                 >
                   {label}

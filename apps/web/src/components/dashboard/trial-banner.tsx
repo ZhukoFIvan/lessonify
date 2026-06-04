@@ -25,7 +25,7 @@ export function TrialBanner() {
     }
 
     return (
-      <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl border bg-amber-500/10 border-amber-500/20">
+      <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-lg border bg-amber-500/10 border-amber-500/20">
         <Sparkles size={16} className="text-amber-500 shrink-0" />
         <p className="text-xs font-medium flex-1 text-amber-700 dark:text-amber-400">
           Попробуйте PRO бесплатно — 30 дней без ограничений
@@ -54,7 +54,7 @@ export function TrialBanner() {
   const isUrgent = daysLeft <= 2
 
   return (
-    <div className={`mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl border ${
+    <div className={`mt-4 flex items-center gap-3 px-4 py-3 rounded-lg border ${
       isUrgent
         ? 'bg-red-500/10 border-red-500/20'
         : 'bg-amber-500/10 border-amber-500/20'

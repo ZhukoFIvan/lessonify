@@ -75,12 +75,12 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Заголовок */}
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-3 shadow-lg">
-          <GraduationCap size={28} className="text-white" />
+      <div>
+        <div className="brand-gradient mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-white shadow-elevation-2 lg:hidden">
+          <GraduationCap size={24} />
         </div>
-        <h1 className="text-xl font-bold text-foreground tracking-tight">Создать аккаунт</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Присоединяйтесь к Lessonify</p>
+        <h1 className="text-h1 text-foreground">Создать аккаунт</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">Присоединяйтесь к Lessonify</p>
       </div>
 
       {/* Выбор роли */}
@@ -89,30 +89,35 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
           {([
             { value: 'TUTOR', label: 'Репетитор', icon: GraduationCap, desc: 'Веду уроки' },
             { value: 'STUDENT', label: 'Ученик', icon: BookOpen, desc: 'Учусь' },
-          ] as const).map(({ value, label, icon: Icon, desc }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setValue('role', value)}
-              className={cn(
-                'flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all duration-150',
-                role === value
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border bg-card',
-              )}
-            >
-              <div className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center',
-                role === value ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground',
-              )}>
-                <Icon size={20} />
-              </div>
-              <div>
-                <p className={cn('font-semibold text-sm', role === value && 'text-primary')}>{label}</p>
-                <p className="text-xs text-muted-foreground">{desc}</p>
-              </div>
-            </button>
-          ))}
+          ] as const).map(({ value, label, icon: Icon, desc }) => {
+            const selected = role === value
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setValue('role', value)}
+                className={cn(
+                  'flex flex-col items-start gap-3 rounded-lg border p-4 text-left transition-all duration-150',
+                  selected
+                    ? 'border-primary/50 brand-wash accent-ring'
+                    : 'border-[var(--border-subtle)] bg-surface-0 hover:bg-surface-2',
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-md transition-colors',
+                    selected ? 'brand-gradient text-white shadow-elevation-1' : 'bg-surface-2 text-muted-foreground',
+                  )}
+                >
+                  <Icon size={20} />
+                </span>
+                <div>
+                  <p className={cn('text-sm font-semibold', selected ? 'text-primary' : 'text-foreground')}>{label}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </button>
+            )
+          })}
         </div>
       )}
 
@@ -144,7 +149,7 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -166,8 +171,8 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
 
         {/* Поле для токена приглашения (только для ученика) */}
         {role === 'STUDENT' && !inviteToken && (
-          <div className="rounded-2xl bg-warning/10 border border-warning/30 p-4">
-            <p className="text-sm text-warning font-medium mb-1">Нужна ссылка-приглашение</p>
+          <div className="rounded-lg border border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.12)] p-4">
+            <p className="mb-1 text-sm font-semibold text-[hsl(var(--warning))]">Нужна ссылка-приглашение</p>
             <p className="text-xs text-muted-foreground">
               Попросите репетитора отправить вам персональную ссылку для регистрации.
             </p>
@@ -187,9 +192,9 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
       {role !== 'STUDENT' && (
         <>
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border" />
+            <div className="h-px flex-1 bg-[var(--border-subtle)]" />
             <span className="text-xs text-muted-foreground">или</span>
-            <div className="flex-1 h-px bg-border" />
+            <div className="h-px flex-1 bg-[var(--border-subtle)]" />
           </div>
           <GoogleButton />
         </>
@@ -204,7 +209,7 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
 
       <p className="text-center text-sm text-muted-foreground">
         Уже есть аккаунт?{' '}
-        <Link href="/auth/login" className="text-primary font-semibold">
+        <Link href="/auth/login" className="font-semibold text-primary hover:underline">
           Войти
         </Link>
       </p>

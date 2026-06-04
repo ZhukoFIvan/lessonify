@@ -31,7 +31,7 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
   return (
     <div
       ref={scrollRef}
-      className="scrollbar-hide flex overflow-x-auto px-3 py-2 lg:flex-wrap lg:justify-center lg:gap-0.5 lg:px-8"
+      className="scrollbar-hide flex gap-1 overflow-x-auto px-3 py-2 lg:flex-wrap lg:justify-start lg:gap-1.5 lg:px-0"
       role="group"
       aria-label="Выбор даты"
     >
@@ -40,7 +40,7 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
         const isSelected = isSameDay(day, selected)
         const _isToday = isToday(day)
         const lessons = lessonCounts.get(key) ?? []
-        const dotCount = Math.min(lessons.length, 3)
+        const hasLessons = lessons.length > 0
 
         // Цвет кружков = цвета уроков (если у разных учеников разные цвета)
         const dotColors = lessons.slice(0, 3).map((l) => l.student.color ?? '#6C63FF')
@@ -50,7 +50,14 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
             key={key}
             ref={_isToday ? todayRef : undefined}
             onClick={() => onSelect(day)}
-            className="inline-flex min-w-[44px] flex-col items-center gap-1 whitespace-normal rounded-2xl px-2 py-1.5 transition-colors duration-100 active:scale-95 lg:flex"
+            className={cn(
+              'group inline-flex w-[50px] shrink-0 flex-col items-center gap-1.5 rounded-lg px-1 py-2 transition-all duration-150 active:scale-[0.96] lg:w-[52px]',
+              isSelected
+                ? 'brand-gradient text-white shadow-elevation-2 shadow-glow'
+                : _isToday
+                  ? 'bg-primary/10 ring-1 ring-inset ring-primary/20'
+                  : 'hover:bg-surface-2',
+            )}
             aria-pressed={isSelected}
             aria-label={format(day, 'd MMMM', { locale: ru })}
           >
@@ -58,37 +65,41 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
             <span
               className={cn(
                 'text-[10px] font-semibold uppercase leading-none tracking-wide',
-                isSelected ? 'text-primary' : 'text-muted-foreground',
+                isSelected
+                  ? 'text-white/80'
+                  : _isToday
+                    ? 'text-primary'
+                    : 'text-muted-foreground',
               )}
             >
               {DAY_ABBR[day.getDay()]}
             </span>
 
-            {/* Кружок с датой */}
-            <div
+            {/* Дата */}
+            <span
               className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-all duration-150',
+                'tnum text-[17px] font-bold leading-none',
                 isSelected
-                  ? 'bg-primary shadow-primary/30 text-white shadow-md'
+                  ? 'text-white'
                   : _isToday
-                    ? 'bg-primary/10 text-primary'
+                    ? 'text-primary'
                     : 'text-foreground',
               )}
             >
               {format(day, 'd')}
-            </div>
+            </span>
 
             {/* Точки — количество уроков */}
-            <div className="flex h-[6px] items-center gap-[3px]">
-              {dotCount > 0
+            <div className="flex h-[6px] items-center justify-center gap-[3px]">
+              {hasLessons
                 ? dotColors.map((color, i) => (
-                    <div
+                    <span
                       key={i}
-                      className="h-[5px] w-[5px] rounded-full"
-                      style={{
-                        backgroundColor: isSelected ? 'white' : color,
-                        opacity: isSelected ? 0.8 : 1,
-                      }}
+                      className={cn(
+                        'h-[6px] w-[6px] rounded-full',
+                        isSelected && 'ring-1 ring-white/40',
+                      )}
+                      style={{ backgroundColor: isSelected ? '#FFFFFF' : color }}
                     />
                   ))
                 : null}

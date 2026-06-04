@@ -16,6 +16,7 @@ import { pluralize } from '@tutorflow/utils'
 import { useAuthStore } from '@/store/auth.store'
 import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
 import { toast } from '@/components/ui/use-toast'
+import { cn } from '@/lib/utils'
 
 type CalendarLesson = LessonWithStudent | LessonWithTutor
 
@@ -31,9 +32,11 @@ interface DayViewProps {
   lessons: CalendarLesson[]
   loading: boolean
   onRefetch: () => void
+  /** Плотный режим для десктопной колонки (день встроен в карточку) */
+  dense?: boolean
 }
 
-export function DayView({ date, lessons, loading, onRefetch }: DayViewProps) {
+export function DayView({ date, lessons, loading, onRefetch, dense = false }: DayViewProps) {
   const [addOpen, setAddOpen] = useState(false)
   const [hwLessonId, setHwLessonId] = useState<string | null>(null)
   const { payLesson, loadingId: payLoadingId } = usePayLesson()
@@ -61,11 +64,22 @@ export function DayView({ date, lessons, loading, onRefetch }: DayViewProps) {
   }
 
   return (
-    <div className="px-4 pt-1 pb-4">
+    <div
+      className={cn(
+        dense ? 'flex flex-col px-5 pt-5 pb-5' : 'px-4 pt-1 pb-4',
+      )}
+    >
       {/* Заголовок дня */}
-      <div className="flex items-center justify-between mb-4">
+      <div
+        className={cn(
+          'flex items-center justify-between',
+          dense ? 'mb-4 shrink-0' : 'mb-4',
+        )}
+      >
         <div>
-          <h2 className="text-base font-bold text-foreground">{dayLabel}</h2>
+          <h2 className={cn('font-bold text-foreground', dense ? 'text-h3 capitalize' : 'text-base')}>
+            {dayLabel}
+          </h2>
           {!loading && (
             <p className="text-xs text-muted-foreground mt-0.5">
               {lessons.length === 0
@@ -91,14 +105,17 @@ export function DayView({ date, lessons, loading, onRefetch }: DayViewProps) {
         isTutor ? (
           <button
             onClick={() => setAddOpen(true)}
-            className="w-full rounded-2xl border-2 border-dashed border-border py-10 flex flex-col items-center gap-3 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            className={cn(
+              'group flex w-full flex-col items-center gap-3 rounded-lg border border-dashed border-strong text-muted-foreground transition-all hover:border-primary/50 hover:text-primary',
+              dense ? 'py-12' : 'py-10',
+            )}
           >
-            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
               <Plus size={22} />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium">Нет уроков</p>
-              <p className="text-xs mt-0.5">Нажмите, чтобы добавить</p>
+              <p className="text-sm font-medium text-foreground group-hover:text-primary">Нет уроков</p>
+              <p className="mt-0.5 text-xs">Нажмите, чтобы добавить</p>
             </div>
           </button>
         ) : (

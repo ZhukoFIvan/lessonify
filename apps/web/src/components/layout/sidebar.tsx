@@ -2,17 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  LayoutDashboard,
-  Calendar,
-  Users,
-  Wallet,
-  BookOpen,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-} from 'lucide-react'
+import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
@@ -30,87 +20,111 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'lg:border-border lg:bg-card sticky top-0 hidden h-screen transition-all duration-300 lg:flex lg:flex-col lg:border-r',
-        collapsed ? 'lg:w-20' : 'lg:w-64',
+        'sticky top-0 hidden h-screen shrink-0 flex-col bg-surface-1 transition-[width] duration-300 lg:flex',
+        'border-r border-[var(--border-subtle)]',
+        collapsed ? 'lg:w-[76px]' : 'lg:w-64',
       )}
     >
-      <div className="border-border border-b p-4">
-        <div className="flex items-center justify-between">
-          {!collapsed && (
-            <div className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="Lessonify" className="w-8 h-8 rounded-xl shrink-0" />
-              <div className="min-w-0">
-                <h1 className="text-foreground truncate text-base font-bold">Lessonify</h1>
-                <p className="text-muted-foreground truncate text-xs">
-                  {user?.role === 'TUTOR' ? 'Репетитор' : 'Ученик'}
-                </p>
-              </div>
+      {/* Бренд + переключатель */}
+      <div className="flex h-16 items-center gap-2.5 px-3">
+        {!collapsed && (
+          <Link href="/dashboard" className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1">
+            <img
+              src="/logo.png"
+              alt="Lessonify"
+              className="h-9 w-9 shrink-0 rounded-md shadow-elevation-1"
+            />
+            <div className="min-w-0">
+              <h1 className="truncate text-[15px] font-bold leading-tight tracking-tight text-foreground">
+                Lessonify
+              </h1>
+              <p className="truncate text-[11px] leading-tight text-muted-foreground">
+                {user?.role === 'TUTOR' ? 'Репетитор' : 'Ученик'}
+              </p>
             </div>
+          </Link>
+        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
+          className={cn(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors',
+            'hover:bg-surface-2 hover:text-foreground',
+            collapsed && 'mx-auto',
           )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className={cn(
-              'hover:bg-secondary shrink-0 rounded-lg p-2 transition-colors',
-              collapsed && 'mx-auto mt-2',
-            )}
-          >
-            {collapsed ? <Menu size={18} /> : <X size={18} />}
-          </button>
-        </div>
+        >
+          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-3">
+      <div className="mx-3 h-px bg-[var(--border-subtle)]" />
+
+      {/* Навигация */}
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {nav.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href
+          const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
               title={collapsed ? label : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-3 transition-all',
-                collapsed ? 'justify-center' : '',
+                'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
+                collapsed && 'justify-center px-0',
                 isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground',
+                  ? 'brand-gradient text-primary-foreground shadow-[0_4px_14px_-4px_rgba(108,99,255,0.5)]'
+                  : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground',
               )}
             >
-              <Icon size={20} className="shrink-0" />
-              {!collapsed && <span className="truncate font-medium">{label}</span>}
+              <Icon
+                size={19}
+                strokeWidth={isActive ? 2.4 : 1.9}
+                className="shrink-0"
+              />
+              {!collapsed && <span className="truncate">{label}</span>}
             </Link>
           )
         })}
       </nav>
 
-      <div className="border-border border-t p-3">
+      {/* Профиль + выход */}
+      <div className="space-y-2 p-3">
+        <div className="mx-0 h-px bg-[var(--border-subtle)]" />
         {!collapsed ? (
           <>
-            <div className="bg-secondary mb-2 flex items-center gap-3 rounded-xl px-3 py-2">
-              <div className="bg-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white">
+            <div className="flex items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5">
+              <div className="brand-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-elevation-1">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-foreground truncate text-sm font-medium">{user?.name}</p>
-                <p className="text-muted-foreground truncate text-xs">{user?.email}</p>
+                <p className="truncate text-sm font-semibold text-foreground">{user?.name}</p>
+                <p className="truncate text-[11px] text-muted-foreground">{user?.email}</p>
               </div>
             </div>
             <button
               onClick={() => logout()}
-              className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground flex w-full items-center gap-3 rounded-xl px-3 py-2 transition-colors"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-[hsl(var(--danger)/0.12)] hover:text-[hsl(var(--danger))]"
             >
-              <LogOut size={20} />
-              <span className="font-medium">Выйти</span>
+              <LogOut size={18} />
+              <span>Выйти</span>
             </button>
           </>
         ) : (
-          <button
-            onClick={() => logout()}
-            title="Выйти"
-            className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground flex w-full items-center justify-center rounded-xl p-3 transition-colors"
-          >
-            <LogOut size={20} />
-          </button>
+          <>
+            <div
+              title={user?.name ?? undefined}
+              className="brand-gradient mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white shadow-elevation-1"
+            >
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={() => logout()}
+              title="Выйти"
+              className="flex w-full items-center justify-center rounded-lg p-2.5 text-muted-foreground transition-colors hover:bg-[hsl(var(--danger)/0.12)] hover:text-[hsl(var(--danger))]"
+            >
+              <LogOut size={18} />
+            </button>
+          </>
         )}
       </div>
     </aside>

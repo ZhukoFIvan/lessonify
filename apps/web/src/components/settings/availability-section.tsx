@@ -35,20 +35,20 @@ function AddSlotForm({ dayOfWeek, onSave, onCancel }: AddSlotFormProps) {
   }
 
   return (
-    <div className="mt-2 p-2.5 bg-secondary/40 rounded-xl flex flex-wrap items-center gap-2">
+    <div className="mt-2 p-2.5 bg-surface-0 border border-subtle rounded-md flex flex-wrap items-center gap-2">
       <select value={hour} onChange={(e) => setHour(e.target.value)}
-        className="text-xs border border-border rounded-lg px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-primary">
+        className="text-xs border border-subtle rounded-sm px-2 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60">
         {Array.from({ length: 24 }, (_, i) => (
           <option key={i} value={i}>{pad(i)}</option>
         ))}
       </select>
       <span className="text-xs text-muted-foreground">:</span>
       <select value={minute} onChange={(e) => setMinute(e.target.value)}
-        className="text-xs border border-border rounded-lg px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-primary">
+        className="text-xs border border-subtle rounded-sm px-2 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60">
         {['00', '15', '30', '45'].map((m) => <option key={m} value={m}>{m}</option>)}
       </select>
       <select value={duration} onChange={(e) => setDuration(e.target.value)}
-        className="text-xs border border-border rounded-lg px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-primary">
+        className="text-xs border border-subtle rounded-sm px-2 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60">
         {[30, 45, 60, 90, 120].map((d) => <option key={d} value={d}>{d} мин</option>)}
       </select>
       <div className="flex gap-1.5 ml-auto">
@@ -99,9 +99,9 @@ export function AvailabilitySection() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="surface-1 rounded-lg p-5">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-md bg-primary/12 flex items-center justify-center shrink-0">
           <CalendarClock size={20} className="text-primary" />
         </div>
         <div>
@@ -131,8 +131,8 @@ export function AvailabilitySection() {
               </div>
 
               {slotsByDay[dayIdx]!.map((slot) => (
-                <div key={slot.id} className={`flex items-center justify-between px-3 py-2 rounded-xl mb-1 transition-opacity ${slot.isActive ? 'bg-secondary/60' : 'bg-secondary/20 opacity-50'}`}>
-                  <span className="text-sm font-medium">
+                <div key={slot.id} className={`flex items-center justify-between px-3 py-2 rounded-md border border-subtle mb-1 transition-opacity ${slot.isActive ? 'bg-surface-0' : 'bg-surface-0 opacity-50'}`}>
+                  <span className="tnum text-sm font-medium">
                     {pad(slot.startHour)}:{pad(slot.startMinute)} · {slot.durationMinutes} мин
                   </span>
                   <div className="flex items-center gap-1">

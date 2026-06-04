@@ -123,51 +123,63 @@ function HomeworkLayout({
 
   return (
     <div className="flex flex-col min-h-full lg:p-8">
-      <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3">
-        <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Домашние задания</h1>
-        <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 min-h-[1em]">
-          {!showSkeleton && (count === 0 ? 'Нет заданий' : `${count} задан${count === 1 ? 'ие' : 'ия'}`)}
-        </p>
-      </motion.div>
-
-      <motion.div {...fadeUp(0.08)} className="flex gap-2 px-4 lg:px-0 pb-3 overflow-x-auto scrollbar-hide">
-        {FILTERS.map(({ label, value }) => (
-          <button
-            key={label}
-            onClick={() => onFilter(value)}
-            className={cn(
-              'shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold border transition-colors',
-              filter === value
-                ? 'bg-primary text-white border-primary'
-                : 'bg-background text-foreground border-border',
-            )}
-          >
-            {label}
-          </button>
-        ))}
-      </motion.div>
-
-      <motion.div {...fadeUp(0.16)} className={cn('flex-1 px-4 lg:px-0 pb-4 transition-opacity duration-150', isDimmed && 'opacity-40 pointer-events-none')}>
-        {showSkeleton ? (
-          <div className="grid gap-3 lg:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-[140px] rounded-2xl" />)}
+      <div className="w-full max-w-6xl mx-auto flex flex-col flex-1">
+        <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3 flex items-end justify-between gap-3">
+          <div>
+            <h1 className="text-h2 lg:text-h1 text-foreground">Домашние задания</h1>
+            <p className="text-xs lg:text-sm text-muted-foreground mt-1 min-h-[1em]">
+              {!showSkeleton && (count === 0 ? 'Нет заданий' : `${count} задан${count === 1 ? 'ие' : 'ия'}`)}
+            </p>
           </div>
-        ) : count === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-16 gap-3 text-muted-foreground">
-            <BookOpen size={40} strokeWidth={1.5} />
-            <div className="text-center">
-              <p className="text-sm font-medium text-foreground">
-                {filter ? 'Нет заданий с таким статусом' : 'Заданий нет'}
-              </p>
-              <p className="text-xs mt-0.5">
-                {filter ? '' : 'Задания появятся здесь после создания'}
-              </p>
+        </motion.div>
+
+        {/* Сегментированный фильтр — утопленная дорожка с активным брендовым чипом */}
+        <motion.div {...fadeUp(0.08)} className="px-4 lg:px-0 pb-4">
+          <div className="inline-flex max-w-full gap-1 rounded-full bg-surface-0 border border-[var(--border-subtle)] p-1 scroll-x">
+            {FILTERS.map(({ label, value }) => {
+              const active = filter === value
+              return (
+                <button
+                  key={label}
+                  onClick={() => onFilter(value)}
+                  className={cn(
+                    'shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200',
+                    active
+                      ? 'bg-surface-2 text-foreground shadow-elevation-1 border border-[var(--border-subtle)]'
+                      : 'text-muted-foreground hover:text-foreground border border-transparent',
+                  )}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </motion.div>
+
+        <motion.div {...fadeUp(0.16)} className={cn('flex-1 px-4 lg:px-0 pb-4 transition-opacity duration-150', isDimmed && 'opacity-40 pointer-events-none')}>
+          {showSkeleton ? (
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-[164px] rounded-lg" />)}
             </div>
-          </div>
-        ) : (
-          <div className="grid gap-3 lg:grid-cols-2">{children}</div>
-        )}
-      </motion.div>
+          ) : count === 0 ? (
+            <div className="flex flex-col items-center justify-center pt-20 gap-4 text-muted-foreground">
+              <div className="w-16 h-16 rounded-full bg-surface-1 border border-[var(--border-subtle)] shadow-elevation-1 flex items-center justify-center">
+                <BookOpen size={28} strokeWidth={1.5} className="text-muted-foreground" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-foreground">
+                  {filter ? 'Нет заданий с таким статусом' : 'Заданий нет'}
+                </p>
+                <p className="text-xs mt-1">
+                  {filter ? 'Попробуйте другой фильтр' : 'Задания появятся здесь после создания'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 items-start">{children}</div>
+          )}
+        </motion.div>
+      </div>
     </div>
   )
 }
