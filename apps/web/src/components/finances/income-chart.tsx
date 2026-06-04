@@ -75,6 +75,10 @@ export function IncomeChart({ data, loading }: IncomeChartProps) {
   }))
 
   const maxValue = Math.max(...data.map((d) => d.earned + d.pending), 1)
+  // Округляем верх шкалы до «красивого» шага, чтобы столбцы заполняли область,
+  // а не жались к низу (шкала по МАКСИМУМУ ЗА МЕСЯЦ, не по сумме).
+  const niceStep = maxValue > 80000 ? 20000 : maxValue > 30000 ? 10000 : maxValue > 10000 ? 5000 : 1000
+  const niceMax = Math.max(Math.ceil((maxValue * 1.1) / niceStep) * niceStep, niceStep)
   const hasData = data.some((d) => d.earned + d.pending > 0)
 
   return (
@@ -108,7 +112,7 @@ export function IncomeChart({ data, loading }: IncomeChartProps) {
       ) : (
         <div className="flex-1">
           <ResponsiveContainer width="100%" height="100%" minHeight={170}>
-            <BarChart data={chartData} barSize={16} barGap={2} margin={{ top: 4, right: 0, left: -8, bottom: 0 }}>
+            <BarChart data={chartData} barSize={26} margin={{ top: 4, right: 0, left: -8, bottom: 0 }}>
               <CartesianGrid
                 vertical={false}
                 strokeDasharray="2 4"
@@ -127,18 +131,18 @@ export function IncomeChart({ data, loading }: IncomeChartProps) {
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}к` : String(v))}
-                domain={[0, Math.ceil(maxValue * 1.15)]}
-                width={36}
+                domain={[0, niceMax]}
+                ticks={[0, niceMax / 2, niceMax]}
+                width={40}
               />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--secondary))', radius: 6 }} />
-              <Bar dataKey="earned" stackId="a" fill="hsl(var(--primary))" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="earned" stackId="a" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               <Bar
                 dataKey="pending"
                 stackId="a"
                 fill="hsl(var(--warning))"
-                opacity={0.55}
-                radius={[5, 5, 0, 0]}
-                background={{ fill: 'hsl(var(--secondary))', radius: 5 }}
+                opacity={0.6}
+                radius={[4, 4, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
