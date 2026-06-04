@@ -1,5 +1,6 @@
 import { prisma } from '../../lib/prisma'
 import { bot } from '../telegram/telegram.bot'
+import { encrypt, decrypt } from '../../lib/crypto'
 
 const MIN_WITHDRAWAL = 500   // минимум 500 ₽
 const COMMISSION_RATE = 0.20 // 20%
@@ -8,6 +9,18 @@ const COMMISSION_RATE = 0.20 // 20%
 
 export function generateReferralCode(): string {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
+}
+
+// ── Расшифровка реквизитов с fallback на legacy-плейнтекст ─────────────────────
+// Старые заявки хранят cardDetails в открытом виде — такие строки не являются
+// валидным шифротекстом AES-GCM и не должны ронять выдачу. Возвращаем как есть.
+
+export function decryptCardDetails(stored: string): string {
+  try {
+    return decrypt(stored)
+  } catch {
+    return stored // legacy-плейнтекст или повреждённые данные — отдаём без изменений
+  }
 }
 
 // ── Уведомление администратора через Telegram ─────────────────────────────────
@@ -119,7 +132,7 @@ export const referralsService = {
       data: {
         userId,
         amount: stats.availableBalance,
-        cardDetails,
+        cardDetails: encrypt(cardDetails),
         status: 'PENDING',
       },
     })
@@ -128,7 +141,7 @@ export const referralsService = {
       userName: user.name,
       userEmail: user.email,
       amount: request.amount,
-      cardDetails: request.cardDetails,
+      cardDetails, // в уведомлении — открытые реквизиты (введённые юзером)
       requestId: request.id,
     })
 
@@ -137,6 +150,9 @@ export const referralsService = {
 
   // Начислить комиссию (вызывается при покупке подписки)
   async recordPurchase(referredUserId: string, purchaseAmount: number, description?: string) {
+    // Бесплатные промокоды / нулевые покупки не дают реферальной комиссии
+    if (!purchaseAmount || purchaseAmount <= 0) return null
+
     const user = await prisma.user.findUnique({
       where: { id: referredUserId },
       select: { referredById: true },
@@ -160,11 +176,29 @@ export const referralsService = {
   async markPaid(requestId: string) {
     const request = await prisma.withdrawalRequest.findUniqueOrThrow({ where: { id: requestId } })
 
-    // Помечаем все unpaid earning'и как paid
-    await prisma.referralEarning.updateMany({
+    // Закрываем ИМЕННО сумму этой заявки: помечаем самые старые неоплаченные
+    // начисления как paid, пока не наберётся request.amount. Так начисления,
+    // появившиеся уже после подачи заявки, остаются доступны к следующему выводу.
+    const unpaid = await prisma.referralEarning.findMany({
       where: { earnerId: request.userId, paid: false },
-      data: { paid: true },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, earnAmount: true },
     })
+
+    const idsToPay: string[] = []
+    let covered = 0
+    for (const earning of unpaid) {
+      if (covered >= request.amount) break
+      idsToPay.push(earning.id)
+      covered += earning.earnAmount
+    }
+
+    if (idsToPay.length > 0) {
+      await prisma.referralEarning.updateMany({
+        where: { id: { in: idsToPay } },
+        data: { paid: true },
+      })
+    }
 
     return prisma.withdrawalRequest.update({
       where: { id: requestId },

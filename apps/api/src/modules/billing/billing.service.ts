@@ -1,5 +1,6 @@
 import { prisma } from '../../lib/prisma'
 import { buildPaymentUrl, verifyWebhook, type WebhookResult } from './robokassa'
+import { referralsService } from '../referrals/referrals.service'
 
 const FRONTEND_URL = () => process.env.FRONTEND_URL ?? 'http://localhost:3000'
 const FREE_STUDENT_LIMIT = 5
@@ -73,19 +74,42 @@ export const billingService = {
   async handleWebhook(body: Record<string, string>): Promise<WebhookResult & { handled: boolean; planExpiresAt?: Date }> {
     const result = verifyWebhook(body)
 
+    // 1) Проверка подписи
     if (!result.valid) {
       throw new BillingError('Неверная подпись', 403)
     }
 
-    const { userId, period } = result
+    const { userId, period, invId, outSum } = result
     const config = PLAN_CONFIG[period as PlanPeriod]
     if (!config) {
       return { ...result, handled: false }
     }
 
+    // 2) Валидация суммы против ожидаемой цены плана
+    if (outSum !== config.price) {
+      throw new BillingError(
+        `Сумма ${outSum} не соответствует цене тарифа (${config.price})`,
+        400,
+      )
+    }
+
     const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
       return { ...result, handled: false }
+    }
+
+    // 3) Идемпотентность: invId — стабильный идентификатор платежа.
+    // Если Order с таким externalId уже есть — повторный/refresh вызов
+    // НЕ должен повторно продлевать PRO и начислять комиссию.
+    const externalId = String(invId)
+    const existing = await prisma.order.findUnique({ where: { externalId } })
+    if (existing) {
+      console.log(`[billing] duplicate webhook for invId=${externalId}, ignored`)
+      return {
+        ...result,
+        handled: true,
+        ...(user.planExpiresAt ? { planExpiresAt: user.planExpiresAt } : {}),
+      }
     }
 
     // Продлеваем от текущей даты истечения если PRO ещё активен
@@ -97,10 +121,55 @@ export const billingService = {
     const planExpiresAt = new Date(base)
     planExpiresAt.setDate(planExpiresAt.getDate() + config.days)
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { plan: 'PRO', planExpiresAt },
+    // Считаем, первый ли это успешный Order пользователя (до создания текущего)
+    const priorPaidOrders = await prisma.order.count({
+      where: { userId, status: 'PAID' },
     })
+    const isFirstOrder = priorPaidOrders === 0
+
+    // Создаём Order (даёт идемпотентность за счёт @unique externalId)
+    // и продлеваем PRO в одной транзакции.
+    try {
+      await prisma.$transaction([
+        prisma.order.create({
+          data: {
+            userId,
+            provider: 'robokassa',
+            externalId,
+            plan: period,
+            amount: outSum,
+            status: 'PAID',
+          },
+        }),
+        prisma.user.update({
+          where: { id: userId },
+          data: { plan: 'PRO', planExpiresAt },
+        }),
+      ])
+    } catch (err: any) {
+      // Гонка: параллельный дубль вебхука успел создать Order с тем же externalId.
+      // P2002 — нарушение unique. Считаем обработанным, без повторного продления.
+      if (err?.code === 'P2002') {
+        console.log(`[billing] concurrent duplicate webhook for invId=${externalId}, ignored`)
+        return {
+          ...result,
+          handled: true,
+          ...(user.planExpiresAt ? { planExpiresAt: user.planExpiresAt } : {}),
+        }
+      }
+      throw err
+    }
+
+    // 4) Реферальная комиссия — только из верифицированного вебхука и только
+    // на ПЕРВОМ успешном Order, с реальной оплаченной суммой.
+    if (isFirstOrder) {
+      try {
+        await referralsService.recordPurchase(userId, outSum, `Покупка ${config.label} ${outSum} ₽`)
+      } catch (err: any) {
+        // Не валим оплату из-за реферальной логики — PRO уже выдан.
+        console.error('[billing] recordPurchase failed:', err?.message ?? err)
+      }
+    }
 
     console.log(`[billing] PRO activated for ${userId}, expires ${planExpiresAt.toISOString()}`)
     return { ...result, handled: true, planExpiresAt }

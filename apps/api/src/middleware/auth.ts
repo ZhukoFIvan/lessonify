@@ -41,3 +41,11 @@ export function requireStudent(req: Request, res: Response, next: NextFunction):
   }
   next()
 }
+
+export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  if (req.user?.role !== 'ADMIN') {
+    res.status(403).json({ error: 'Admin access required' })
+    return
+  }
+  next()
+}

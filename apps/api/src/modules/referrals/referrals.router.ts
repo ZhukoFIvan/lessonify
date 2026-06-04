@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { z } from 'zod'
-import { requireAuth } from '../../middleware/auth'
+import { requireAuth, requireAdmin } from '../../middleware/auth'
 import { referralsService } from './referrals.service'
 
 export const referralsRouter = Router()
@@ -35,35 +35,13 @@ referralsRouter.post('/withdraw', requireAuth, async (req, res) => {
   }
 })
 
-// POST /referrals/record-purchase — начислить комиссию (вызывается при покупке Pro)
-// В будущем будет вызываться автоматически из payment webhook
-const purchaseSchema = z.object({
-  userId: z.string(),
-  amount: z.number().positive(),
-  description: z.string().optional(),
-})
+// Начисление реферальной комиссии происходит внутри сервера:
+// referralsService.recordPurchase(userId, amount, description?) вызывает
+// платёжный вебхук / promo-сервис. Публичного HTTP-роута для этого НЕТ —
+// иначе любой авторизованный юзер мог бы начислить себе доход.
 
-referralsRouter.post('/record-purchase', requireAuth, async (req, res) => {
-  const parsed = purchaseSchema.safeParse(req.body)
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.errors[0]?.message })
-    return
-  }
-
-  try {
-    const earning = await referralsService.recordPurchase(
-      parsed.data.userId,
-      parsed.data.amount,
-      parsed.data.description,
-    )
-    res.json({ earning })
-  } catch (err: any) {
-    res.status(err.statusCode ?? 500).json({ error: err.message })
-  }
-})
-
-// PATCH /referrals/withdraw/:id/paid — пометить заявку оплаченной (для admin)
-referralsRouter.patch('/withdraw/:id/paid', requireAuth, async (req, res) => {
+// PATCH /referrals/withdraw/:id/paid — пометить заявку оплаченной (только ADMIN)
+referralsRouter.patch('/withdraw/:id/paid', requireAuth, requireAdmin, async (req, res) => {
   try {
     const result = await referralsService.markPaid(req.params.id!)
     res.json(result)

@@ -55,6 +55,12 @@ enum WithdrawalStatus {
   REJECTED
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // User — базовый аккаунт (репетитор или ученик)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -84,6 +90,7 @@ model User {
   referralEarnings   ReferralEarning[]
   withdrawalRequests WithdrawalRequest[]
   promoCodeUses      PromoCodeUse[]
+  orders             Order[]
 
   // Relations
   tutor              Tutor?
@@ -486,6 +493,29 @@ model PromoCodeUse {
   @@unique([promoCodeId, userId])
   @@index([userId])
   @@map("promo_code_uses")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Order — запись об оплате подписки (Robokassa). Делает MRR измеримым.
+// externalId = стабильный invId платежа → @unique даёт идемпотентность вебхука.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Order {
+  id         String      @id @default(cuid())
+  userId     String
+  provider   String      @default("robokassa")
+  externalId String      @unique // стабильный invId платежа
+  plan       String      // monthly | yearly
+  amount     Int         // фактически оплаченная сумма в рублях
+  status     OrderStatus @default(PAID)
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("orders")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import { prisma } from '../../lib/prisma'
 import { subDays, startOfDay, format } from 'date-fns'
+import { decryptCardDetails } from '../referrals/referrals.service'
 
 // ── Dashboard stats ────────────────────────────────────────────────────────────
 
@@ -106,7 +107,7 @@ export const adminService = {
   },
 
   async getUserById(id: string) {
-    return prisma.user.findUniqueOrThrow({
+    const user = await prisma.user.findUniqueOrThrow({
       where: { id },
       include: {
         tutor: {
@@ -123,6 +124,13 @@ export const adminService = {
         withdrawalRequests: { orderBy: { createdAt: 'desc' }, take: 5 },
       },
     })
+    return {
+      ...user,
+      withdrawalRequests: user.withdrawalRequests.map((w) => ({
+        ...w,
+        cardDetails: decryptCardDetails(w.cardDetails),
+      })),
+    }
   },
 
   async toggleBlock(userId: string) {
@@ -166,17 +174,38 @@ export const adminService = {
       prisma.withdrawalRequest.count({ where }),
     ])
 
-    return { items, total, pages: Math.ceil(total / take), page }
+    return {
+      items: items.map((it) => ({ ...it, cardDetails: decryptCardDetails(it.cardDetails) })),
+      total,
+      pages: Math.ceil(total / take),
+      page,
+    }
   },
 
   async processWithdrawal(id: string, action: 'PAID' | 'REJECTED', adminNote?: string) {
     const request = await prisma.withdrawalRequest.findUniqueOrThrow({ where: { id } })
 
     if (action === 'PAID') {
-      await prisma.referralEarning.updateMany({
+      // Закрываем ИМЕННО сумму заявки (как в referralsService.markPaid):
+      // самые старые неоплаченные начисления, пока не наберётся request.amount.
+      const unpaid = await prisma.referralEarning.findMany({
         where: { earnerId: request.userId, paid: false },
-        data: { paid: true },
+        orderBy: { createdAt: 'asc' },
+        select: { id: true, earnAmount: true },
       })
+      const idsToPay: string[] = []
+      let covered = 0
+      for (const earning of unpaid) {
+        if (covered >= request.amount) break
+        idsToPay.push(earning.id)
+        covered += earning.earnAmount
+      }
+      if (idsToPay.length > 0) {
+        await prisma.referralEarning.updateMany({
+          where: { id: { in: idsToPay } },
+          data: { paid: true },
+        })
+      }
     }
 
     return prisma.withdrawalRequest.update({

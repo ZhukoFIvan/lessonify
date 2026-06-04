@@ -61,6 +61,7 @@ export interface WebhookResult {
   userId: string
   period: string
   invId: number
+  outSum: number // фактически оплаченная сумма (рубли)
 }
 
 export function verifyWebhook(body: Record<string, string>): WebhookResult {
@@ -73,5 +74,11 @@ export function verifyWebhook(body: Record<string, string>): WebhookResult {
   const shp = shpString('Shp', userId, period)
   const expected = md5(`${outSum}:${invId}:${cfg.pass2()}:${shp}`)
 
-  return { valid: expected === sign, userId, period, invId: parseInt(invId, 10) }
+  return {
+    valid: expected === sign,
+    userId,
+    period,
+    invId: parseInt(invId, 10),
+    outSum: Math.round(parseFloat(outSum)),
+  }
 }
