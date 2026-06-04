@@ -1,10 +1,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, rgb } from 'pdf-lib'
 import * as fontkit from '@pdf-lib/fontkit'
 import { prisma } from '../../lib/prisma'
 
-const FONT_PATH = path.join(process.cwd(), 'assets', 'fonts', 'Roboto-Regular.ttf')
+const FONT_PATH = path.join(process.cwd(), 'assets', 'fonts', 'OpenSans-Regular.ttf')
 
 function formatDate(d: Date): string {
   return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -48,16 +48,18 @@ export const invoiceService = {
 
     // Создаём PDF
     const pdfDoc = await PDFDocument.create()
-    pdfDoc.registerFontkit(fontkit)
+    // @pdf-lib/fontkit экспортируется как default — namespace без .create ломает embedFont
+    pdfDoc.registerFontkit((fontkit as any).default ?? fontkit)
 
-    // Загружаем Roboto с Кириллицей
+    // Загружаем шрифт с кириллицей. Без него инвойс с русским текстом не собрать,
+    // поэтому НЕ откатываемся молча на Helvetica (раньше это давало краш на «С»).
     let font
     try {
       const fontBytes = fs.readFileSync(FONT_PATH)
       font = await pdfDoc.embedFont(fontBytes)
-    } catch {
-      // Fallback на стандартный шрифт (без кириллицы)
-      font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    } catch (err) {
+      console.error('[invoice] Не удалось встроить шрифт', FONT_PATH, '—', (err as Error).message)
+      throw new Error('Не удалось загрузить шрифт для счёта')
     }
 
     const page = pdfDoc.addPage([595, 842]) // A4
@@ -72,7 +74,7 @@ export const invoiceService = {
     let y = height - margin
 
     // ── Заголовок ──────────────────────────────────────────────────────────────
-    page.drawText('TutorFlow', { x: margin, y, size: 22, font, color: primary })
+    page.drawText('Lessonify', { x: margin, y, size: 22, font, color: primary })
     page.drawText('СЧЁТ', { x: width - margin - 80, y, size: 22, font, color: textDark })
     y -= 28
 
@@ -185,7 +187,7 @@ export const invoiceService = {
     }
 
     y -= 10
-    page.drawText('Сформировано в TutorFlow', { x: margin, y: 40, size: 8, font, color: rgb(0.8, 0.8, 0.82) })
+    page.drawText('Сформировано в Lessonify', { x: margin, y: 40, size: 8, font, color: rgb(0.8, 0.8, 0.82) })
 
     return pdfDoc.save()
   },
