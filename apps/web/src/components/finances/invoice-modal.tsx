@@ -32,8 +32,9 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
       toast({ variant: 'destructive', title: 'Выберите ученика' })
       return
     }
+    const all = studentId === 'ALL'
     try {
-      await downloadInvoice(studentId, selectedStudent?.name ?? 'ученик', from, to)
+      await downloadInvoice(all ? undefined : studentId, all ? 'все-ученики' : (selectedStudent?.name ?? 'ученик'), from, to)
       toast({ variant: 'success', title: 'Счёт скачан' })
       onClose()
     } catch {
@@ -61,6 +62,7 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
               className="h-12 w-full rounded-2xl border border-input bg-secondary/50 px-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary"
             >
               <option value="">Выберите ученика...</option>
+              <option value="ALL">Все ученики (общий счёт)</option>
               {students.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}{s.subject ? ` · ${s.subject}` : ''}

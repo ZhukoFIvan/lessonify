@@ -92,7 +92,7 @@ paymentsRouter.get('/invoice', async (req: Request, res: Response) => {
     const query = invoiceQuerySchema.parse(req.query)
     const pdfBytes = await invoiceService.generate(tutorId, query.studentId, query.from, query.to)
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', `attachment; filename="invoice-${query.studentId}-${query.from}.pdf"`)
+    res.setHeader('Content-Disposition', `attachment; filename="invoice-${query.studentId ?? 'all'}-${query.from}.pdf"`)
     res.send(Buffer.from(pdfBytes))
   } catch (err) {
     handleError(res, err)

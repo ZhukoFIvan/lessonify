@@ -21,7 +21,7 @@ export const debtQuerySchema = z.object({
 })
 
 export const invoiceQuerySchema = z.object({
-  studentId: z.string().min(1),
+  studentId: z.string().min(1).optional(),
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Формат: YYYY-MM-DD'),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Формат: YYYY-MM-DD'),
 })

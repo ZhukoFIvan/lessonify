@@ -6,11 +6,11 @@ import api from '@/lib/api'
 export function useDownloadInvoice() {
   const [loading, setLoading] = useState(false)
 
-  async function downloadInvoice(studentId: string, studentName: string, from: string, to: string) {
+  async function downloadInvoice(studentId: string | undefined, studentName: string, from: string, to: string) {
     setLoading(true)
     try {
       const response = await api.get('/payments/invoice', {
-        params: { studentId, from, to },
+        params: { ...(studentId ? { studentId } : {}), from, to },
         responseType: 'blob',
       })
       const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
