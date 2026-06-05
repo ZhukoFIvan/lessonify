@@ -10,9 +10,30 @@ import { AuthInitializer } from '@/components/auth/auth-initializer'
 //   display: 'swap',
 // })
 
+const APP_DESCRIPTION =
+  'Lessonify — CRM для частных репетиторов: расписание, учёт учеников и оплат, домашние задания, Telegram-напоминания. Бесплатно до 5 учеников.'
+
 export const metadata: Metadata = {
-  title: 'Lessonify — умный помощник репетитора',
-  description: 'Управляйте расписанием, учениками и оплатами в одном месте',
+  metadataBase: new URL('https://app.lessonify.ru'),
+  title: {
+    default: 'Lessonify — CRM для репетиторов',
+    template: '%s — Lessonify',
+  },
+  description: APP_DESCRIPTION,
+  applicationName: 'Lessonify',
+  keywords: [
+    'CRM для репетитора',
+    'программа для репетитора',
+    'учёт учеников репетитора',
+    'расписание для репетитора',
+    'приложение для репетитора',
+    'журнал репетитора',
+    'учёт оплат репетитор',
+    'репетитор онлайн-кабинет',
+  ],
+  authors: [{ name: 'Жуков Иван Андреевич' }],
+  creator: 'Жуков Иван Андреевич',
+  publisher: 'Lessonify',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -22,6 +43,25 @@ export const metadata: Metadata = {
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Lessonify',
+    locale: 'ru_RU',
+    url: 'https://app.lessonify.ru/',
+    title: 'Lessonify — CRM для репетиторов',
+    description: APP_DESCRIPTION,
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lessonify — CRM для репетиторов' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lessonify — CRM для репетиторов',
+    description: APP_DESCRIPTION,
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 

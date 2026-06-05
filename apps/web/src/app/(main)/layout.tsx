@@ -1,7 +1,13 @@
+import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Prefetcher } from '@/components/layout/prefetcher'
+
+// Authenticated application area — never indexable.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (

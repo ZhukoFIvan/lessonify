@@ -1,12 +1,35 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+import { JsonLd, organizationLd, softwareApplicationLd } from '@/components/seo/json-ld'
 
-export const metadata = {
-  title: 'Публичная оферта — Lessonify',
+export const metadata: Metadata = {
+  title: 'Публичная оферта',
+  description:
+    'Публичная оферта о возмездном оказании услуг сервиса Lessonify — CRM для частных репетиторов. Условия использования, тарифы Free и PRO.',
+  alternates: { canonical: '/offer' },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    siteName: 'Lessonify',
+    locale: 'ru_RU',
+    url: 'https://app.lessonify.ru/offer',
+    title: 'Публичная оферта — Lessonify',
+    description: 'Публичная оферта о возмездном оказании услуг сервиса Lessonify.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lessonify — CRM для репетиторов' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Публичная оферта — Lessonify',
+    description: 'Публичная оферта о возмездном оказании услуг сервиса Lessonify.',
+    images: ['/og-image.png'],
+  },
 }
 
 export default function OfferPage() {
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={organizationLd} />
+      <JsonLd data={softwareApplicationLd} />
       <header className="border-b border-border">
         <div className="max-w-3xl mx-auto px-6 py-5 flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">

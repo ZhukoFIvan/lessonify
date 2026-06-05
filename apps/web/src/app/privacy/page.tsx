@@ -1,7 +1,27 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata = {
-  title: 'Политика конфиденциальности — Lessonify',
+export const metadata: Metadata = {
+  title: 'Политика конфиденциальности',
+  description:
+    'Политика конфиденциальности сервиса Lessonify — CRM для частных репетиторов. Как мы обрабатываем и защищаем персональные данные пользователей.',
+  alternates: { canonical: '/privacy' },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: 'website',
+    siteName: 'Lessonify',
+    locale: 'ru_RU',
+    url: 'https://app.lessonify.ru/privacy',
+    title: 'Политика конфиденциальности — Lessonify',
+    description: 'Как Lessonify обрабатывает и защищает персональные данные пользователей.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lessonify — CRM для репетиторов' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Политика конфиденциальности — Lessonify',
+    description: 'Как Lessonify обрабатывает и защищает персональные данные пользователей.',
+    images: ['/og-image.png'],
+  },
 }
 
 export default function PrivacyPage() {
