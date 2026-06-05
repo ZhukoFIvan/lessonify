@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BrandLogo } from '@/components/ui/brand-logo'
 
 interface StepWelcomeProps {
   onNext: () => void
@@ -62,17 +63,15 @@ export function StepWelcome({ onNext, userName }: StepWelcomeProps) {
           className="absolute -bottom-4 -right-8 w-16 h-16 rounded-full bg-violet-400/10 blur-2xl"
         />
 
-        {/* Logo icon */}
-        <motion.div
-          variants={item}
-          className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-xl shadow-primary/20"
-        >
-          <Sparkles size={36} className="text-white" />
+        {/* Logo */}
+        <motion.div variants={item} className="relative w-20 h-20">
+          {/* Пульсирующее свечение за логотипом */}
           <motion.div
-            className="absolute inset-0 rounded-3xl bg-primary/20"
-            animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
+            className="absolute inset-0 rounded-3xl bg-primary/30 blur-xl"
+            animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0.2, 0.6] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
           />
+          <BrandLogo className="relative w-20 h-20 rounded-3xl shadow-xl shadow-primary/30" />
         </motion.div>
       </div>
 
