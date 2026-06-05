@@ -15,12 +15,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { useAuthStore } from '@/store/auth.store'
 import { LogOut, Palette } from 'lucide-react'
 import { useState, Suspense } from 'react'
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
-})
+import { fadeUp } from '@/lib/motion'
 
 export default function SettingsPage() {
   const { logout } = useAuth()
@@ -80,7 +75,7 @@ export default function SettingsPage() {
     <div className="flex flex-col min-h-full lg:p-8">
       <div className="w-full max-w-5xl mx-auto">
         {/* Header */}
-        <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-5">
+        <motion.div variants={fadeUp(0)} initial="hidden" animate="show" className="px-4 lg:px-0 pt-5 lg:pt-0 pb-5">
           <h1 className="text-h1 lg:text-display text-foreground">Настройки</h1>
           <p className="text-sm text-muted-foreground mt-1.5">
             Профиль, оформление, тариф и интеграции
@@ -92,7 +87,7 @@ export default function SettingsPage() {
             {/* Left column */}
             <div className="flex flex-col gap-4 lg:gap-5">
               {leftColumn.map((section, i) => (
-                <motion.div key={i} {...fadeUp(0.06 + i * 0.05)}>
+                <motion.div key={i} variants={fadeUp(0.06 + i * 0.05)} initial="hidden" animate="show">
                   {section}
                 </motion.div>
               ))}
@@ -101,7 +96,7 @@ export default function SettingsPage() {
             {/* Right column */}
             <div className="flex flex-col gap-4 lg:gap-5">
               {rightColumn.map((section, i) => (
-                <motion.div key={i} {...fadeUp(0.06 + (leftColumn.length + i) * 0.05)}>
+                <motion.div key={i} variants={fadeUp(0.06 + (leftColumn.length + i) * 0.05)} initial="hidden" animate="show">
                   {section}
                 </motion.div>
               ))}
@@ -109,7 +104,9 @@ export default function SettingsPage() {
           </div>
 
           <motion.div
-            {...fadeUp(0.06 + (leftColumn.length + rightColumn.length) * 0.05)}
+            variants={fadeUp(0.06 + (leftColumn.length + rightColumn.length) * 0.05)}
+            initial="hidden"
+            animate="show"
             className="mt-6 lg:mt-8 lg:max-w-md lg:mx-auto"
           >
             <Button

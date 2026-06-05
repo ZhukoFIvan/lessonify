@@ -11,12 +11,7 @@ import { toast } from '@/components/ui/use-toast'
 import { BookOpen } from 'lucide-react'
 import type { HomeworkStatus } from '@tutorflow/types'
 import { cn } from '@/lib/utils'
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
-})
+import { fadeUp } from '@/lib/motion'
 
 const FILTERS: { label: string; value: HomeworkStatus | undefined }[] = [
   { label: 'Все', value: undefined },
@@ -124,7 +119,7 @@ function HomeworkLayout({
   return (
     <div className="flex flex-col min-h-full lg:p-8">
       <div className="w-full max-w-6xl mx-auto flex flex-col flex-1">
-        <motion.div {...fadeUp(0)} className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3 flex items-end justify-between gap-3">
+        <motion.div variants={fadeUp(0)} initial="hidden" animate="show" className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3 flex items-end justify-between gap-3">
           <div>
             <h1 className="text-h2 lg:text-h1 text-foreground">Домашние задания</h1>
             <p className="text-xs lg:text-sm text-muted-foreground mt-1 min-h-[1em]">
@@ -134,7 +129,7 @@ function HomeworkLayout({
         </motion.div>
 
         {/* Сегментированный фильтр — утопленная дорожка с активным брендовым чипом */}
-        <motion.div {...fadeUp(0.08)} className="px-4 lg:px-0 pb-4">
+        <motion.div variants={fadeUp(0.08)} initial="hidden" animate="show" className="px-4 lg:px-0 pb-4">
           <div className="inline-flex max-w-full gap-1 rounded-full bg-surface-0 border border-[var(--border-subtle)] p-1 scroll-x">
             {FILTERS.map(({ label, value }) => {
               const active = filter === value
@@ -156,7 +151,7 @@ function HomeworkLayout({
           </div>
         </motion.div>
 
-        <motion.div {...fadeUp(0.16)} className={cn('flex-1 px-4 lg:px-0 pb-4 transition-opacity duration-150', isDimmed && 'opacity-40 pointer-events-none')}>
+        <motion.div variants={fadeUp(0.16)} initial="hidden" animate="show" className={cn('flex-1 px-4 lg:px-0 pb-4 transition-opacity duration-150', isDimmed && 'opacity-40 pointer-events-none')}>
           {showSkeleton ? (
             <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-[164px] rounded-lg" />)}

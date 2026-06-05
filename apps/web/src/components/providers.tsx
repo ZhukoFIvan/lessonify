@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import { GoogleOAuthProvider } from '@react-oauth/google'
+import { MotionConfig } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -14,12 +15,14 @@ const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
 export function Providers({ children }: ProvidersProps) {
   const inner = (
-    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
-      <SessionProvider>
-        {children}
-        <Toaster />
-      </SessionProvider>
-    </NextThemesProvider>
+    <MotionConfig reducedMotion="user">
+      <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+        <SessionProvider>
+          {children}
+          <Toaster />
+        </SessionProvider>
+      </NextThemesProvider>
+    </MotionConfig>
   )
 
   if (!googleClientId) return inner

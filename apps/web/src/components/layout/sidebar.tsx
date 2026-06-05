@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { BrandLogo } from '@/components/ui/brand-logo'
 import { STUDENT_TABS, TUTOR_TABS } from './constants'
 
 export function Sidebar() {
@@ -29,11 +30,7 @@ export function Sidebar() {
       <div className="flex h-16 items-center gap-2.5 px-3">
         {!collapsed && (
           <Link href="/dashboard" className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1">
-            <img
-              src="/logo.png"
-              alt="Lessonify"
-              className="h-9 w-9 shrink-0 rounded-md shadow-elevation-1"
-            />
+            <BrandLogo className="h-9 w-9 shrink-0 rounded-md shadow-elevation-1" />
             <div className="min-w-0">
               <h1 className="truncate text-[15px] font-bold leading-tight tracking-tight text-foreground">
                 Lessonify

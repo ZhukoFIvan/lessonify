@@ -10,12 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useMyTutors, useAcceptInvite } from '@/hooks/use-students'
 import { getInitials, pluralize } from '@tutorflow/utils'
 import { toast } from '@/components/ui/use-toast'
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
-})
+import { fadeUp, cappedDelay } from '@/lib/motion'
 
 export default function TeachersPage() {
   const { tutors, loading, refetch } = useMyTutors()
@@ -39,7 +34,7 @@ export default function TeachersPage() {
 
   return (
     <div className="flex flex-col min-h-full lg:p-8">
-      <motion.div {...fadeUp(0)} className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-4">
+      <motion.div variants={fadeUp(0)} initial="hidden" animate="show" className="flex items-center justify-between px-4 lg:px-0 pt-5 lg:pt-0 pb-4">
         <div>
           <h1 className="text-xl lg:text-2xl font-bold text-foreground tracking-tight">Преподаватели</h1>
           {!loading && (
@@ -102,7 +97,7 @@ export default function TeachersPage() {
             <Skeleton className="h-24 rounded-2xl" />
           </>
         ) : tutors.length === 0 ? (
-          <motion.div {...fadeUp(0.1)}>
+          <motion.div variants={fadeUp(0.1)} initial="hidden" animate="show">
             <div className="rounded-2xl border-2 border-dashed border-border py-14 flex flex-col items-center gap-3 text-muted-foreground">
               <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center">
                 <GraduationCap size={26} />
@@ -121,7 +116,7 @@ export default function TeachersPage() {
           </motion.div>
         ) : (
           tutors.map((item, i) => (
-            <motion.div key={item.studentRecordId} {...fadeUp(0.05 + i * 0.05)}>
+            <motion.div key={item.studentRecordId} variants={fadeUp(cappedDelay(i))} initial="hidden" animate="show">
               <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-4">
                 <Avatar className="w-14 h-14 shrink-0">
                   <AvatarImage src={item.tutor.user.avatarUrl ?? undefined} />

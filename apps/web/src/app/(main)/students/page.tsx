@@ -11,12 +11,7 @@ import { StudentDetailModal } from '@/components/students/student-detail-modal'
 import { AddStudentModal } from '@/components/students/add-student-modal'
 import { useStudents } from '@/hooks/use-students'
 import { formatRub, pluralize } from '@tutorflow/utils'
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
-})
+import { fadeUp } from '@/lib/motion'
 
 export default function StudentsPage() {
   const [search, setSearch] = useState('')
@@ -48,7 +43,9 @@ export default function StudentsPage() {
     <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col lg:p-8">
       {/* ── Заголовок ── */}
       <motion.div
-        {...fadeUp(0)}
+        variants={fadeUp(0)}
+        initial="hidden"
+        animate="show"
         className="flex items-center justify-between gap-3 px-4 pt-5 pb-3 lg:px-0 lg:pt-0"
       >
         <div className="min-w-0">
@@ -67,7 +64,7 @@ export default function StudentsPage() {
 
       {/* ── Сводка ── */}
       {!loading && hasStudents && (
-        <motion.div {...fadeUp(0.06)} className="grid grid-cols-2 gap-2.5 px-4 pb-3 lg:grid-cols-3 lg:px-0">
+        <motion.div variants={fadeUp(0.06)} initial="hidden" animate="show" className="grid grid-cols-2 gap-2.5 px-4 pb-3 lg:grid-cols-3 lg:px-0">
           <SummaryTile
             icon={<Users size={16} />}
             label="Всего"
@@ -90,7 +87,7 @@ export default function StudentsPage() {
       )}
 
       {/* ── Поиск ── */}
-      <motion.div {...fadeUp(0.12)} className="px-4 pb-3 lg:px-0">
+      <motion.div variants={fadeUp(0.12)} initial="hidden" animate="show" className="px-4 pb-3 lg:px-0">
         <div className="relative lg:max-w-md">
           <Search
             size={16}
@@ -116,7 +113,7 @@ export default function StudentsPage() {
       </motion.div>
 
       {/* ── Список ── */}
-      <motion.div {...fadeUp(0.18)} className="flex-1 px-4 pb-6 lg:px-0">
+      <motion.div variants={fadeUp(0.18)} initial="hidden" animate="show" className="flex-1 px-4 pb-6 lg:px-0">
         {loading ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (

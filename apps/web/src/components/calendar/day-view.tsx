@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { isToday, isTomorrow, isYesterday, format, formatISO } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { Plus } from 'lucide-react'
@@ -13,6 +14,7 @@ import { BookingSlotsView } from '@/components/calendar/booking-slots-view'
 import { usePayLesson, useRemindLesson } from '@/hooks/use-lessons'
 import { useMyTutor } from '@/hooks/use-my-tutor'
 import { pluralize } from '@tutorflow/utils'
+import { staggerContainer, staggerItem } from '@/lib/motion'
 import { useAuthStore } from '@/store/auth.store'
 import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
 import { toast } from '@/components/ui/use-toast'
@@ -127,19 +129,25 @@ export function DayView({ date, lessons, loading, onRefetch, dense = false }: Da
           </div>
         )
       ) : (
-        <div className="flex flex-col gap-3">
+        <motion.div
+          className="flex flex-col gap-3"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
           {lessons.map((lesson) => (
-            <LessonCard
-              key={lesson.id}
-              lesson={lesson}
-              onPay={isTutor ? handlePay : undefined}
-              payLoading={payLoadingId === lesson.id}
-              onRemind={isTutor ? handleRemind : undefined}
-              remindLoading={remindLoadingId === lesson.id}
-              onAddHomework={isTutor ? (id) => setHwLessonId(id) : undefined}
-            />
+            <motion.div key={lesson.id} variants={staggerItem}>
+              <LessonCard
+                lesson={lesson}
+                onPay={isTutor ? handlePay : undefined}
+                payLoading={payLoadingId === lesson.id}
+                onRemind={isTutor ? handleRemind : undefined}
+                remindLoading={remindLoadingId === lesson.id}
+                onAddHomework={isTutor ? (id) => setHwLessonId(id) : undefined}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {isTutor && (

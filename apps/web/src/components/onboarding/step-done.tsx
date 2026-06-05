@@ -28,6 +28,14 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
     if (confettiFired.current) return
     confettiFired.current = true
 
+    // Respect prefers-reduced-motion: skip the confetti burst entirely.
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return
+    }
+
     const duration = 1500
     const end = Date.now() + duration
 

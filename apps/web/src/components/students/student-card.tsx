@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { getInitials, formatRub, pluralize } from '@tutorflow/utils'
@@ -17,15 +18,17 @@ export function StudentCard({ student, onClick }: StudentCardProps) {
   const accent = student.color ?? '#6C63FF'
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.97 }}
       className={cn(
         'group relative flex w-full flex-col overflow-hidden rounded-lg text-left',
         'bg-card border border-[var(--border-subtle)] shadow-elevation-1',
         'transition-all duration-200',
         'hover:-translate-y-0.5 hover:bg-surface-2 hover:shadow-elevation-2',
-        'active:scale-[0.99] active:translate-y-0',
+        'active:translate-y-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
       )}
     >
@@ -97,6 +100,6 @@ export function StudentCard({ student, onClick }: StudentCardProps) {
           </Badge>
         )}
       </div>
-    </button>
+    </motion.button>
   )
 }

@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { CalendarDays, ChevronRight, Plus } from 'lucide-react'
+import { staggerContainer, staggerItem } from '@/lib/motion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AddLessonModal } from '@/components/lesson/add-lesson-modal'
@@ -50,41 +52,47 @@ export function TodayLessons() {
           <span className="text-xs font-medium">Запланировать урок</span>
         </button>
       ) : (
-        <div className="flex flex-col gap-2 flex-1">
+        <motion.div
+          className="flex flex-col gap-2 flex-1"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
           {lessons.slice(0, 4).map((lesson) => (
-            <Link
-              key={lesson.id}
-              href="/calendar"
-              className="flex items-center gap-2.5 py-1.5 rounded-md hover:bg-surface-2 transition-colors px-1 -mx-1"
-            >
-              <span className="text-xs font-mono tnum text-muted-foreground w-10 shrink-0">
-                {new Date(lesson.startTime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-              <div
-                className="w-1 h-8 rounded-full shrink-0"
-                style={{ backgroundColor: lesson.student.color ?? '#6C63FF' }}
-              />
-              <Avatar className="w-7 h-7 shrink-0">
-                <AvatarImage src={lesson.student.user?.avatarUrl ?? undefined} />
-                <AvatarFallback className="text-[10px]">
-                  {getInitials(lesson.student.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{lesson.student.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{lesson.subject}</p>
-              </div>
-              <Badge variant={PAYMENT_VARIANT[lesson.paymentStatus] ?? 'secondary'} className="text-[10px] shrink-0">
-                {PAYMENT_LABELS[lesson.paymentStatus]}
-              </Badge>
-            </Link>
+            <motion.div key={lesson.id} variants={staggerItem}>
+              <Link
+                href="/calendar"
+                className="flex items-center gap-2.5 py-1.5 rounded-md hover:bg-surface-2 transition-colors px-1 -mx-1"
+              >
+                <span className="text-xs font-mono tnum text-muted-foreground w-10 shrink-0">
+                  {new Date(lesson.startTime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <div
+                  className="w-1 h-8 rounded-full shrink-0"
+                  style={{ backgroundColor: lesson.student.color ?? '#6C63FF' }}
+                />
+                <Avatar className="w-7 h-7 shrink-0">
+                  <AvatarImage src={lesson.student.user?.avatarUrl ?? undefined} />
+                  <AvatarFallback className="text-[10px]">
+                    {getInitials(lesson.student.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{lesson.student.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{lesson.subject}</p>
+                </div>
+                <Badge variant={PAYMENT_VARIANT[lesson.paymentStatus] ?? 'secondary'} className="text-[10px] shrink-0">
+                  {PAYMENT_LABELS[lesson.paymentStatus]}
+                </Badge>
+              </Link>
+            </motion.div>
           ))}
           {lessons.length > 4 && (
             <Link href="/calendar" className="flex items-center justify-center gap-1 text-xs text-primary font-medium pt-1">
               ещё {lessons.length - 4} <ChevronRight size={14} />
             </Link>
           )}
-        </div>
+        </motion.div>
       )}
 
       <AddLessonModal open={addOpen} onClose={() => setAddOpen(false)} onCreated={refetch} />

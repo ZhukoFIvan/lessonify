@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Clock, ChevronRight, PartyPopper, Timer } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -65,6 +66,7 @@ export function NextLessonCard() {
 
   return (
     <Link href={`/calendar`} className="block h-full">
+      <motion.div whileTap={{ scale: 0.97 }} className="h-full">
       <Card className="h-full brand-gradient text-white border-transparent card-hover shadow-glow">
         <CardContent className="p-4 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
@@ -97,6 +99,7 @@ export function NextLessonCard() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
     </Link>
   )
 }

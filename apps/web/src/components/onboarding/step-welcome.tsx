@@ -21,11 +21,21 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 }
 
+const floatLoop = { duration: 6, repeat: Infinity, ease: 'easeInOut' } as const
+
 const floatingOrb = {
   animate: {
     y: [-8, 8, -8],
     rotate: [0, 5, -5, 0],
-    transition: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+    transition: floatLoop,
+  },
+}
+
+const floatingOrbDelayed = {
+  animate: {
+    y: [-8, 8, -8],
+    rotate: [0, 5, -5, 0],
+    transition: { ...floatLoop, delay: 2 },
   },
 }
 
@@ -47,9 +57,8 @@ export function StepWelcome({ onNext, userName }: StepWelcomeProps) {
           className="absolute -top-6 -left-10 w-20 h-20 rounded-full bg-primary/10 blur-2xl"
         />
         <motion.div
-          variants={floatingOrb}
+          variants={floatingOrbDelayed}
           animate="animate"
-          style={{ animationDelay: '2s' }}
           className="absolute -bottom-4 -right-8 w-16 h-16 rounded-full bg-violet-400/10 blur-2xl"
         />
 

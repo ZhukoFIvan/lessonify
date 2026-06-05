@@ -9,12 +9,7 @@ import { InvoiceModal } from '@/components/finances/invoice-modal'
 import { usePaymentSummary } from '@/hooks/use-payments'
 import { FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
-})
+import { fadeUp } from '@/lib/motion'
 
 export default function FinancesPage() {
   const { summary, chart, loading } = usePaymentSummary(6)
@@ -24,7 +19,9 @@ export default function FinancesPage() {
     <div className="flex min-h-full flex-col lg:p-8">
       {/* Заголовок */}
       <motion.div
-        {...fadeUp(0)}
+        variants={fadeUp(0)}
+        initial="hidden"
+        animate="show"
         className="flex items-start justify-between px-4 pb-4 pt-5 lg:px-0 lg:pt-0"
       >
         <div>
@@ -44,17 +41,17 @@ export default function FinancesPage() {
             Мобайл: компактная сводка → должники-герой → график. */}
         <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
           {/* Сводка дохода — на мобайле сверху, на десктопе в правом сайдбаре */}
-          <motion.div {...fadeUp(0.08)} className="order-1 lg:order-2 lg:col-span-4">
+          <motion.div variants={fadeUp(0.08)} initial="hidden" animate="show" className="order-1 lg:order-2 lg:col-span-4">
             <SummaryCard summary={summary} loading={loading} />
           </motion.div>
 
           {/* ГЕРОЙ: должники */}
-          <motion.div {...fadeUp(0.14)} className="order-2 lg:order-1 lg:col-span-8 lg:row-span-2">
+          <motion.div variants={fadeUp(0.14)} initial="hidden" animate="show" className="order-2 lg:order-1 lg:col-span-8 lg:row-span-2">
             <DebtorsList />
           </motion.div>
 
           {/* График — на мобайле снизу, на десктопе под сводкой в сайдбаре */}
-          <motion.div {...fadeUp(0.2)} className="order-3 lg:order-3 lg:col-span-4 lg:min-h-[240px]">
+          <motion.div variants={fadeUp(0.2)} initial="hidden" animate="show" className="order-3 lg:order-3 lg:col-span-4 lg:min-h-[240px]">
             <IncomeChart data={chart} loading={loading} />
           </motion.div>
         </div>

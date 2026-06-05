@@ -1,6 +1,7 @@
 'use client'
 
 import { format, isToday, isSameDay, getDay, isSameMonth } from 'date-fns'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import type { LessonWithStudent } from '@tutorflow/types'
 
@@ -54,13 +55,14 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
           const extra = lessons.length - dotColors.length
 
           return (
-            <button
+            <motion.button
               key={key}
               onClick={() => onSelect(day)}
+              whileTap={{ scale: 0.94 }}
               aria-pressed={isSelected}
               aria-label={format(day, 'd MMMM yyyy')}
               className={cn(
-                'group relative flex aspect-square flex-col items-center justify-center gap-1 rounded-md transition-all duration-150 active:scale-[0.94] lg:aspect-[1/0.82]',
+                'group relative flex aspect-square flex-col items-center justify-center gap-1 rounded-md transition-all duration-150 lg:aspect-[1/0.82]',
                 isSelected
                   ? 'brand-gradient text-white shadow-elevation-2 shadow-glow'
                   : _isToday
@@ -114,7 +116,7 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
                   <span className="h-[6px] w-[6px]" />
                 )}
               </div>
-            </button>
+            </motion.button>
           )
         })}
       </div>

@@ -11,12 +11,7 @@ import { DayView } from '@/components/calendar/day-view'
 import { MonthYearPicker } from '@/components/calendar/month-year-picker'
 import { useCalendarDots, useDayView } from '@/hooks/use-calendar'
 import { cn } from '@/lib/utils'
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 18 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.45, delay, ease: [0.25, 0.46, 0.45, 0.94] },
-})
+import { fadeUp } from '@/lib/motion'
 
 type ViewMode = 'strip' | 'grid'
 
@@ -148,12 +143,14 @@ export default function CalendarPage() {
     <div className="flex min-h-full flex-col lg:p-6 xl:p-8">
       {/* ───────────────── МОБИЛЬНАЯ РАСКЛАДКА (< lg) ───────────────── */}
       <div className="flex flex-col lg:hidden">
-        <motion.div {...fadeUp(0)} className="px-4 pb-1 pt-5">
+        <motion.div variants={fadeUp(0)} initial="hidden" animate="show" className="px-4 pb-1 pt-5">
           {header}
         </motion.div>
 
         <motion.div
-          {...fadeUp(0.08)}
+          variants={fadeUp(0.08)}
+          initial="hidden"
+          animate="show"
           className={cn(
             'overflow-hidden border-b border-border/60',
             viewMode === 'strip'
@@ -164,19 +161,21 @@ export default function CalendarPage() {
           {picker}
         </motion.div>
 
-        <motion.div {...fadeUp(0.16)} className="flex-1 pt-3">
+        <motion.div variants={fadeUp(0.16)} initial="hidden" animate="show" className="flex-1 pt-3">
           <DayView date={selectedDate} lessons={dayLessons} loading={loading} onRefetch={refetch} />
         </motion.div>
       </div>
 
       {/* ───────────────── ДЕСКТОПНАЯ РАСКЛАДКА (lg+) ───────────────── */}
       <div className="hidden lg:flex lg:flex-col lg:flex-1 lg:gap-6">
-        <motion.div {...fadeUp(0)}>{header}</motion.div>
+        <motion.div variants={fadeUp(0)} initial="hidden" animate="show">{header}</motion.div>
 
         <div className="grid flex-1 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(380px,440px)] 2xl:grid-cols-[minmax(0,1fr)_480px]">
           {/* Календарь / список дат */}
           <motion.div
-            {...fadeUp(0.08)}
+            variants={fadeUp(0.08)}
+            initial="hidden"
+            animate="show"
             className="surface-1 flex h-fit flex-col gap-3 rounded-xl p-5"
           >
             {picker}
@@ -200,7 +199,9 @@ export default function CalendarPage() {
 
           {/* Список выбранного дня */}
           <motion.div
-            {...fadeUp(0.16)}
+            variants={fadeUp(0.16)}
+            initial="hidden"
+            animate="show"
             className="surface-1 flex h-fit min-h-full flex-col overflow-hidden rounded-xl"
           >
             <DayView date={selectedDate} lessons={dayLessons} loading={loading} onRefetch={refetch} dense />

@@ -15,11 +15,7 @@ import { ActionCards } from '@/components/dashboard/action-cards'
 import { HomeworkOverview } from '@/components/dashboard/homework-overview'
 import { AddLessonModal } from '@/components/lesson/add-lesson-modal'
 import { AddStudentModal } from '@/components/students/add-student-modal'
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-}
+import { fadeUp } from '@/lib/motion'
 
 export default function DashboardPage() {
   const role = useAuthStore((s) => s.user?.role)
@@ -54,32 +50,32 @@ export default function DashboardPage() {
         <TrialBanner />
 
         {/* Stats */}
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.05 }} className="mt-4">
+        <motion.div variants={fadeUp(0.05)} initial="hidden" animate="show" className="mt-4">
           <QuickStats />
         </motion.div>
 
         {/* Main row — 3 equal cards */}
         <div className="mt-6 grid gap-5 lg:grid-cols-3 items-stretch">
-          <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.12 }} className="h-full">
+          <motion.div variants={fadeUp(0.12)} initial="hidden" animate="show" className="h-full">
             <NextLessonCard />
           </motion.div>
 
-          <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.2 }} className="h-full">
+          <motion.div variants={fadeUp(0.2)} initial="hidden" animate="show" className="h-full">
             <TodayLessons />
           </motion.div>
 
-          <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.28 }} className="h-full">
+          <motion.div variants={fadeUp(0.28)} initial="hidden" animate="show" className="h-full">
             <HomeworkOverview />
           </motion.div>
         </div>
 
         {/* Должники — во всю ширину, внутри раскладываются в несколько колонок */}
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.36 }} className="mt-6">
+        <motion.div variants={fadeUp(0.36)} initial="hidden" animate="show" className="mt-6">
           <DebtorsStrip />
         </motion.div>
 
         {/* Быстрые действия — якорят нижнюю зону, 3-колоночная сетка на десктопе */}
-        <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay: 0.42 }} className="mt-6">
+        <motion.div variants={fadeUp(0.42)} initial="hidden" animate="show" className="mt-6">
           <ActionCards onAction={handleQuickAction} />
         </motion.div>
       </div>

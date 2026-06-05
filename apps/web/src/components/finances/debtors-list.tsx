@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +11,7 @@ import { getInitials, formatRub, pluralize } from '@tutorflow/utils'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { CheckCircle2, AlertCircle, Check } from 'lucide-react'
+import { cappedDelay } from '@/lib/motion'
 import { toast } from '@/components/ui/use-toast'
 
 export function DebtorsList() {
@@ -86,9 +88,12 @@ export function DebtorsList() {
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {debtors.map((debtor) => (
-              <article
+            {debtors.map((debtor, i) => (
+              <motion.article
                 key={debtor.studentId}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: cappedDelay(i) }}
                 className="group flex flex-col gap-3 rounded-lg border border-[var(--border-subtle)] bg-card p-4 shadow-elevation-1 transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-2 hover:shadow-elevation-2"
               >
                 <div className="flex items-center gap-3">
@@ -132,7 +137,7 @@ export function DebtorsList() {
                     </>
                   )}
                 </Button>
-              </article>
+              </motion.article>
             ))}
           </div>
         )}

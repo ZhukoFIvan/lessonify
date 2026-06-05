@@ -1,8 +1,10 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { TrendingUp, Clock, BookOpen } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatNumber } from '@/components/ui/stat'
+import { EASE_OUT } from '@/lib/motion'
 import { formatRub, pluralize } from '@tutorflow/utils'
 import type { PaymentSummary } from '@tutorflow/types'
 
@@ -57,9 +59,11 @@ export function SummaryCard({ summary, loading }: SummaryCardProps) {
 
         {/* Прогресс-бар */}
         <div className="mt-4 mb-4 h-2 overflow-hidden rounded-full bg-white/20">
-          <div
-            className="h-full rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.5)] transition-all duration-700"
-            style={{ width: `${progress}%` }}
+          <motion.div
+            className="h-full rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.5)]"
+            initial={{ width: '0%' }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.6, ease: EASE_OUT }}
           />
         </div>
 
