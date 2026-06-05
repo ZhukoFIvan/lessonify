@@ -63,9 +63,9 @@ function createMailTransporter() {
 async function sendPasswordResetEmail(email: string, name: string, code: string): Promise<void> {
   const transporter = createMailTransporter()
   await transporter.sendMail({
-    from: `"TutorFlow" <${process.env.SMTP_FROM ?? process.env.SMTP_USER}>`,
+    from: `"Lessonify" <${process.env.SMTP_FROM ?? process.env.SMTP_USER}>`,
     to: email,
-    subject: 'Сброс пароля — TutorFlow',
+    subject: 'Сброс пароля — Lessonify',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
         <h2 style="margin:0 0 8px">Сброс пароля</h2>

@@ -102,6 +102,7 @@ export const lessonsService = {
         tutorId: true,
         hourlyRate: true,
         name: true,
+        timezone: true,
         telegramConnection: { select: { telegramId: true } },
       },
     })
@@ -129,19 +130,20 @@ export const lessonsService = {
     })
 
     // Отправляем уведомления в Telegram
+    const tutor = await prisma.tutor.findUnique({
+      where: { id: tutorId },
+      select: { timezone: true, user: { select: { name: true } } },
+    })
+    const tutorTz = tutor?.timezone ?? 'Europe/Moscow'
+
     // 1. Ученику (если подключен Telegram)
-    if (student.telegramConnection?.telegramId) {
-      const tutor = await prisma.tutor.findUnique({
-        where: { id: tutorId },
-        select: { user: { select: { name: true } } },
-      })
-      if (tutor) {
-        sendLessonCreatedToStudent(student.telegramConnection.telegramId, {
-          tutorName: tutor.user.name,
-          subject: data.subject,
-          startTime,
-        }).catch((err) => console.error('[telegram] Failed to notify student:', err))
-      }
+    if (student.telegramConnection?.telegramId && tutor) {
+      sendLessonCreatedToStudent(student.telegramConnection.telegramId, {
+        tutorName: tutor.user.name,
+        subject: data.subject,
+        startTime,
+        timezone: student.timezone ?? tutorTz,
+      }).catch((err) => console.error('[telegram] Failed to notify student:', err))
     }
 
     // 2. Репетитору (если подключен Telegram)
@@ -154,6 +156,7 @@ export const lessonsService = {
         studentName: student.name,
         subject: data.subject,
         startTime,
+        timezone: tutorTz,
       }).catch((err) => console.error('[telegram] Failed to notify tutor:', err))
     }
 
@@ -190,26 +193,26 @@ export const lessonsService = {
       where: { id: lessonData.studentId },
       select: {
         name: true,
+        timezone: true,
         telegramConnection: { select: { telegramId: true } },
       },
     })
 
     if (student) {
-      const frequencyText = repeat.frequency === 'weekly' ? 'еженедельно' : 'раз в 2 недели'
+      const tutor = await prisma.tutor.findUnique({
+        where: { id: tutorId },
+        select: { timezone: true, user: { select: { name: true } } },
+      })
+      const tutorTz = tutor?.timezone ?? 'Europe/Moscow'
 
       // Уведомление ученику
-      if (student.telegramConnection?.telegramId) {
-        const tutor = await prisma.tutor.findUnique({
-          where: { id: tutorId },
-          select: { user: { select: { name: true } } },
-        })
-        if (tutor) {
-          sendLessonCreatedToStudent(student.telegramConnection.telegramId, {
-            tutorName: tutor.user.name,
-            subject: lessonData.subject,
-            startTime: firstStart,
-          }).catch((err) => console.error('[telegram] Failed to notify student:', err))
-        }
+      if (student.telegramConnection?.telegramId && tutor) {
+        sendLessonCreatedToStudent(student.telegramConnection.telegramId, {
+          tutorName: tutor.user.name,
+          subject: lessonData.subject,
+          startTime: firstStart,
+          timezone: student.timezone ?? tutorTz,
+        }).catch((err) => console.error('[telegram] Failed to notify student:', err))
       }
 
       // Уведомление репетитору
@@ -222,6 +225,7 @@ export const lessonsService = {
           studentName: student.name,
           subject: lessonData.subject,
           startTime: firstStart,
+          timezone: tutorTz,
         }).catch((err) => console.error('[telegram] Failed to notify tutor:', err))
       }
     }

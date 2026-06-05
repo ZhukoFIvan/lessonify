@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useStudents } from '@/hooks/use-students'
 import { useCreateLesson } from '@/hooks/use-lessons'
 import { toast } from '@/components/ui/use-toast'
@@ -106,15 +107,24 @@ export function AddLessonModal({ open, onClose, onCreated, defaultDate }: AddLes
           {/* Ученик */}
           <div className="flex flex-col gap-1.5">
             <Label>Ученик</Label>
-            <select
-              {...register('studentId')}
-              className="h-12 w-full rounded-2xl border border-input bg-secondary/50 px-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary"
-            >
-              <option value="">Выберите ученика...</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>{s.name} {s.subject ? `· ${s.subject}` : ''}</option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="studentId"
+              render={({ field }) => (
+                <Select value={field.value || ''} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Выберите ученика..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}{s.subject ? ` · ${s.subject}` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.studentId && <p className="text-xs text-destructive">{errors.studentId.message}</p>}
           </div>
 

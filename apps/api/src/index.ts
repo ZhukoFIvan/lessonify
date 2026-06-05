@@ -19,7 +19,7 @@ import { referralsRouter } from './modules/referrals/referrals.router'
 import { adminRouter } from './modules/admin/admin.router'
 import { promoRouter } from './modules/promo/promo.router'
 import { billingRouter } from './modules/billing/billing.router'
-import { bot } from './modules/telegram/telegram.bot'
+import { bot, configureBotProfile } from './modules/telegram/telegram.bot'
 import { startCronJobs } from './cron/reminders'
 
 const app = express()
@@ -86,10 +86,16 @@ app.listen(PORT, async () => {
       // Production: webhook
       await bot.telegram.setWebhook(`${process.env.TELEGRAM_WEBHOOK_URL}/telegram/webhook`)
       console.log('[telegram] Webhook set')
+
+      // Профиль бота (описание, команды, кнопка меню) — best-effort.
+      await configureBotProfile()
     } else {
       // Development: long polling
       bot.launch({ dropPendingUpdates: true })
       console.log('[telegram] Bot started (polling)')
+
+      // Профиль бота (описание, команды, кнопка меню) — best-effort.
+      await configureBotProfile()
 
       // Graceful stop
       process.once('SIGINT', () => bot.stop('SIGINT'))

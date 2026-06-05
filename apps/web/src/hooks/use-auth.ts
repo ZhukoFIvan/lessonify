@@ -125,7 +125,7 @@ export function useAuth() {
     avatarUrl: string
   }) {
     await updateProfile(data)
-    toast({ variant: 'success', title: 'Добро пожаловать в TutorFlow!' })
+    toast({ variant: 'success', title: 'Добро пожаловать в Lessonify!' })
     router.push('/dashboard')
   }
 

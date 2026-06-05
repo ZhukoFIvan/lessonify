@@ -30,19 +30,28 @@ export const calendarService = {
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client })
 
-    // Создаём или находим календарь "TutorFlow"
+    const tutor = await prisma.tutor.findUnique({
+      where: { id: tutorId },
+      select: { timezone: true },
+    })
+    const timeZone = tutor?.timezone ?? 'Europe/Moscow'
+
+    // Создаём или находим календарь "Lessonify"
+    // Учитываем легаси-название "TutorFlow", чтобы не плодить дубли
     let calendarId = 'primary'
     try {
       const listRes = await calendar.calendarList.list()
-      const existing = listRes.data.items?.find((c) => c.summary === 'TutorFlow')
+      const existing = listRes.data.items?.find(
+        (c) => c.summary === 'Lessonify' || c.summary === 'TutorFlow',
+      )
       if (existing?.id) {
         calendarId = existing.id
       } else {
         const created = await calendar.calendars.insert({
           requestBody: {
-            summary: 'TutorFlow',
-            description: 'Уроки репетитора, синхронизированные через TutorFlow',
-            timeZone: 'Europe/Moscow',
+            summary: 'Lessonify',
+            description: 'Уроки репетитора, синхронизированные через Lessonify',
+            timeZone,
           },
         })
         calendarId = created.data.id ?? 'primary'
@@ -106,7 +115,10 @@ export const calendarService = {
 
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
-      include: { student: { select: { name: true } } },
+      include: {
+        student: { select: { name: true } },
+        tutor: { select: { timezone: true } },
+      },
     })
     if (!lesson) return
 
@@ -114,14 +126,15 @@ export const calendarService = {
       const auth = await getAuthenticatedClient(sync)
       const calendar = google.calendar({ version: 'v3', auth })
 
+      const timeZone = lesson.tutor.timezone ?? 'Europe/Moscow'
       const startTime = new Date(lesson.startTime)
       const endTime = new Date(startTime.getTime() + lesson.durationMinutes * 60000)
 
       const event = {
         summary: `${lesson.subject} — ${lesson.student.name}`,
         description: lesson.notes ?? '',
-        start: { dateTime: startTime.toISOString(), timeZone: 'Europe/Moscow' },
-        end: { dateTime: endTime.toISOString(), timeZone: 'Europe/Moscow' },
+        start: { dateTime: startTime.toISOString(), timeZone },
+        end: { dateTime: endTime.toISOString(), timeZone },
         colorId: lesson.status === 'CANCELLED' ? '11' : '7',
       }
 

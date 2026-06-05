@@ -53,6 +53,7 @@ async function remind24h(): Promise<void> {
       tutor: {
         select: {
           reminderBeforeLesson: true,
+          timezone: true,
           user: { select: { name: true } },
           telegramConnection: { select: { telegramId: true } },
         },
@@ -61,6 +62,7 @@ async function remind24h(): Promise<void> {
         select: {
           name: true,
           userId: true,
+          timezone: true,
           telegramConnection: { select: { telegramId: true } },
         },
       },
@@ -68,6 +70,8 @@ async function remind24h(): Promise<void> {
   })
 
   for (const lesson of lessons) {
+    const tutorTz = lesson.tutor.timezone ?? 'Europe/Moscow'
+
     // Репетитору — если включены 24ч напоминания
     const tutorTg = lesson.tutor.telegramConnection?.telegramId
     if (tutorTg && lesson.tutor.reminderBeforeLesson <= 1440) {
@@ -76,6 +80,7 @@ async function remind24h(): Promise<void> {
         subject: lesson.subject,
         startTime: lesson.startTime,
         timeLabel: '24 часа',
+        timezone: tutorTz,
       })
     }
 
@@ -90,6 +95,7 @@ async function remind24h(): Promise<void> {
         subject: lesson.subject,
         startTime: lesson.startTime,
         timeLabel: '24 часа',
+        timezone: lesson.student.timezone ?? tutorTz,
       })
     }
   }
@@ -133,6 +139,7 @@ async function remindBeforeLesson(): Promise<void> {
         startTime: true,
         tutor: {
           select: {
+            timezone: true,
             user: { select: { name: true } },
             telegramConnection: { select: { telegramId: true } },
           },
@@ -141,6 +148,7 @@ async function remindBeforeLesson(): Promise<void> {
           select: {
             name: true,
             userId: true,
+            timezone: true,
             telegramConnection: { select: { telegramId: true } },
           },
         },
@@ -150,6 +158,8 @@ async function remindBeforeLesson(): Promise<void> {
     const timeLabel = timeLabelFromMinutes(minutes)
 
     for (const lesson of lessons) {
+      const tutorTz = lesson.tutor.timezone ?? 'Europe/Moscow'
+
       const tutorTg = lesson.tutor.telegramConnection?.telegramId
       if (tutorTg) {
         await sendLessonReminder(tutorTg, {
@@ -157,6 +167,7 @@ async function remindBeforeLesson(): Promise<void> {
           subject: lesson.subject,
           startTime: lesson.startTime,
           timeLabel,
+          timezone: tutorTz,
         })
       }
 
@@ -170,6 +181,7 @@ async function remindBeforeLesson(): Promise<void> {
           subject: lesson.subject,
           startTime: lesson.startTime,
           timeLabel,
+          timezone: lesson.student.timezone ?? tutorTz,
         })
       }
 
@@ -201,6 +213,7 @@ async function remindPayment(): Promise<void> {
       tutor: {
         select: {
           reminderAfterLesson: true,
+          timezone: true,
           telegramConnection: { select: { telegramId: true } },
         },
       },
@@ -217,6 +230,7 @@ async function remindPayment(): Promise<void> {
         studentName: lesson.student.name,
         subject: lesson.subject,
         amount: lesson.price,
+        timezone: lesson.tutor.timezone ?? 'Europe/Moscow',
       })
     }
   }

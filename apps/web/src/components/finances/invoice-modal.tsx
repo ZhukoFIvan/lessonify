@@ -5,6 +5,7 @@ import { FileDown, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useStudents } from '@/hooks/use-students'
 import { useDownloadInvoice } from '@/hooks/use-invoice'
@@ -56,19 +57,19 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
           {/* Ученик */}
           <div className="flex flex-col gap-1.5">
             <Label>Ученик</Label>
-            <select
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              className="h-12 w-full rounded-2xl border border-input bg-secondary/50 px-4 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:bg-secondary"
-            >
-              <option value="">Выберите ученика...</option>
-              <option value="ALL">Все ученики (общий счёт)</option>
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}{s.subject ? ` · ${s.subject}` : ''}
-                </option>
-              ))}
-            </select>
+            <Select value={studentId} onValueChange={setStudentId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите ученика..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Все ученики (общий счёт)</SelectItem>
+                {students.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}{s.subject ? ` · ${s.subject}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Период */}

@@ -1,11 +1,20 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, User, UserRound, Users } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Clock, Pencil, User, UserRound, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { AvatarPicker } from '@/components/onboarding/avatar-picker'
 import { cn } from '@/lib/utils'
+import { timezoneLabel, timezoneOptionsWith } from '@/lib/timezones'
 import type { OnboardingData } from '@/app/onboarding/page'
 import type { LucideIcon } from 'lucide-react'
 
@@ -36,6 +45,8 @@ const item = {
 
 export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps) {
   const isValid = data.name.trim().length >= 2 && data.gender !== null
+  const [editingTz, setEditingTz] = useState(false)
+  const tzOptions = timezoneOptionsWith(data.timezone)
 
   return (
     <motion.div
@@ -120,6 +131,50 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
           onChange={(url) => onChange({ avatarUrl: url })}
           userName={data.name}
         />
+      </motion.div>
+
+      {/* Timezone — определён автоматически, подтвердить или изменить */}
+      <motion.div variants={item} className="mt-5">
+        <p className="text-sm font-medium text-foreground mb-2">Часовой пояс</p>
+        {editingTz ? (
+          <Select
+            value={data.timezone}
+            onValueChange={(value) => {
+              onChange({ timezone: value })
+              setEditingTz(false)
+            }}
+          >
+            <SelectTrigger autoFocus>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {tzOptions.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="flex items-center gap-3 rounded-2xl border-2 border-primary bg-primary/5 py-3 px-4">
+            <Clock size={20} className="shrink-0 text-primary" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {timezoneLabel(data.timezone)}
+              </p>
+              <p className="text-xs text-muted-foreground">Определён автоматически</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingTz(true)}
+              className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              <Pencil size={14} />
+              Изменить
+            </button>
+            <Check size={18} className="shrink-0 text-primary" />
+          </div>
+        )}
       </motion.div>
 
       {/* Navigation */}

@@ -10,6 +10,7 @@ import { StepFirstStudent } from '@/components/onboarding/step-first-student'
 import { StepTelegram } from '@/components/onboarding/step-telegram'
 import { StepPlan } from '@/components/onboarding/step-plan'
 import { StepDone } from '@/components/onboarding/step-done'
+import { detectTimezone } from '@/lib/timezones'
 
 export interface OnboardingData {
   name: string
@@ -18,6 +19,7 @@ export interface OnboardingData {
   subjects: string[]
   hourlyRate: number | null
   studentAdded: boolean
+  timezone: string
 }
 
 const slideVariants = {
@@ -56,6 +58,7 @@ export default function OnboardingPage() {
     subjects: [],
     hourlyRate: null,
     studentAdded: false,
+    timezone: detectTimezone(),
   })
 
   const updateData = useCallback((patch: Partial<OnboardingData>) => {

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, Trash2, ToggleLeft, ToggleRight, CalendarClock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAvailabilitySlots } from '@/hooks/use-availability'
 import { toast } from '@/components/ui/use-toast'
@@ -36,21 +37,37 @@ function AddSlotForm({ dayOfWeek, onSave, onCancel }: AddSlotFormProps) {
 
   return (
     <div className="mt-2 p-2.5 bg-surface-0 border border-subtle rounded-md flex flex-wrap items-center gap-2">
-      <select value={hour} onChange={(e) => setHour(e.target.value)}
-        className="text-xs border border-subtle rounded-sm px-2 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60">
-        {Array.from({ length: 24 }, (_, i) => (
-          <option key={i} value={i}>{pad(i)}</option>
-        ))}
-      </select>
+      <Select value={hour} onValueChange={setHour}>
+        <SelectTrigger className="h-9 w-[4.5rem] rounded-lg px-3 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {Array.from({ length: 24 }, (_, i) => (
+            <SelectItem key={i} value={String(i)}>{pad(i)}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <span className="text-xs text-muted-foreground">:</span>
-      <select value={minute} onChange={(e) => setMinute(e.target.value)}
-        className="text-xs border border-subtle rounded-sm px-2 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60">
-        {['00', '15', '30', '45'].map((m) => <option key={m} value={m}>{m}</option>)}
-      </select>
-      <select value={duration} onChange={(e) => setDuration(e.target.value)}
-        className="text-xs border border-subtle rounded-sm px-2 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60">
-        {[30, 45, 60, 90, 120].map((d) => <option key={d} value={d}>{d} мин</option>)}
-      </select>
+      <Select value={minute} onValueChange={setMinute}>
+        <SelectTrigger className="h-9 w-[4.5rem] rounded-lg px-3 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {['00', '15', '30', '45'].map((m) => (
+            <SelectItem key={m} value={m}>{m}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={duration} onValueChange={setDuration}>
+        <SelectTrigger className="h-9 w-[6.5rem] rounded-lg px-3 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {[30, 45, 60, 90, 120].map((d) => (
+            <SelectItem key={d} value={String(d)}>{d} мин</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <div className="flex gap-1.5 ml-auto">
         <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={onCancel}>Отмена</Button>
         <Button size="sm" className="h-7 px-3 text-xs" onClick={handleSave} disabled={saving}>Добавить</Button>

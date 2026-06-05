@@ -61,6 +61,19 @@ enum OrderStatus {
   FAILED
 }
 
+// Статус черновика урока из голосовой диктовки (Telegram)
+enum LessonDraftStatus {
+  AWAITING_CONFIRM
+  EDITING_STUDENT
+  EDITING_DATE
+  EDITING_TIME
+  EDITING_DURATION
+  EDITING_PRICE
+  EDITING_SUBJECT
+  CONFIRMED
+  CANCELLED
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // User — базовый аккаунт (репетитор или ученик)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -133,6 +146,7 @@ model Tutor {
   bookingRequests    BookingRequest[]
   telegramConnection TelegramConnection?
   calendarSync       CalendarSync?
+  lessonDrafts       LessonDraft[]
 
   @@map("tutors")
 }
@@ -154,6 +168,7 @@ model Student {
   notes       String?  // заметки репетитора
   inviteToken String?  @unique // для ссылки-приглашения
   color       String?  // цвет для отображения в календаре (HEX)
+  timezone    String?  // IANA-зона ученика (если есть свой портал); null → берём пояс репетитора
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -536,4 +551,36 @@ model CalendarSync {
   tutor Tutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
 
   @@map("calendar_syncs")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LessonDraft — черновик урока из голосовой диктовки в Telegram.
+// Хранит распознанные/разрешённые поля и состояние редактирования между
+// нажатиями inline-кнопок, пока репетитор не подтвердит создание урока.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model LessonDraft {
+  id              String            @id @default(cuid())
+  tutorId         String
+  telegramId      String            // кто диктует (числовой Telegram id, строкой)
+  chatId          String
+  status          LessonDraftStatus @default(AWAITING_CONFIRM)
+  transcript      String?           // последний распознанный текст
+  studentId       String?           // разрешённый ученик (null = не найден / неоднозначно)
+  studentName     String?           // распознанное имя для отображения
+  subject         String?
+  startTime       DateTime?         // вычисленный момент урока в UTC
+  durationMinutes Int?
+  price           Int?
+  lessonId        String?           // заполняется после успешного создания урока
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  expiresAt       DateTime          // TTL для очистки брошенных черновиков
+
+  // Relations
+  tutor Tutor @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@index([telegramId, status])
+  @@index([tutorId])
+  @@map("lesson_drafts")
 }

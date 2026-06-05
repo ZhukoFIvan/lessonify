@@ -4,7 +4,7 @@ import { NotFoundError } from '../students/students.service'
 import type { AuthTokenPayload } from '@tutorflow/types'
 import { sendMessage } from './telegram.bot'
 
-const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'tutorflow_bot'
+const BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME ?? 'lessonify_bot'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -113,9 +113,9 @@ export const telegramService = {
       await sendMessage(
         connection.telegramId,
         `❌ *Аккаунт отключён*\n\n` +
-          `Ваш аккаунт TutorFlow был отключён от Telegram.\n\n` +
+          `Ваш аккаунт Lessonify был отключён от Telegram.\n\n` +
           `Вы больше не будете получать уведомления о занятиях и оплатах.\n\n` +
-          `Чтобы подключить бот заново, откройте настройки в приложении TutorFlow.`,
+          `Чтобы подключить бот заново, откройте настройки в приложении Lessonify.`,
       )
     }
 

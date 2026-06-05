@@ -39,6 +39,7 @@ export function useUpdateTutorSettings() {
   async function update(data: Partial<{
     subjects: string[]
     hourlyRate: number | null
+    timezone: string
     reminderBeforeLesson: number
     reminderAfterLesson: number
   }>): Promise<TutorSettings> {

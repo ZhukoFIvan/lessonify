@@ -3,9 +3,17 @@
 import { useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useTutorSettings, useUpdateTutorSettings } from '@/hooks/use-tutor-settings'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
+import { detectTimezone, timezoneOptionsWith } from '@/lib/timezones'
 import { Bell } from 'lucide-react'
 
 const BEFORE_OPTIONS = [
@@ -31,22 +39,27 @@ export function RemindersSection() {
 
   const [before, setBefore] = useState<number | null>(null)
   const [after, setAfter] = useState<number | null>(null)
+  const [timezone, setTimezone] = useState<string | null>(null)
 
-  // Инициализируем из загруженных настроек
+  // Инициализируем из загруженных настроек (часовой пояс — из настроек или из браузера)
   const currentBefore = before ?? settings?.reminderBeforeLesson ?? 60
   const currentAfter = after ?? settings?.reminderAfterLesson ?? 120
+  const currentTimezone = timezone ?? settings?.timezone ?? detectTimezone()
+  const timezoneOptions = timezoneOptionsWith(currentTimezone)
 
-  const isDirty = before !== null || after !== null
+  const isDirty = before !== null || after !== null || timezone !== null
 
   async function handleSave() {
     try {
       await update({
         ...(before !== null && { reminderBeforeLesson: before }),
         ...(after !== null && { reminderAfterLesson: after }),
+        ...(timezone !== null && { timezone }),
       })
       toast({ variant: 'success', title: 'Напоминания сохранены' })
       setBefore(null)
       setAfter(null)
+      setTimezone(null)
       refetch()
     } catch {
       toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось сохранить' })
@@ -112,6 +125,23 @@ export function RemindersSection() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Часовой пояс */}
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Ваш часовой пояс</p>
+            <Select value={currentTimezone} onValueChange={setTimezone}>
+              <SelectTrigger className="h-11 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {timezoneOptions.map(({ value, label }) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {isDirty && (

@@ -7,6 +7,7 @@ import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth.store'
 import { toast } from '@/components/ui/use-toast'
+import { useUpdateTutorSettings } from '@/hooks/use-tutor-settings'
 import api from '@/lib/api'
 import confetti from 'canvas-confetti'
 import type { OnboardingData } from '@/app/onboarding/page'
@@ -19,6 +20,7 @@ interface StepDoneProps {
 export function StepDone({ data, isTutor }: StepDoneProps) {
   const router = useRouter()
   const { setUser } = useAuthStore()
+  const { update: updateTutor } = useUpdateTutorSettings()
   const [saving, setSaving] = useState(false)
   const confettiFired = useRef(false)
 
@@ -56,10 +58,11 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
   async function handleFinish() {
     setSaving(true)
     try {
-      if (isTutor && (data.subjects.length > 0 || data.hourlyRate !== null)) {
-        await api.patch('/auth/tutor', {
-          subjects: data.subjects.length > 0 ? data.subjects : undefined,
-          hourlyRate: data.hourlyRate ?? undefined,
+      if (isTutor) {
+        await updateTutor({
+          ...(data.subjects.length > 0 && { subjects: data.subjects }),
+          ...(data.hourlyRate !== null && { hourlyRate: data.hourlyRate }),
+          ...(data.timezone && { timezone: data.timezone }),
         })
       }
 
