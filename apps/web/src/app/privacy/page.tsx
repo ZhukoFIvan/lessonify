@@ -107,6 +107,8 @@ export default function PrivacyPage() {
             <p>ИНН: 434566912109</p>
             <p className="mt-1">Email: <a href="mailto:jukov0411200303@gmail.com" className="text-primary hover:underline">jukov0411200303@gmail.com</a></p>
             <p>Телефон: <a href="tel:+79254571210" className="text-primary hover:underline">+7 (925) 457-12-10</a></p>
+            <p className="mt-1">Сайт: <a href="https://lessonify.ru" className="text-primary hover:underline">lessonify.ru</a></p>
+            <p>Приложение: <a href="https://app.lessonify.ru" className="text-primary hover:underline">app.lessonify.ru</a></p>
           </section>
         </div>
       </main>

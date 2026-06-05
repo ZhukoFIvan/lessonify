@@ -48,9 +48,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </ul>
         </div>
 
-        <p className="relative text-xs text-white/55">
-          © {new Date().getFullYear()} Lessonify — всё для репетиторов
-        </p>
+        <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/55">
+          <span>© {new Date().getFullYear()} Lessonify</span>
+          <a href="/offer" className="hover:text-white/80 transition-colors">Публичная оферта</a>
+          <a href="/privacy" className="hover:text-white/80 transition-colors">Политика конфиденциальности</a>
+        </div>
       </aside>
 
       {/* Правая колонка — форма */}
