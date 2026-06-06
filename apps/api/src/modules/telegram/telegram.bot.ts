@@ -1,4 +1,5 @@
 import { Telegraf, Markup } from 'telegraf'
+import { Agent } from 'https'
 import { prisma } from '../../lib/prisma'
 import { voiceService, type DraftRender } from './voice.service'
 
@@ -6,8 +7,15 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
   console.warn('[telegram] TELEGRAM_BOT_TOKEN is not set — bot disabled')
 }
 
+// С этого сервера часть IPv4-узлов api.telegram.org недоступна (ETIMEDOUT),
+// из-за чего ответы бота/getMe зависали. IPv6 к Telegram стабилен — форсим его
+// агентом только для запросов к Telegram (на Gemini/оплаты не влияет).
+const telegramAgent = new Agent({ family: 6, keepAlive: true })
+
 export const bot = process.env.TELEGRAM_BOT_TOKEN
-  ? new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
+  ? new Telegraf(process.env.TELEGRAM_BOT_TOKEN, {
+      telegram: { agent: telegramAgent },
+    })
   : (null as unknown as Telegraf)
 
 const WEB_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'
