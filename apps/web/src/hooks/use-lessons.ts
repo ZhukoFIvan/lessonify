@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import api from '@/lib/api'
+import { useRefreshOnTick } from '@/hooks/use-refresh-tick'
 import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
 
 // ── Уроки на конкретный день ─────────────────────────────────────────────────
@@ -14,8 +15,8 @@ export function useDayLessons(date: Date) {
 
   const dateStr = format(date, 'yyyy-MM-dd')
 
-  const fetch = useCallback(async () => {
-    setLoading(true)
+  const fetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     setError(null)
     try {
       const { data } = await api.get(`/lessons?date=${dateStr}&limit=50`)
@@ -23,11 +24,12 @@ export function useDayLessons(date: Date) {
     } catch {
       setError('Не удалось загрузить уроки')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [dateStr])
 
   useEffect(() => { fetch() }, [fetch])
+  useRefreshOnTick(() => fetch(true)) // тихое фоновое обновление по «тику свежести»
 
   return { lessons, loading, error, refetch: fetch }
 }
@@ -38,21 +40,25 @@ export function useNextLesson() {
   const [lesson, setLesson] = useState<LessonWithStudent | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     const now = new Date()
     const dateStr = format(now, 'yyyy-MM-dd')
-
-    api
-      .get(`/lessons?date=${dateStr}&status=SCHEDULED&limit=20`)
-      .then(({ data }) => {
-        const upcoming = (data.data as LessonWithStudent[])
-          .filter((l) => new Date(l.startTime) > now)
-          .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-        setLesson(upcoming[0] ?? null)
-      })
-      .catch(() => setLesson(null))
-      .finally(() => setLoading(false))
+    try {
+      const { data } = await api.get(`/lessons?date=${dateStr}&status=SCHEDULED&limit=20`)
+      const upcoming = (data.data as LessonWithStudent[])
+        .filter((l) => new Date(l.startTime) > now)
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      setLesson(upcoming[0] ?? null)
+    } catch {
+      setLesson(null)
+    } finally {
+      if (!silent) setLoading(false)
+    }
   }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+  useRefreshOnTick(() => fetch(true))
 
   return { lesson, loading }
 }
@@ -63,21 +69,25 @@ export function useStudentNextLesson() {
   const [lesson, setLesson] = useState<LessonWithTutor | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     const now = new Date()
     const dateStr = format(now, 'yyyy-MM-dd')
-
-    api
-      .get(`/lessons/my?date=${dateStr}&status=SCHEDULED&limit=20`)
-      .then(({ data }) => {
-        const upcoming = (data.data as LessonWithTutor[])
-          .filter((l) => new Date(l.startTime) > now)
-          .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-        setLesson(upcoming[0] ?? null)
-      })
-      .catch(() => setLesson(null))
-      .finally(() => setLoading(false))
+    try {
+      const { data } = await api.get(`/lessons/my?date=${dateStr}&status=SCHEDULED&limit=20`)
+      const upcoming = (data.data as LessonWithTutor[])
+        .filter((l) => new Date(l.startTime) > now)
+        .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      setLesson(upcoming[0] ?? null)
+    } catch {
+      setLesson(null)
+    } finally {
+      if (!silent) setLoading(false)
+    }
   }, [])
+
+  useEffect(() => { fetch() }, [fetch])
+  useRefreshOnTick(() => fetch(true))
 
   return { lesson, loading }
 }

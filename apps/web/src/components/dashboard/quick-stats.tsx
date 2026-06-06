@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Users, BookOpen, Wallet, ClipboardCheck, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import api from '@/lib/api'
+import { useRefreshOnTick } from '@/hooks/use-refresh-tick'
 
 interface Stats {
   studentsCount: number
@@ -103,8 +104,7 @@ export function QuickStats() {
     pendingHomework: 0,
   })
 
-  useEffect(() => {
-    async function load() {
+  const load = useCallback(async () => {
       try {
         const [studentsRes, summaryRes, homeworkRes] = await Promise.allSettled([
           api.get('/students?limit=1'),
@@ -134,10 +134,12 @@ export function QuickStats() {
       } catch {
         // silently fail
       }
-    }
-
-    load()
   }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+  useRefreshOnTick(() => load()) // тихое фоновое обновление дашборда
 
   return (
     <motion.div

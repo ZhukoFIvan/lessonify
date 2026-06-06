@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Prefetcher } from '@/components/layout/prefetcher'
+import { AutoRefresh } from '@/components/system/auto-refresh'
 
 // Authenticated application area — never indexable.
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background w-screen max-w-screen overflow-x-clip">
       <Prefetcher />
+      <AutoRefresh />
       <Sidebar />
 
       <div className="flex flex-col flex-1 min-h-screen min-w-0">

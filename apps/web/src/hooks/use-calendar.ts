@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { format, startOfDay, endOfDay, addDays, subDays } from 'date-fns'
 import api from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
+import { useRefreshOnTick } from '@/hooks/use-refresh-tick'
 import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
 
 // Универсальный тип урока (для репетитора или ученика)
@@ -31,8 +32,8 @@ export function useCalendarDots(centerDate: Date, spread = 20) {
     [format(centerDate, 'yyyy-MM')],
   )
 
-  const fetch = useCallback(async () => {
-    setLoading(true)
+  const fetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
       const { data } = await api.get(`${endpoint}?from=${from}&to=${to}&limit=200`)
       const map = new Map<string, CalendarLesson[]>()
@@ -45,11 +46,12 @@ export function useCalendarDots(centerDate: Date, spread = 20) {
     } catch {
       setCounts(new Map())
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [from, to, endpoint])
 
   useEffect(() => { fetch() }, [fetch])
+  useRefreshOnTick(() => fetch(true)) // тихое фоновое обновление по «тику свежести»
 
   return { counts, loading, refetch: fetch }
 }
