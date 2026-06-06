@@ -8,7 +8,12 @@
 
 import type { LessonDraft, LessonDraftStatus } from '@prisma/client'
 import { prisma } from '../../lib/prisma'
-import { lessonsService } from '../lessons/lessons.service'
+import {
+  lessonsService,
+  LessonConflictError,
+  type LessonConflict,
+} from '../lessons/lessons.service'
+import { billingService } from '../billing/billing.service'
 import { geminiService, GeminiConfigError } from './gemini.service'
 
 // ── Публичный контракт рендера ─────────────────────────────────────────────────
@@ -22,6 +27,26 @@ export type DraftRender = {
 
 const DRAFT_TTL_MS = 60 * 60 * 1000 // 1 час
 const DEFAULT_TZ = 'Europe/Moscow'
+
+// STUB: рабочие часы репетитора для алгоритма альтернативных слотов.
+// Пока захардкожены 09:00–21:00 в локальном поясе репетитора. Не используем
+// AvailabilitySlot (другая семантика). TODO: вынести в профиль репетитора.
+const WORK_START_HOUR = 9
+const WORK_END_HOUR = 21
+
+// Ограничения значений из Gemini (совпадают с ручной правкой).
+const MIN_DURATION = 15
+const MAX_DURATION = 480
+const MIN_PRICE = 0
+const MAX_PRICE = 100000
+
+function clampDuration(n: number): number {
+  return Math.min(MAX_DURATION, Math.max(MIN_DURATION, Math.round(n)))
+}
+
+function clampPrice(n: number): number {
+  return Math.min(MAX_PRICE, Math.max(MIN_PRICE, Math.round(n)))
+}
 
 const ACTIVE_STATUSES: LessonDraftStatus[] = [
   'AWAITING_CONFIRM',
@@ -339,6 +364,222 @@ function studentPickKeyboard(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Конфликты расписания: альтернативные слоты + карточка.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function toUnixMinute(date: Date): number {
+  return Math.floor(date.getTime() / 60000)
+}
+
+function localHour(date: Date, timeZone: string): number {
+  return wallPartsInZone(date, timeZone).hour
+}
+
+function isWithinWorkHours(start: Date, durationMin: number, timeZone: string): boolean {
+  const startHour = localHour(start, timeZone)
+  // Конец урока должен укладываться в рабочий день: startHour ≥ 9 и
+  // start + dur не позже 21:00. Считаем по настенному часу старта + длительность.
+  if (startHour < WORK_START_HOUR) return false
+  const p = wallPartsInZone(start, timeZone)
+  const endMinutesOfDay = p.hour * 60 + p.minute + durationMin
+  return endMinutesOfDay <= WORK_END_HOUR * 60
+}
+
+// Сдвигает UTC-инстант на N дней вперёд, СОХРАНЯЯ настенное время в поясе
+// (через разбор настенных частей и пересборку) — устойчиво к DST.
+function shiftWallDays(date: Date, days: number, timeZone: string): Date {
+  const p = wallPartsInZone(date, timeZone)
+  const base = new Date(Date.UTC(p.year, p.month - 1, p.day, 12, 0, 0))
+  const shifted = new Date(base.getTime() + days * 86400000)
+  const sp = wallPartsInZone(shifted, timeZone)
+  return zonedWallTimeToUtc(sp.year, sp.month, sp.day, p.hour, p.minute, timeZone)
+}
+
+// Предлагает до 3 свободных слотов, опираясь ТОЛЬКО на существующие уроки
+// (без AvailabilitySlot), в пределах рабочих часов 09:00–21:00 tutor-local.
+// Приоритет: (a) сразу после последнего конфликтующего урока в этот день,
+// (b) до = desiredStart − duration, (c) то же настенное время завтра/послезавтра,
+// (d) gap-fill по дню. Каждый кандидат валидируется через findConflicts.
+async function suggestAlternativeSlots(
+  tutorId: string,
+  desiredStartUtc: Date,
+  durationMin: number,
+  timeZone: string,
+  conflicts: LessonConflict[],
+): Promise<Date[]> {
+  const now = Date.now()
+  const candidates: Date[] = []
+
+  // (a) Сразу после последнего пересекающегося урока.
+  if (conflicts.length > 0) {
+    const maxEnd = conflicts.reduce(
+      (acc, c) => (c.endUtc.getTime() > acc ? c.endUtc.getTime() : acc),
+      0,
+    )
+    candidates.push(new Date(maxEnd))
+  }
+
+  // (b) До: desiredStart − duration.
+  candidates.push(new Date(desiredStartUtc.getTime() - durationMin * 60000))
+
+  // (c) То же настенное время завтра и послезавтра.
+  candidates.push(shiftWallDays(desiredStartUtc, 1, timeZone))
+  candidates.push(shiftWallDays(desiredStartUtc, 2, timeZone))
+
+  // (d) Gap-fill по дню desiredStart: между концами уроков и рабочими границами.
+  const dayLessons = await prisma.lesson.findMany({
+    where: {
+      tutorId,
+      status: { in: ['SCHEDULED', 'RESCHEDULED'] },
+      startTime: {
+        gte: new Date(desiredStartUtc.getTime() - 12 * 3600000),
+        lt: new Date(desiredStartUtc.getTime() + 12 * 3600000),
+      },
+    },
+    select: { startTime: true, durationMinutes: true },
+    orderBy: { startTime: 'asc' },
+  })
+  for (const l of dayLessons) {
+    candidates.push(new Date(l.startTime.getTime() + l.durationMinutes * 60000))
+  }
+
+  // Валидация + дедуп.
+  const out: Date[] = []
+  const seen = new Set<number>()
+  for (const cand of candidates) {
+    if (out.length >= 3) break
+    const unixMin = toUnixMinute(cand)
+    if (seen.has(unixMin)) continue
+    seen.add(unixMin)
+    if (cand.getTime() <= now) continue
+    if (!isWithinWorkHours(cand, durationMin, timeZone)) continue
+    const c = await lessonsService.findConflicts(tutorId, cand, durationMin)
+    if (c.length > 0) continue
+    out.push(cand)
+  }
+  return out
+}
+
+function slotLabel(date: Date, timeZone: string, desiredUtc: Date): string {
+  const time = formatTime(date, timeZone)
+  // Если день отличается от желаемого — показываем дату.
+  const dp = wallPartsInZone(desiredUtc, timeZone)
+  const sp = wallPartsInZone(date, timeZone)
+  const sameDay = dp.year === sp.year && dp.month === sp.month && dp.day === sp.day
+  if (sameDay) {
+    if (date.getTime() > desiredUtc.getTime()) {
+      return `🕐 ${time} (сразу после)`
+    }
+    return `🕐 ${time} (до)`
+  }
+  const day = date.toLocaleString('ru-RU', { timeZone, day: 'numeric' })
+  const month = date.toLocaleString('ru-RU', { timeZone, month: 'short' })
+  return `📅 ${day} ${month}, ${time}`
+}
+
+// Карточка конфликта (founder decision 1: ТОЛЬКО слоты + «Другое время» + «Отмена»,
+// никакого «Всё равно поставить»). Для дубля того же ученика — особый текст.
+function buildConflictCard(
+  draft: LessonDraft,
+  conflicts: LessonConflict[],
+  suggestions: Date[],
+  timeZone: string,
+  opts?: { toctou?: boolean },
+): DraftRender {
+  const lines: string[] = []
+
+  if (opts?.toctou) {
+    lines.push('⚠️ Пока вы подтверждали, это время заняли.')
+    lines.push('')
+  }
+
+  const fmtConflict = (c: LessonConflict): string =>
+    `${c.studentName} · ${c.subject} · ${formatTime(c.startUtc, timeZone)}–${formatTime(c.endUtc, timeZone)}`
+
+  const sameStudentDup =
+    draft.studentId !== null && conflicts.some((c) => c.studentId === draft.studentId)
+
+  if (sameStudentDup) {
+    const who = draft.studentName ?? 'ученика'
+    lines.push(`🔁 У ${who} уже есть урок в это время.`)
+    lines.push(`Это дубль? ${conflicts.map(fmtConflict).join('; ')}`)
+  } else if (conflicts.length === 1) {
+    lines.push(`⚠️ В это время уже занято: ${fmtConflict(conflicts[0]!)}.`)
+    lines.push(`Куда поставить ${draft.studentName ?? 'урок'}?`)
+  } else {
+    lines.push(`⚠️ Пересекается с ${conflicts.length} уроками:`)
+    lines.push(conflicts.map(fmtConflict).join('; '))
+    lines.push(`Куда поставить ${draft.studentName ?? 'урок'}?`)
+  }
+
+  const desiredUtc = draft.startTime ?? new Date()
+  const rows: Array<Array<{ text: string; callback_data: string }>> = []
+  for (const slot of suggestions) {
+    rows.push([
+      {
+        text: slotLabel(slot, timeZone, desiredUtc),
+        callback_data: `v:slot:${draft.id}:${toUnixMinute(slot)}`,
+      },
+    ])
+  }
+  // «Другое время» переиспользует существующий flow правки времени.
+  rows.push([{ text: '🔀 Другое время', callback_data: `v:f:${draft.id}:time` }])
+  rows.push([{ text: '⬅️ Отмена', callback_data: `v:x:${draft.id}` }])
+
+  if (suggestions.length === 0) {
+    lines.push('')
+    lines.push('Свободных слотов рядом не нашёл — выберите другое время.')
+  }
+
+  return { text: lines.join('\n'), keyboard: { inline_keyboard: rows } }
+}
+
+// Простая нормализация имени для fuzzy-сравнения (нижний регистр, ё→е, без пробелов).
+function normName(s: string): string {
+  return s.toLowerCase().replace(/ё/g, 'е').replace(/[^а-яa-z]/g, '')
+}
+
+// Расстояние Левенштейна (ограниченное) для подбора похожих имён.
+function levenshtein(a: string, b: string): number {
+  const m = a.length
+  const n = b.length
+  if (m === 0) return n
+  if (n === 0) return m
+  let prev = Array.from({ length: n + 1 }, (_, i) => i)
+  let curr = new Array<number>(n + 1)
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      curr[j] = Math.min(prev[j]! + 1, curr[j - 1]! + 1, prev[j - 1]! + cost)
+    }
+    ;[prev, curr] = [curr, prev]
+  }
+  return prev[n]!
+}
+
+// Ищет похожих по имени учеников (для случая 0 точных совпадений).
+async function findSimilarStudents(
+  tutorId: string,
+  rawName: string,
+): Promise<Array<{ id: string; name: string }>> {
+  const all = await prisma.student.findMany({
+    where: { tutorId },
+    select: { id: true, name: true },
+    take: 200,
+  })
+  const target = normName(rawName)
+  if (!target) return []
+  // Короткие имена (Ян, Лев) дают ложные совпадения при d=2 — ужимаем порог.
+  const maxDist = target.length < 4 ? 1 : 2
+  const scored = all
+    .map((s) => ({ s, d: levenshtein(target, normName(s.name)) }))
+    .filter((x) => x.d <= maxDist)
+    .sort((a, b) => a.d - b.d)
+  return scored.slice(0, 3).map((x) => ({ id: x.s.id, name: x.s.name }))
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Сервис.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -396,6 +637,7 @@ export const voiceService = {
     let studentId: string | null = null
     let studentName = parsed.studentName
     let ambiguous: Array<{ id: string; name: string }> = []
+    let similar: Array<{ id: string; name: string }> = []
     if (parsed.studentName) {
       const matches = await searchStudents(input.tutorId, parsed.studentName)
       if (matches.length === 1) {
@@ -404,13 +646,17 @@ export const voiceService = {
         studentName = m.name
       } else if (matches.length > 1) {
         ambiguous = matches.map((m) => ({ id: m.id, name: m.name }))
+      } else {
+        // 0 точных совпадений — ищем похожих для защиты от дублей (decision 2).
+        similar = await findSimilarStudents(input.tutorId, parsed.studentName)
       }
     }
 
     const startTime = buildStartTime(parsed.date, parsed.time, timeZone)
-    const durationMinutes = parsed.durationMinutes ?? 60
-    const price =
-      parsed.price ?? (await computePrice(input.tutorId, studentId, durationMinutes))
+    // D5: клампим значения из Gemini в разумные границы.
+    const durationMinutes = clampDuration(parsed.durationMinutes ?? 60)
+    const rawPrice = parsed.price ?? (await computePrice(input.tutorId, studentId, durationMinutes))
+    const price = rawPrice === null ? null : clampPrice(rawPrice)
 
     const draft = await prisma.lessonDraft.create({
       data: {
@@ -429,14 +675,48 @@ export const voiceService = {
       },
     })
 
+    // E4 / decision 3: в одном сообщении несколько уроков — создаём первый,
+    // честно просим остальные отдельным сообщением.
+    const multiNote = parsed.multipleDetected
+      ? '\n\nℹ️ Создам первый урок. Остальные продиктуйте отдельным сообщением.'
+      : ''
+
     // Если имя неоднозначно — сразу показываем выбор ученика.
     if (ambiguous.length > 1) {
       return {
         text:
           buildCardText(draft, timeZone) +
-          `\n\nНайдено несколько учеников по запросу «${parsed.studentName}». Выберите нужного:`,
+          `\n\nНайдено несколько учеников по запросу «${parsed.studentName}». Выберите нужного:` +
+          multiNote,
         keyboard: studentPickKeyboard(draft.id, ambiguous),
       }
+    }
+
+    // Имя названо, но в ростере не найдено (0 совпадений) — предлагаем
+    // похожих + кнопку создать нового (decision 2).
+    if (parsed.studentName && !studentId) {
+      const rows: Array<Array<{ text: string; callback_data: string }>> = []
+      for (const s of similar) {
+        rows.push([{ text: `Похоже на: ${s.name}?`, callback_data: `v:s:${draft.id}:${s.id}` }])
+      }
+      rows.push([
+        { text: `➕ Создать «${parsed.studentName}»`, callback_data: `v:newstud:${draft.id}` },
+      ])
+      rows.push([{ text: '✏️ Изменить', callback_data: `v:edit:${draft.id}` }])
+      rows.push([{ text: '❌ Отмена', callback_data: `v:x:${draft.id}` }])
+      const head = similar.length > 0 ? 'Не нашёл точного совпадения. Возможно, это:' : ''
+      return {
+        text:
+          buildCardText(draft, timeZone) +
+          (head ? `\n\n${head}` : `\n\nУченик «${parsed.studentName}» не найден в списке.`) +
+          multiNote,
+        keyboard: { inline_keyboard: rows },
+      }
+    }
+
+    if (multiNote) {
+      const base = await voiceService.getCardRender(draft.id)
+      return { ...base, text: base.text + multiNote }
     }
 
     return voiceService.getCardRender(draft.id)
@@ -465,6 +745,7 @@ export const voiceService = {
       orderBy: { updatedAt: 'desc' },
     })
     if (!draft) return null
+    if (isExpired(draft)) return EXPIRED_RENDER
 
     const field = FIELD_BY_STATUS[draft.status]
     if (!field) return null
@@ -578,8 +859,8 @@ export const voiceService = {
       }
       case 'price': {
         const n = parseIntFromText(valueText)
-        if (n === null || n < 0) {
-          return { text: '⚠️ Введите цену в рублях целым числом, например «2000».' }
+        if (n === null || n < 0 || n > MAX_PRICE) {
+          return { text: '⚠️ Введите цену в рублях целым числом (0–100000), например «2000».' }
         }
         data.price = n
         break
@@ -598,30 +879,60 @@ export const voiceService = {
     return voiceService.getCardRender(draft.id)
   },
 
-  async getCardRender(draftId: string): Promise<DraftRender> {
+  async getCardRender(draftId: string, telegramId?: string): Promise<DraftRender> {
     const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
     if (!draft) {
       return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
     }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
+    if (isExpired(draft)) return EXPIRED_RENDER
     const timeZone = await getTutorTimeZone(draft.tutorId)
+
+    // ADVISORY-проверка пересечений: если есть конфликт — показываем
+    // конфликт-карточку вместо обычной (founder decision 1: жёсткая блокировка).
+    if (draft.studentId && draft.startTime && draft.startTime.getTime() > Date.now()) {
+      const durationMin = draft.durationMinutes ?? 60
+      const conflicts = await lessonsService.findConflicts(
+        draft.tutorId,
+        draft.startTime,
+        durationMin,
+      )
+      if (conflicts.length > 0) {
+        const suggestions = await suggestAlternativeSlots(
+          draft.tutorId,
+          draft.startTime,
+          durationMin,
+          timeZone,
+          conflicts,
+        )
+        return buildConflictCard(draft, conflicts, suggestions, timeZone)
+      }
+    }
+
     return {
       text: buildCardText(draft, timeZone),
       keyboard: cardKeyboard(draft.id),
     }
   },
 
-  async openEditMenu(draftId: string): Promise<DraftRender> {
+  async openEditMenu(draftId: string, telegramId?: string): Promise<DraftRender> {
     const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
     if (!draft) {
       return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
     }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
+    if (isExpired(draft)) return EXPIRED_RENDER
     return {
       text: 'Что изменить?',
       keyboard: editMenuKeyboard(draft.id),
     }
   },
 
-  async startEditField(draftId: string, fieldCode: string): Promise<DraftRender> {
+  async startEditField(draftId: string, fieldCode: string, telegramId?: string): Promise<DraftRender> {
     if (!isFieldCode(fieldCode)) {
       return { text: '⚠️ Неизвестное поле.' }
     }
@@ -629,6 +940,10 @@ export const voiceService = {
     if (!draft) {
       return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
     }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
+    if (isExpired(draft)) return EXPIRED_RENDER
 
     await prisma.lessonDraft.update({
       where: { id: draftId },
@@ -643,11 +958,15 @@ export const voiceService = {
     }
   },
 
-  async pickStudent(draftId: string, studentId: string): Promise<DraftRender> {
+  async pickStudent(draftId: string, studentId: string, telegramId?: string): Promise<DraftRender> {
     const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
     if (!draft) {
       return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
     }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
+    if (isExpired(draft)) return EXPIRED_RENDER
 
     const student = await prisma.student.findUnique({
       where: { id: studentId },
@@ -676,14 +995,19 @@ export const voiceService = {
     return voiceService.getCardRender(draftId)
   },
 
-  async confirmDraft(draftId: string): Promise<DraftRender> {
+  async confirmDraft(draftId: string, telegramId?: string): Promise<DraftRender> {
     const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
     if (!draft) {
       return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
     }
+    // F6: чужой черновик (групповой чат).
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
     if (draft.status === 'CONFIRMED' && draft.lessonId) {
       return { text: '✅ Этот урок уже создан.' }
     }
+    if (isExpired(draft)) return EXPIRED_RENDER
 
     const timeZone = await getTutorTimeZone(draft.tutorId)
 
@@ -706,12 +1030,6 @@ export const voiceService = {
         keyboard: cardKeyboard(draft.id),
       }
     }
-    if (draft.startTime.getTime() <= Date.now()) {
-      return {
-        text: '⚠️ Урок не может быть в прошлом. Измените дату или время.',
-        keyboard: cardKeyboard(draft.id),
-      }
-    }
     if (draft.price === null || draft.price === undefined) {
       return {
         text: '⚠️ Не указана цена — её нужно задать вручную. Нажмите «Изменить» → «Цена».',
@@ -719,6 +1037,44 @@ export const voiceService = {
       }
     }
     const durationMinutes = draft.durationMinutes ?? 60
+
+    // ── C3 / founder decision 4: прошедшее время ──────────────────────────────
+    // Различаем: «дата сегодня, но время прошло» → предлагаем завтра;
+    // «явная прошлая дата» → создаём как проведённый (COMPLETED).
+    let lessonStatus: 'COMPLETED' | undefined
+    if (draft.startTime.getTime() <= Date.now()) {
+      const decision = classifyPast(draft.startTime, timeZone)
+      if (decision === 'today') {
+        const tomorrow = shiftWallDays(draft.startTime, 1, timeZone)
+        return {
+          text:
+            '🕐 Это время сегодня уже прошло. Поставить на завтра в то же время?',
+          keyboard: {
+            inline_keyboard: [
+              [
+                {
+                  text: `📅 Завтра ${formatTime(tomorrow, timeZone)}`,
+                  callback_data: `v:slot:${draft.id}:${toUnixMinute(tomorrow)}`,
+                },
+              ],
+              [{ text: '🔀 Другое время', callback_data: `v:f:${draft.id}:time` }],
+              [{ text: '⬅️ Отмена', callback_data: `v:x:${draft.id}` }],
+            ],
+          },
+        }
+      }
+      // Явная прошлая дата — фиксируем как проведённый урок (учёт дохода).
+      lessonStatus = 'COMPLETED'
+    }
+
+    // F5: атомарно «застолбить» черновик, чтобы двойной тап не создал 2 урока.
+    const claim = await prisma.lessonDraft.updateMany({
+      where: { id: draftId, status: { not: 'CONFIRMED' } },
+      data: { status: 'CONFIRMED' },
+    })
+    if (claim.count === 0) {
+      return { text: '✅ Этот урок уже создан.' }
+    }
 
     // Создаём урок через существующий сервис (он же шлёт уведомления).
     let lessonId: string
@@ -729,10 +1085,30 @@ export const voiceService = {
         startTime: draft.startTime.toISOString(),
         durationMinutes,
         price: draft.price,
+        ...(lessonStatus ? { status: lessonStatus } : {}),
       })
       // create без repeat возвращает { data: lesson }.
       lessonId = (result as { data: { id: string } }).data.id
     } catch (err) {
+      // Откатываем claim, чтобы можно было повторить попытку.
+      await prisma.lessonDraft
+        .update({ where: { id: draftId }, data: { status: 'AWAITING_CONFIRM' } })
+        .catch(() => undefined)
+
+      // A6 TOCTOU: время заняли пока подтверждали — показываем конфликт-карточку.
+      if (err instanceof LessonConflictError) {
+        const suggestions = await suggestAlternativeSlots(
+          draft.tutorId,
+          draft.startTime,
+          durationMinutes,
+          timeZone,
+          err.conflicts,
+        )
+        return buildConflictCard(draft, err.conflicts, suggestions, timeZone, {
+          toctou: true,
+        })
+      }
+
       const message = err instanceof Error ? err.message : 'Не удалось создать урок'
       return {
         text: `⚠️ ${message}`,
@@ -742,20 +1118,121 @@ export const voiceService = {
 
     await prisma.lessonDraft.update({
       where: { id: draftId },
-      data: { status: 'CONFIRMED', lessonId },
+      data: { lessonId },
     })
 
     const dateLabel = formatDateLabel(draft.startTime, timeZone)
     const timeLabel = formatTime(draft.startTime, timeZone)
+    const head = lessonStatus === 'COMPLETED' ? '✅ Записал как проведённый урок' : '✅ Урок создан'
     return {
-      text: `✅ Урок создан: ${draft.studentName ?? 'ученик'} · ${draft.subject} · ${dateLabel} ${timeLabel}`,
+      text: `${head}: ${draft.studentName ?? 'ученик'} · ${draft.subject} · ${dateLabel} ${timeLabel}`,
     }
   },
 
-  async cancelDraft(draftId: string): Promise<DraftRender> {
+  // pickSlot: выбор альтернативного слота из конфликт-карточки (или «завтра»).
+  async pickSlot(draftId: string, unixMinuteUtc: number, telegramId?: string): Promise<DraftRender> {
+    const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
+    if (!draft) {
+      return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
+    }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
+    if (isExpired(draft)) return EXPIRED_RENDER
+
+    const timeZone = await getTutorTimeZone(draft.tutorId)
+    const newStart = new Date(unixMinuteUtc * 60000)
+    const durationMin = draft.durationMinutes ?? 60
+
+    // Защита от подделанного callback_data: слот обязан быть в будущем и в рабочих
+    // часах. Иначе крафтнутая кнопка могла бы записать урок задним числом.
+    if (newStart.getTime() <= Date.now() || !isWithinWorkHours(newStart, durationMin, timeZone)) {
+      return {
+        text: '⚠️ Этот вариант больше недоступен. Нажмите «Изменить» → «Время», чтобы выбрать другое.',
+      }
+    }
+
+    // Перепроверяем, что слот всё ещё свободен.
+    const conflicts = await lessonsService.findConflicts(draft.tutorId, newStart, durationMin)
+    if (conflicts.length > 0) {
+      const suggestions = await suggestAlternativeSlots(
+        draft.tutorId,
+        newStart,
+        durationMin,
+        timeZone,
+        conflicts,
+      )
+      const refreshed = { ...draft, startTime: newStart }
+      return buildConflictCard(refreshed, conflicts, suggestions, timeZone, {
+        toctou: true,
+      })
+    }
+
+    await prisma.lessonDraft.update({
+      where: { id: draftId },
+      data: { startTime: newStart, status: 'AWAITING_CONFIRM' },
+    })
+    return voiceService.getCardRender(draftId)
+  },
+
+  // B1 / G1: создать нового ученика из черновика (0 точных совпадений).
+  async createStudentForDraft(draftId: string, telegramId?: string): Promise<DraftRender> {
+    const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
+    if (!draft) {
+      return { text: '⚠️ Черновик не найден или устарел. Отправьте голосовое сообщение заново.' }
+    }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
+    }
+    if (isExpired(draft)) return EXPIRED_RENDER
+    const name = draft.studentName?.trim()
+    if (!name) {
+      return { text: '⚠️ Имя ученика не распознано. Нажмите «Изменить» → «Ученик».' }
+    }
+
+    // G1: лимит FREE-плана.
+    try {
+      await billingService.checkStudentLimit(draft.tutorId)
+    } catch {
+      return {
+        text:
+          `🔒 На бесплатном тарифе можно добавить до 5 учеников. ` +
+          `Чтобы добавить «${name}» — оформите PRO в приложении. ` +
+          `Либо выберите существующего ученика через «Изменить» → «Ученик».`,
+        keyboard: cardKeyboard(draft.id),
+      }
+    }
+
+    const student = await prisma.student.create({
+      data: { tutorId: draft.tutorId, name },
+      select: { id: true, name: true, hourlyRate: true },
+    })
+
+    // Цена по ставке нового ученика, если ещё не задана.
+    let price = draft.price
+    if (price === null) {
+      price = await computePrice(draft.tutorId, student.id, draft.durationMinutes)
+    }
+
+    await prisma.lessonDraft.update({
+      where: { id: draftId },
+      data: {
+        studentId: student.id,
+        studentName: student.name,
+        price,
+        status: 'AWAITING_CONFIRM',
+      },
+    })
+    return voiceService.getCardRender(draftId)
+  },
+
+  async cancelDraft(draftId: string, telegramId?: string): Promise<DraftRender> {
     const draft = await prisma.lessonDraft.findUnique({ where: { id: draftId } })
     if (!draft) {
       return { text: '❌ Черновик отменён.' }
+    }
+    if (telegramId && draft.telegramId !== telegramId) {
+      return { text: '⚠️ Это не ваш черновик урока.' }
     }
     if (draft.status !== 'CONFIRMED') {
       await prisma.lessonDraft.update({
@@ -778,6 +1255,28 @@ function isFieldCode(value: string): value is FieldCode {
     value === 'dur' ||
     value === 'price' ||
     value === 'subj'
+}
+
+// C3: классификация прошедшего времени.
+// 'today'  — настенная дата урока == сегодня (прошло только время) → предлагаем завтра.
+// 'past'   — настенная дата строго раньше сегодняшней → фиксируем как проведённый.
+function classifyPast(startTime: Date, timeZone: string): 'today' | 'past' {
+  const lesson = wallPartsInZone(startTime, timeZone)
+  const now = wallPartsInZone(new Date(), timeZone)
+  if (lesson.year === now.year && lesson.month === now.month && lesson.day === now.day) {
+    return 'today'
+  }
+  return 'past'
+}
+
+// F2: черновик истёк (TTL 1ч).
+function isExpired(draft: { expiresAt: Date; status: LessonDraftStatus }): boolean {
+  if (draft.status === 'CONFIRMED' || draft.status === 'CANCELLED') return false
+  return draft.expiresAt.getTime() < Date.now()
+}
+
+const EXPIRED_RENDER: DraftRender = {
+  text: '⏳ Черновик устарел (прошёл час). Продиктуйте урок заново.',
 }
 
 const EDIT_PROMPTS: Record<FieldCode, string> = {

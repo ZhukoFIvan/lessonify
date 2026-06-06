@@ -255,11 +255,30 @@ bot?.on('voice', async (ctx) => {
       return
     }
 
-    // (3) Скачиваем аудио.
+    // (3) E1: слишком короткое/пустое аудио — не гоняем Gemini зря.
+    const voiceDuration = ctx.message.voice.duration ?? 0
+    // duration в Telegram — целые секунды, поэтому отсекаем клипы < 2с.
+    if (voiceDuration > 0 && voiceDuration < 2) {
+      await ctx.reply(
+        '🎤 Слишком короткое сообщение, ничего не расслышал. ' +
+          'Скажите целиком, например: «поставь Ане физику завтра в 5 на час».',
+      )
+      return
+    }
+
+    // (4) Скачиваем аудио.
     const audio = await downloadVoice(ctx, ctx.message.voice.file_id)
     const mimeType = ctx.message.voice.mime_type ?? 'audio/ogg'
 
-    // (4) Если есть активное редактирование поля — применяем значение из голоса,
+    if (audio.length < 1024) {
+      await ctx.reply(
+        '🎤 Слишком короткое сообщение, ничего не расслышал. ' +
+          'Скажите целиком, например: «поставь Ане физику завтра в 5 на час».',
+      )
+      return
+    }
+
+    // (5) Если есть активное редактирование поля — применяем значение из голоса,
     //     иначе создаём новый черновик.
     const editing = await voiceService.getActiveEditing(telegramId)
     let render: DraftRender | null
@@ -280,7 +299,7 @@ bot?.on('voice', async (ctx) => {
       return
     }
 
-    // (5) Отправляем карточку.
+    // (6) Отправляем карточку.
     await sendRender(ctx, render)
   } catch (err) {
     console.error('[telegram] voice handler failed:', err)
@@ -327,7 +346,7 @@ bot?.on('text', async (ctx) => {
 
 bot?.action(/^v:ok:(.+)$/, async (ctx) => {
   try {
-    const render = await voiceService.confirmDraft(ctx.match[1]!)
+    const render = await voiceService.confirmDraft(ctx.match[1]!, String(ctx.from!.id))
     await editRender(ctx, render)
   } catch (err) {
     console.error('[telegram] v:ok failed:', err)
@@ -341,7 +360,7 @@ bot?.action(/^v:ok:(.+)$/, async (ctx) => {
 
 bot?.action(/^v:edit:(.+)$/, async (ctx) => {
   try {
-    const render = await voiceService.openEditMenu(ctx.match[1]!)
+    const render = await voiceService.openEditMenu(ctx.match[1]!, String(ctx.from!.id))
     await editRender(ctx, render)
   } catch (err) {
     console.error('[telegram] v:edit failed:', err)
@@ -355,7 +374,11 @@ bot?.action(/^v:edit:(.+)$/, async (ctx) => {
 
 bot?.action(/^v:f:([^:]+):(\w+)$/, async (ctx) => {
   try {
-    const render = await voiceService.startEditField(ctx.match[1]!, ctx.match[2]!)
+    const render = await voiceService.startEditField(
+      ctx.match[1]!,
+      ctx.match[2]!,
+      String(ctx.from!.id),
+    )
     await editRender(ctx, render)
   } catch (err) {
     console.error('[telegram] v:f failed:', err)
@@ -369,7 +392,7 @@ bot?.action(/^v:f:([^:]+):(\w+)$/, async (ctx) => {
 
 bot?.action(/^v:back:(.+)$/, async (ctx) => {
   try {
-    const render = await voiceService.getCardRender(ctx.match[1]!)
+    const render = await voiceService.getCardRender(ctx.match[1]!, String(ctx.from!.id))
     await editRender(ctx, render)
   } catch (err) {
     console.error('[telegram] v:back failed:', err)
@@ -383,7 +406,7 @@ bot?.action(/^v:back:(.+)$/, async (ctx) => {
 
 bot?.action(/^v:x:(.+)$/, async (ctx) => {
   try {
-    const render = await voiceService.cancelDraft(ctx.match[1]!)
+    const render = await voiceService.cancelDraft(ctx.match[1]!, String(ctx.from!.id))
     await editRender(ctx, render)
   } catch (err) {
     console.error('[telegram] v:x failed:', err)
@@ -397,10 +420,45 @@ bot?.action(/^v:x:(.+)$/, async (ctx) => {
 
 bot?.action(/^v:s:([^:]+):(.+)$/, async (ctx) => {
   try {
-    const render = await voiceService.pickStudent(ctx.match[1]!, ctx.match[2]!)
+    const render = await voiceService.pickStudent(
+      ctx.match[1]!,
+      ctx.match[2]!,
+      String(ctx.from!.id),
+    )
     await editRender(ctx, render)
   } catch (err) {
     console.error('[telegram] v:s failed:', err)
+    try {
+      await ctx.answerCbQuery('Ошибка')
+    } catch {
+      /* best-effort */
+    }
+  }
+})
+
+// Выбор альтернативного свободного слота из конфликт-карточки.
+bot?.action(/^v:slot:([^:]+):(\d+)$/, async (ctx) => {
+  try {
+    const unixMin = Number(ctx.match[2])
+    const render = await voiceService.pickSlot(ctx.match[1]!, unixMin, String(ctx.from!.id))
+    await editRender(ctx, render)
+  } catch (err) {
+    console.error('[telegram] v:slot failed:', err)
+    try {
+      await ctx.answerCbQuery('Ошибка')
+    } catch {
+      /* best-effort */
+    }
+  }
+})
+
+// Создание нового ученика из голосового черновика (0 совпадений в ростере).
+bot?.action(/^v:newstud:(.+)$/, async (ctx) => {
+  try {
+    const render = await voiceService.createStudentForDraft(ctx.match[1]!, String(ctx.from!.id))
+    await editRender(ctx, render)
+  } catch (err) {
+    console.error('[telegram] v:newstud failed:', err)
     try {
       await ctx.answerCbQuery('Ошибка')
     } catch {

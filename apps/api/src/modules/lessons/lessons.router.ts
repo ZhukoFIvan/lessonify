@@ -7,7 +7,7 @@ import {
   updateLessonSchema,
   lessonsQuerySchema,
 } from './lessons.schemas'
-import { lessonsService, BadRequestError } from './lessons.service'
+import { lessonsService, BadRequestError, LessonConflictError } from './lessons.service'
 import { NotFoundError, ForbiddenError } from '../students/students.service'
 
 export const lessonsRouter = Router()
@@ -29,6 +29,30 @@ function handleError(res: Response, err: unknown): void {
   }
   if (err instanceof BadRequestError) {
     res.status(400).json({ error: err.message })
+    return
+  }
+  if (err instanceof LessonConflictError) {
+    // Жёсткая блокировка пересечений. Отдаём 409 + читаемое сообщение и
+    // список конфликтующих уроков, чтобы модалка добавления могла их показать.
+    const fmt = (d: Date): string =>
+      d.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: err.timeZone ?? 'Europe/Moscow',
+      })
+    const list = err.conflicts
+      .map((c) => `${c.studentName} · ${c.subject} (${fmt(c.startUtc)}–${fmt(c.endUtc)})`)
+      .join(', ')
+    res.status(409).json({
+      error: `В это время уже есть урок: ${list}. Выберите другое время.`,
+      conflicts: err.conflicts.map((c) => ({
+        id: c.id,
+        studentName: c.studentName,
+        subject: c.subject,
+        startTime: c.startUtc.toISOString(),
+        endTime: c.endUtc.toISOString(),
+      })),
+    })
     return
   }
   console.error('[lessons]', err)

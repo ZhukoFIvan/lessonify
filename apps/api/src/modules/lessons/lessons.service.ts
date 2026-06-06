@@ -13,6 +13,40 @@ export class BadRequestError extends Error {
 import type { CreateLessonInput, UpdateLessonInput, LessonsQuery } from './lessons.schemas'
 import { sendLessonCreatedToStudent, sendLessonCreatedToTutor } from '../telegram/telegram.bot'
 
+// ── Конфликты расписания ───────────────────────────────────────────────────────
+
+// Описание одного пересекающегося урока (для карточки/ответа).
+export interface LessonConflict {
+  id: string
+  studentId: string
+  studentName: string
+  subject: string
+  startUtc: Date
+  endUtc: Date
+}
+
+// Бросается из create(), когда новый урок пересекается с существующими.
+// Жёсткая блокировка: обхода (override) НЕТ — конфликт всегда блокирует.
+export class LessonConflictError extends Error {
+  readonly statusCode = 409
+  readonly conflicts: LessonConflict[]
+  // Таймзона репетитора — чтобы веб/бот показали время конфликта в его поясе.
+  readonly timeZone?: string | undefined
+  constructor(conflicts: LessonConflict[], timeZone?: string) {
+    super('Время урока пересекается с другим уроком')
+    this.name = 'LessonConflictError'
+    this.conflicts = conflicts
+    this.timeZone = timeZone
+  }
+}
+
+// Статусы, которые реально занимают слот в расписании.
+const BLOCKING_STATUSES = ['SCHEDULED', 'RESCHEDULED'] as const
+
+// Длительности уроков ограничены 480 мин (8 ч), поэтому существующий урок,
+// начавшийся раньше чем за 8 ч до нового, физически не может пересечься.
+const MAX_LESSON_MS = 8 * 60 * 60 * 1000
+
 // ── Select ────────────────────────────────────────────────────────────────────
 
 const lessonSelect = {
@@ -92,6 +126,64 @@ export const lessonsService = {
     }
   },
 
+  // ── Поиск пересечений ─────────────────────────────────────────────────────
+  // Возвращает уроки репетитора (SCHEDULED|RESCHEDULED), пересекающиеся с
+  // интервалом [startUtc, startUtc + durationMin). Полуоткрытый интервал:
+  // касание встык (existing.end == newStart) НЕ считается конфликтом.
+  // Можно передать клиента транзакции (tx), чтобы проверка шла атомарно с insert.
+
+  async findConflicts(
+    tutorId: string,
+    startUtc: Date,
+    durationMin: number,
+    excludeLessonId?: string,
+    client: Prisma.TransactionClient = prisma,
+  ): Promise<LessonConflict[]> {
+    const newStart = startUtc.getTime()
+    const newEnd = newStart + durationMin * 60000
+
+    // Индекс @@index([tutorId, startTime]). Ограничиваем окно слева на MAX_LESSON_MS:
+    // урок, начавшийся раньше, не может тянуться до newStart (длительность ≤ 480 мин).
+    const candidates = await client.lesson.findMany({
+      where: {
+        tutorId,
+        status: { in: [...BLOCKING_STATUSES] },
+        startTime: {
+          gte: new Date(newStart - MAX_LESSON_MS),
+          lt: new Date(newEnd),
+        },
+        ...(excludeLessonId ? { id: { not: excludeLessonId } } : {}),
+      },
+      select: {
+        id: true,
+        studentId: true,
+        subject: true,
+        startTime: true,
+        durationMinutes: true,
+        student: { select: { name: true } },
+      },
+      orderBy: { startTime: 'asc' },
+    })
+
+    const conflicts: LessonConflict[] = []
+    for (const l of candidates) {
+      const exStart = l.startTime.getTime()
+      const exEnd = exStart + l.durationMinutes * 60000
+      // Полуоткрытое пересечение: exStart < newEnd && exEnd > newStart.
+      if (exStart < newEnd && exEnd > newStart) {
+        conflicts.push({
+          id: l.id,
+          studentId: l.studentId,
+          studentName: l.student.name,
+          subject: l.subject,
+          startUtc: l.startTime,
+          endUtc: new Date(exEnd),
+        })
+      }
+    }
+    return conflicts
+  },
+
   // ── POST /lessons ───────────────────────────────────────────────────────────
 
   async create(tutorId: string, data: CreateLessonInput) {
@@ -116,25 +208,47 @@ export const lessonsService = {
       return lessonsService.createRepeating(tutorId, data, startTime)
     }
 
-    const lesson = await prisma.lesson.create({
-      data: {
-        tutorId,
-        studentId: data.studentId,
-        subject: data.subject,
-        startTime,
-        durationMinutes: data.durationMinutes,
-        price: data.price,
-        notes: data.notes ?? null,
-      },
-      select: lessonSelect,
-    })
+    // Прошедший урок (status === 'COMPLETED') фиксируется задним числом —
+    // проверка пересечений для него не нужна и не желательна.
+    const isPastRecord = data.status === 'COMPLETED'
 
-    // Отправляем уведомления в Telegram
+    // Таймзона репетитора нужна и для уведомлений, и для текста ошибки конфликта.
     const tutor = await prisma.tutor.findUnique({
       where: { id: tutorId },
       select: { timezone: true, user: { select: { name: true } } },
     })
     const tutorTz = tutor?.timezone ?? 'Europe/Moscow'
+
+    // Проверка пересечений + insert в ОДНОЙ транзакции (закрывает TOCTOU-окно):
+    // если за время показа карточки слот заняли, конфликт всплывёт здесь.
+    const lesson = await prisma.$transaction(async (tx) => {
+      if (!isPastRecord) {
+        const conflicts = await lessonsService.findConflicts(
+          tutorId,
+          startTime,
+          data.durationMinutes,
+          undefined,
+          tx,
+        )
+        if (conflicts.length > 0) {
+          // ЖЁСТКАЯ блокировка — обхода нет.
+          throw new LessonConflictError(conflicts, tutorTz)
+        }
+      }
+      return tx.lesson.create({
+        data: {
+          tutorId,
+          studentId: data.studentId,
+          subject: data.subject,
+          startTime,
+          durationMinutes: data.durationMinutes,
+          price: data.price,
+          notes: data.notes ?? null,
+          ...(data.status ? { status: data.status } : {}),
+        },
+        select: lessonSelect,
+      })
+    })
 
     // 1. Ученику (если подключен Telegram)
     if (student.telegramConnection?.telegramId && tutor) {

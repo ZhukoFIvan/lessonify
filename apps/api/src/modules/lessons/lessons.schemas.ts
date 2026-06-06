@@ -15,6 +15,9 @@ export const createLessonSchema = z
     durationMinutes: z.number().int().min(15).max(480).default(60),
     price: z.number().int().nonnegative('Цена не может быть отрицательной'),
     notes: z.string().max(2000).trim().optional(),
+    // Статус урока. По умолчанию SCHEDULED. COMPLETED используется для
+    // фиксации прошедшего урока задним числом (голосовой ввод, прошлая дата).
+    status: lessonStatus.optional(),
     // Повторяющиеся уроки
     repeat: z
       .object({
@@ -32,6 +35,9 @@ export const createLessonSchema = z
   )
   .refine(
     (d) => {
+      // Прошедшее время допускается ТОЛЬКО для урока, который фиксируется
+      // задним числом как проведённый (status === 'COMPLETED').
+      if (d.status === 'COMPLETED') return true
       const start = new Date(d.startTime)
       const now = new Date()
       return start > now

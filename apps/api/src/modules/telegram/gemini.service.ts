@@ -37,6 +37,12 @@ export interface LessonParseResult {
   durationMinutes: number | null
   price: number | null
   subject: string | null
+  // true, если в одном сообщении продиктовано НЕСКОЛЬКО уроков
+  // (поля выше относятся к ПЕРВОМУ). MVP: создаём только первый.
+  multipleDetected: boolean
+  // true, если время выведено эвристикой «1–7 без утра → вечер (PM)»
+  // и его, возможно, стоит перевернуть на AM (кнопка-флип на карточке).
+  ambiguousTime: boolean
 }
 
 interface ParseAudioInput {
@@ -85,6 +91,8 @@ const responseSchema = {
     durationMinutes: { type: 'INTEGER', nullable: true },
     price: { type: 'INTEGER', nullable: true },
     subject: { type: 'STRING', nullable: true },
+    multipleDetected: { type: 'BOOLEAN', nullable: true },
+    ambiguousTime: { type: 'BOOLEAN', nullable: true },
   },
   required: ['transcript', 'intent'],
 } as const
@@ -130,10 +138,18 @@ function buildPrompt(opts: { nowISO: string; timeZone: string; studentNames: str
     '  Если совпадает по смыслу — верни ИМЯ ИЗ СПИСКА. Если нет — верни как услышал. Если не названо — null.',
     '- date: дата урока в формате "YYYY-MM-DD" или null.',
     '- time: время начала в 24-часовом формате "HH:mm" (например, "17:00") или null.',
-    '  "в 5" вечером трактуй как 17:00, утром — 09:00; ориентируйся на контекст, по умолчанию — дневное/вечернее время.',
+    '  ВАЖНО про "голые" часы 1–7 без уточнения "утра"/"ночи": считай их ВЕЧЕРНИМИ (PM, +12).',
+    '  Например, "в 5" → "17:00", "в час" → "13:00", "в 6" → "18:00". С "утра" → как есть ("в 8 утра" → "08:00").',
+    '  Часы 8–12 и 13–23 трактуй буквально.',
+    '- ambiguousTime: true, ТОЛЬКО если ты применил правило выше (голый час 1–7 без "утра" → PM); иначе false.',
     '- durationMinutes: длительность в минутах ("на час" = 60, "полтора часа" = 90, "45 минут" = 45) или null.',
-    '- price: цена в рублях целым числом, если названа ("за 2000", "две тысячи") или null.',
+    '- price: цена за ВЕСЬ урок в рублях целым числом.',
+    '  Голое число без "в час"/"за час" ("за 2000", "две тысячи") = ИТОГ за урок.',
+    '  Если сказано "в час"/"за час" (например, "по 1000 в час, два часа") — УМНОЖЬ на длительность и верни ИТОГ (=2000).',
+    '  Если цена не названа — null.',
     '- subject: предмет ("физика", "английский") с заглавной буквы или null.',
+    '- multipleDetected: true, если в сообщении продиктовано НЕСКОЛЬКО уроков (разные ученики/даты/времена,',
+    '  например "Машу на понедельник и Петю на вторник"). Поля выше тогда заполняй по ПЕРВОМУ уроку. Иначе false.',
     '',
     'Верни ТОЛЬКО JSON указанной структуры, без пояснений.',
   ].join('\n')
@@ -228,18 +244,28 @@ function normalizeResult(raw: unknown): LessonParseResult {
     if (!TIME_RE.test(time)) time = null
   }
 
+  // D5: клампим значения из модели в разумные границы уже на парсинге.
+  const rawDuration = asPositiveInt(obj.durationMinutes)
+  const durationMinutes =
+    rawDuration === null ? null : Math.min(480, Math.max(15, rawDuration))
+
+  const rawPrice =
+    typeof obj.price === 'number' && Number.isFinite(obj.price) && obj.price >= 0
+      ? Math.round(obj.price)
+      : asPositiveInt(obj.price)
+  const price = rawPrice === null ? null : Math.min(100000, Math.max(0, rawPrice))
+
   return {
     transcript: asNonEmptyString(obj.transcript) ?? '',
     intent,
     studentName: asNonEmptyString(obj.studentName),
     date,
     time,
-    durationMinutes: asPositiveInt(obj.durationMinutes),
-    price:
-      typeof obj.price === 'number' && Number.isFinite(obj.price) && obj.price >= 0
-        ? Math.round(obj.price)
-        : asPositiveInt(obj.price),
+    durationMinutes,
+    price,
     subject: asNonEmptyString(obj.subject),
+    multipleDetected: obj.multipleDetected === true,
+    ambiguousTime: obj.ambiguousTime === true,
   }
 }
 
