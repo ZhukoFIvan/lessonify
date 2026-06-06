@@ -147,7 +147,8 @@ function buildPrompt(opts: { nowISO: string; timeZone: string; studentNames: str
     '  Голое число без "в час"/"за час" ("за 2000", "две тысячи") = ИТОГ за урок.',
     '  Если сказано "в час"/"за час" (например, "по 1000 в час, два часа") — УМНОЖЬ на длительность и верни ИТОГ (=2000).',
     '  Если цена не названа — null.',
-    '- subject: предмет ("физика", "английский") с заглавной буквы или null.',
+    '- subject: предмет в ИМЕНИТЕЛЬНОМ падеже с заглавной буквы ("Математика", "Английский", "Физика"),',
+    '  даже если сказано иначе ("по математике" → "Математика", "английского" → "Английский"); или null.',
     '- multipleDetected: true, если в сообщении продиктовано НЕСКОЛЬКО уроков (разные ученики/даты/времена,',
     '  например "Машу на понедельник и Петю на вторник"). Поля выше тогда заполняй по ПЕРВОМУ уроку. Иначе false.',
     '',
@@ -162,7 +163,7 @@ async function callGemini(content: GeminiContent): Promise<GeminiResponse> {
   if (!key) {
     throw new GeminiConfigError('GEMINI_API_KEY not set')
   }
-  const model = process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'
+  const model = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash-lite'
   const url = `${GEMINI_BASE}/${model}:generateContent?key=${key}`
 
   const body = {
@@ -171,6 +172,9 @@ async function callGemini(content: GeminiContent): Promise<GeminiResponse> {
       responseMimeType: 'application/json',
       responseSchema,
       temperature: 0,
+      // Отключаем «мышление»: для извлечения полей оно лишнее и на 2.5/3.x flash
+      // может «съесть» весь бюджет вывода, вернув пустой JSON. thinkingBudget=0.
+      thinkingConfig: { thinkingBudget: 0 },
     },
   }
 
