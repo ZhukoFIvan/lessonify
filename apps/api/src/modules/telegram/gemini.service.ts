@@ -6,7 +6,11 @@
 // и нормализуем в LessonParseResult.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
+// База Gemini. С прод-сервера Google геоблокирует API ("User location is not
+// supported"), поэтому в проде GEMINI_BASE_URL указывает на Cloudflare AI Gateway
+// (egress из поддерживаемого региона). Локально — прямой адрес Google.
+const GEMINI_BASE =
+  process.env.GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com/v1beta/models'
 
 // ── Ошибки ────────────────────────────────────────────────────────────────────
 
@@ -178,11 +182,17 @@ async function callGemini(content: GeminiContent): Promise<GeminiResponse> {
     },
   }
 
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  // Если ходим через Cloudflare AI Gateway в authenticated-режиме — его токен.
+  if (process.env.GEMINI_GATEWAY_AUTH) {
+    headers['cf-aig-authorization'] = `Bearer ${process.env.GEMINI_GATEWAY_AUTH}`
+  }
+
   let res: Response
   try {
     res = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers,
       body: JSON.stringify(body),
     })
   } catch (err) {
