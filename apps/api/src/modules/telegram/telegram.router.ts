@@ -59,12 +59,13 @@ telegramRouter.delete('/disconnect', requireAuth, async (req: Request, res: Resp
 // ── POST /telegram/webhook — webhook от Telegram ──────────────────────────────
 // Используется в production (Railway). В dev — polling.
 
-telegramRouter.post('/webhook', async (req: Request, res: Response) => {
-  try {
-    await bot.handleUpdate(req.body)
-    res.sendStatus(200)
-  } catch (err) {
+telegramRouter.post('/webhook', (req: Request, res: Response) => {
+  // ВАЖНО: отвечаем Telegram 200 СРАЗУ, апдейт обрабатываем асинхронно.
+  // Иначе медленный/флапающий исходящий вызов к api.telegram.org внутри
+  // обработки блокирует ответ → Telegram видит «Connection timed out» и
+  // копит pending-апдейты (бот «молчит» на /start).
+  res.sendStatus(200)
+  bot.handleUpdate(req.body).catch((err) => {
     console.error('[telegram webhook]', err)
-    res.sendStatus(500)
-  }
+  })
 })

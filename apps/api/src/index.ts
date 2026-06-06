@@ -85,6 +85,9 @@ app.listen(PORT, async () => {
     if (IS_PROD && process.env.TELEGRAM_WEBHOOK_URL) {
       // Production: webhook
       await bot.telegram.setWebhook(`${process.env.TELEGRAM_WEBHOOK_URL}/telegram/webhook`)
+      // Кэшируем профиль бота при старте, чтобы handleUpdate не дёргал getMe
+      // на КАЖДЫЙ апдейт (при нестабильной связи с Telegram это вешало webhook).
+      bot.botInfo = await bot.telegram.getMe()
       console.log('[telegram] Webhook set')
 
       // Профиль бота (описание, команды, кнопка меню) — best-effort.
