@@ -18,7 +18,6 @@ export const bot = process.env.TELEGRAM_BOT_TOKEN
     })
   : (null as unknown as Telegraf)
 
-const WEB_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'
 
 // URL веб-приложения для кнопок/меню бота.
 // WebApp-кнопка Telegram требует HTTPS, поэтому в проде используем публичный URL.
@@ -69,19 +68,10 @@ bot?.command('start', async (ctx) => {
         ? connection.tutor?.user.name ?? 'Репетитор'
         : connection.student?.user?.name ?? connection.student?.name ?? 'Ученик'
 
-    // WebApp кнопка работает только с HTTPS
-    const isHttps = WEB_URL.startsWith('https://')
-    const replyOptions: any = { parse_mode: 'Markdown' }
-
-    if (isHttps) {
-      replyOptions.reply_markup = Markup.keyboard([
-        [Markup.button.webApp('Открыть Lessonify', WEB_URL)],
-      ]).resize().reply_markup
-    }
-
     await ctx.reply(
       `✅ *Аккаунт успешно привязан!*\n\nПривет, ${name}! Теперь вы будете получать уведомления о занятиях и оплатах прямо в Telegram.`,
-      replyOptions,
+      // Убираем постоянную нижнюю клавиатуру (если оставалась от старых версий).
+      { parse_mode: 'Markdown', reply_markup: { remove_keyboard: true } },
     )
     return
   }
@@ -169,20 +159,9 @@ export async function configureBotProfile(): Promise<void> {
     console.error('[telegram] setMyCommands failed:', err)
   }
 
-  // Кнопка меню, открывающая веб-приложение. WebApp требует HTTPS.
+  // Меню-кнопка — стандартный список команд (без WebApp-кнопки «Приложение»).
   try {
-    if (APP_URL.startsWith('https://')) {
-      await bot.telegram.setChatMenuButton({
-        menuButton: {
-          type: 'web_app',
-          text: 'Приложение',
-          web_app: { url: APP_URL },
-        },
-      })
-    } else {
-      // На localhost WebApp недоступен — оставляем стандартную кнопку команд.
-      await bot.telegram.setChatMenuButton({ menuButton: { type: 'commands' } })
-    }
+    await bot.telegram.setChatMenuButton({ menuButton: { type: 'commands' } })
   } catch (err) {
     console.error('[telegram] setChatMenuButton failed:', err)
   }
@@ -354,6 +333,18 @@ bot?.on('text', async (ctx) => {
 
 bot?.action(/^v:ok:(.+)$/, async (ctx) => {
   try {
+    try {
+      await ctx.answerCbQuery()
+    } catch {
+      /* спиннер мог истечь */
+    }
+    // Сразу убираем кнопки: создание урока + уведомления занимают пару секунд,
+    // кнопки не должны «висеть» и не должны тапаться повторно.
+    try {
+      await ctx.editMessageReplyMarkup(undefined)
+    } catch {
+      /* best-effort */
+    }
     const render = await voiceService.confirmDraft(ctx.match[1]!, String(ctx.from!.id))
     await editRender(ctx, render)
   } catch (err) {
