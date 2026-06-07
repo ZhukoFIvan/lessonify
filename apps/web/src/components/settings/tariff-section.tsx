@@ -88,11 +88,19 @@ export function TariffSection() {
 
   useEffect(() => {
     const payment = searchParams.get('payment')
-    if (payment === 'success') {
+    // Robokassa редиректит на Success/Fail URL (= /settings) и сама дописывает
+    // свои параметры. Success-редирект подписан (SignatureValue + OutSum), Fail — нет.
+    const robokassaSuccess = !!searchParams.get('SignatureValue') && !!searchParams.get('OutSum')
+    const robokassaReturn = !!searchParams.get('InvId') || !!searchParams.get('OutSum')
+
+    if (payment === 'success' || robokassaSuccess) {
       refreshStatus()
       toast({ variant: 'success', title: 'Оплата прошла успешно! PRO-план активирован.' })
     } else if (payment === 'cancelled') {
       toast({ variant: 'destructive', title: 'Оплата отменена' })
+    } else if (robokassaReturn) {
+      // Вернулись с оплаты без явного успеха — просто обновим статус плана.
+      refreshStatus()
     }
   }, [searchParams])
 

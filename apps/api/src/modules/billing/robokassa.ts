@@ -45,8 +45,10 @@ export function buildPaymentUrl(params: PaymentParams): string {
   url.searchParams.set('Description', params.description)
   url.searchParams.set('SignatureValue', sig)
   url.searchParams.set('Email', params.email)
-  url.searchParams.set('SuccessURL', params.successUrl)
-  url.searchParams.set('FailURL', params.failUrl)
+  // SuccessURL/FailURL НЕ передаём в ссылке: Robokassa при методе GET запрещает
+  // параметры в этих URL, а наш /settings?payment=... их содержит. Берём адреса
+  // возврата из настроек магазина (Технические настройки → Success/Fail URL =
+  // https://app.lessonify.ru/settings). Robokassa сама допишет InvId/OutSum/SignatureValue.
   url.searchParams.set('Culture', 'ru')
   url.searchParams.set('Encoding', 'utf-8')
   if (cfg.isTest()) url.searchParams.set('IsTest', '1')
