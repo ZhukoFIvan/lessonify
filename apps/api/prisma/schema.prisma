@@ -296,6 +296,22 @@ model TelegramConnection {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// BotUser — все, кто хоть раз нажал /start в боте (верх воронки, даже без привязки)
+// ─────────────────────────────────────────────────────────────────────────────
+model BotUser {
+  id          String   @id @default(cuid())
+  telegramId  String   @unique
+  username    String?
+  firstName   String?
+  lastPayload String? // что было после /start: tutor_<code> / student_<code> / пусто
+  startCount  Int      @default(1)
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  @@map("bot_users")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RefreshToken — токены для JWT refresh rotation
 // ─────────────────────────────────────────────────────────────────────────────
 

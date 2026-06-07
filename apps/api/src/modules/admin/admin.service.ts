@@ -307,7 +307,7 @@ export const adminService = {
   // ── Telegram bot stats ───────────────────────────────────────────────────────
 
   async getBotStats() {
-    const [total, linked, tutorConnections, studentConnections, pendingCodes, totalTutors] =
+    const [total, linked, tutorConnections, studentConnections, pendingCodes, totalTutors, botStarted, startsAgg] =
       await Promise.all([
         prisma.telegramConnection.count(),
         prisma.telegramConnection.count({ where: { telegramId: { not: null } } }),
@@ -316,7 +316,11 @@ export const adminService = {
         // Записи с кодом привязки, но ещё без telegramId — незавершённое подключение
         prisma.telegramConnection.count({ where: { telegramId: null } }),
         prisma.tutor.count(),
+        // Воронка бота: уникальные, кто нажал /start, и суммарное число нажатий
+        prisma.botUser.count(),
+        prisma.botUser.aggregate({ _sum: { startCount: true } }),
       ])
+    const botStartsTotal = startsAgg._sum.startCount ?? 0
 
     const recent = await prisma.telegramConnection.findMany({
       where: { telegramId: { not: null } },
@@ -337,6 +341,10 @@ export const adminService = {
       totalTutors,
       // Конверсия: какая доля репетиторов подключила бота
       tutorConversion: totalTutors > 0 ? Math.round((tutorConnections / totalTutors) * 100) : 0,
+      // Воронка: нажали /start → привязали аккаунт
+      botStarted,
+      botStartsTotal,
+      startToLinkedConversion: botStarted > 0 ? Math.round((linked / botStarted) * 100) : 0,
       recent: recent.map((c) => ({
         id: c.id,
         username: c.username,

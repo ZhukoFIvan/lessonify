@@ -80,6 +80,9 @@ export interface AdminBotStats {
   pendingCodes: number
   totalTutors: number
   tutorConversion: number
+  botStarted: number
+  botStartsTotal: number
+  startToLinkedConversion: number
   recent: {
     id: string
     username: string | null

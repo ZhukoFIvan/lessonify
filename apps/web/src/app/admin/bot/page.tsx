@@ -1,6 +1,6 @@
 'use client'
 
-import { Send, Link2, GraduationCap, BookOpen, Hourglass, TrendingUp } from 'lucide-react'
+import { Send, Link2, GraduationCap, BookOpen, Hourglass, TrendingUp, MousePointerClick } from 'lucide-react'
 import { useAdminBotStats } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
 
@@ -34,6 +34,8 @@ export default function AdminBotPage() {
   if (!stats) return null
 
   const cards = [
+    { label: 'Нажали /start', value: stats.botStarted, icon: <MousePointerClick size={18} className="text-pink-400" />, color: 'bg-pink-500/15', sub: `${stats.botStartsTotal} нажатий всего` },
+    { label: 'Старт → привязка', value: `${stats.startToLinkedConversion}%`, icon: <TrendingUp size={18} className="text-emerald-400" />, color: 'bg-emerald-500/15', sub: `${stats.linked} из ${stats.botStarted}` },
     { label: 'Подключено', value: stats.linked, icon: <Send size={18} className="text-blue-400" />, color: 'bg-blue-500/15', sub: `из ${stats.total} привязок` },
     { label: 'Конверсия репетиторов', value: `${stats.tutorConversion}%`, icon: <TrendingUp size={18} className="text-primary" />, color: 'bg-primary/15', sub: `${stats.tutorConnections} из ${stats.totalTutors}` },
     { label: 'Репетиторы', value: stats.tutorConnections, icon: <GraduationCap size={18} className="text-violet-400" />, color: 'bg-violet-500/15' },

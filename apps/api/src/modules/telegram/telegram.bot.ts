@@ -33,6 +33,27 @@ bot?.command('start', async (ctx) => {
   const payload = ctx.message.text.split(' ')[1] ?? ''
   const tgUser = ctx.from
 
+  // Воронка: фиксируем КАЖДЫЙ /start (верх воронки — даже если не привяжется).
+  // fire-and-forget: не блокируем и не валим ответ, если запись не удалась.
+  prisma.botUser
+    .upsert({
+      where: { telegramId: String(tgUser.id) },
+      create: {
+        telegramId: String(tgUser.id),
+        username: tgUser.username ?? null,
+        firstName: tgUser.first_name ?? null,
+        lastPayload: payload || null,
+      },
+      update: {
+        username: tgUser.username ?? null,
+        firstName: tgUser.first_name ?? null,
+        lastPayload: payload || null,
+        lastSeenAt: new Date(),
+        startCount: { increment: 1 },
+      },
+    })
+    .catch((err) => console.error('[bot] botUser upsert failed:', err?.message ?? err))
+
   // ── Deep link с кодом привязки ─────────────────────────────────────────────
   if (payload.startsWith('tutor_') || payload.startsWith('student_')) {
     const [type, connectCode] = payload.split('_') as [string, string]
