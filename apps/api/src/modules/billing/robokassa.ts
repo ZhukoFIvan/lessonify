@@ -67,17 +67,47 @@ export interface WebhookResult {
 }
 
 export function verifyWebhook(body: Record<string, string>): WebhookResult {
-  const outSum = body['OutSum'] ?? ''
-  const invId = body['InvId'] ?? ''
-  const sign = (body['SignatureValue'] ?? '').toUpperCase()
-  const userId = body['Shp_userId'] ?? ''
-  const period = body['Shp_period'] ?? ''
+  // Robokassa может присылать ключи в разном регистре — читаем без учёта регистра.
+  const get = (name: string): string => {
+    const key = Object.keys(body).find((k) => k.toLowerCase() === name.toLowerCase())
+    return key ? (body[key] ?? '') : ''
+  }
+  const outSum = get('OutSum')
+  const invId = get('InvId')
+  const sign = get('SignatureValue').toUpperCase()
+  const userId = get('Shp_userId')
+  const period = get('Shp_period')
 
-  const shp = shpString('Shp', userId, period)
-  const expected = md5(`${outSum}:${invId}:${cfg.pass2()}:${shp}`)
+  // Кастомные shp_-параметры берём ровно как прислала Robokassa (её регистр),
+  // сортируем по имени — так же, как она считает подпись для Result URL.
+  const shpKeys = Object.keys(body)
+    .filter((k) => /^shp_/i.test(k))
+    .sort()
+  const shp = shpKeys.map((k) => `${k}=${body[k]}`).join(':')
+  const base = shp
+    ? `${outSum}:${invId}:${cfg.pass2()}:${shp}`
+    : `${outSum}:${invId}:${cfg.pass2()}`
+  const expected = md5(base)
+  const valid = expected === sign
+
+  if (!valid) {
+    // Диагностика без утечки пароля: какой алгоритм реально совпадает с подписью.
+    const algoMatch = ['md5', 'sha1', 'sha256', 'sha384', 'sha512'].filter(
+      (a) => crypto.createHash(a).update(base, 'utf8').digest('hex').toUpperCase() === sign,
+    )
+    console.error('[robokassa.verify] signature mismatch', {
+      got: sign,
+      expectedMd5: expected,
+      algoThatMatches: algoMatch,
+      shpKeys,
+      bodyKeys: Object.keys(body),
+      outSum,
+      invId,
+    })
+  }
 
   return {
-    valid: expected === sign,
+    valid,
     userId,
     period,
     invId: parseInt(invId, 10),
