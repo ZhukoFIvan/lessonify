@@ -223,13 +223,25 @@ bot?.on('voice', async (ctx) => {
     // (1) Резолвим репетитора по привязке.
     const connection = await prisma.telegramConnection.findFirst({
       where: { telegramId, tutorId: { not: null } },
-      include: { tutor: true },
+      include: { tutor: { include: { user: { select: { plan: true, planExpiresAt: true } } } } },
     })
 
     if (!connection || !connection.tutorId || !connection.tutor) {
       await ctx.reply(
         '🎤 Голосовое добавление уроков доступно репетиторам, привязавшим аккаунт.\n\n' +
           'Подключите бота в приложении Lessonify (Настройки → Telegram).',
+      )
+      return
+    }
+
+    // (1.5) Голосовой помощник — функция тарифа PRO. На FREE — информер, без обработки.
+    const planUser = connection.tutor.user
+    const isPro =
+      planUser.plan === 'PRO' && (!planUser.planExpiresAt || planUser.planExpiresAt > new Date())
+    if (!isPro) {
+      await ctx.reply(
+        '🎤 Голосовой помощник — функция тарифа PRO.\n\n' +
+          'Оформите PRO в приложении (Настройки → Тариф) — и сможете добавлять и переносить уроки голосом: бот сам поймёт ученика, дату и время и поставит урок в расписание.',
       )
       return
     }

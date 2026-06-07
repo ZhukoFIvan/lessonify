@@ -1,23 +1,58 @@
 import { prisma } from '../../lib/prisma'
-import { subDays, startOfDay, format } from 'date-fns'
+import { subDays, startOfDay, startOfMonth, format } from 'date-fns'
 import { decryptCardDetails } from '../referrals/referrals.service'
 
 // ── Dashboard stats ────────────────────────────────────────────────────────────
 
 export const adminService = {
   async getStats() {
-    const [totalUsers, totalTutors, totalStudents, proUsers, blockedUsers, pendingWithdrawals] =
-      await Promise.all([
-        prisma.user.count({ where: { role: { not: 'ADMIN' } } }),
-        prisma.user.count({ where: { role: 'TUTOR' } }),
-        prisma.user.count({ where: { role: 'STUDENT' } }),
-        prisma.user.count({ where: { plan: 'PRO' } }),
-        prisma.user.count({ where: { isBlocked: true } }),
-        prisma.withdrawalRequest.count({ where: { status: 'PENDING' } }),
-      ])
+    const now = new Date()
+    const monthStart = startOfMonth(now)
+    const last7 = subDays(now, 7)
+    const last30 = subDays(now, 30)
+
+    const [
+      totalUsers,
+      totalTutors,
+      totalStudents,
+      proUsers,
+      blockedUsers,
+      pendingWithdrawals,
+      activeProUsers,
+      totalLessons,
+      lessonsThisMonth,
+      reg7,
+      reg30,
+      botConnections,
+      botLinked,
+      revenueAgg,
+      revenueMonthAgg,
+      paidOrdersCount,
+    ] = await Promise.all([
+      prisma.user.count({ where: { role: { not: 'ADMIN' } } }),
+      prisma.user.count({ where: { role: 'TUTOR' } }),
+      prisma.user.count({ where: { role: 'STUDENT' } }),
+      prisma.user.count({ where: { plan: 'PRO' } }),
+      prisma.user.count({ where: { isBlocked: true } }),
+      prisma.withdrawalRequest.count({ where: { status: 'PENDING' } }),
+      // Активные PRO: либо без срока, либо срок ещё не истёк
+      prisma.user.count({
+        where: { plan: 'PRO', OR: [{ planExpiresAt: null }, { planExpiresAt: { gt: now } }] },
+      }),
+      prisma.lesson.count(),
+      prisma.lesson.count({ where: { startTime: { gte: monthStart } } }),
+      prisma.user.count({ where: { role: { not: 'ADMIN' }, createdAt: { gte: last7 } } }),
+      prisma.user.count({ where: { role: { not: 'ADMIN' }, createdAt: { gte: last30 } } }),
+      prisma.telegramConnection.count(),
+      // «Привязанные» = есть telegramId (реально подключённый аккаунт, а не пустой код)
+      prisma.telegramConnection.count({ where: { telegramId: { not: null } } }),
+      prisma.order.aggregate({ where: { status: 'PAID' }, _sum: { amount: true } }),
+      prisma.order.aggregate({ where: { status: 'PAID', createdAt: { gte: monthStart } }, _sum: { amount: true } }),
+      prisma.order.count({ where: { status: 'PAID' } }),
+    ])
 
     // Регистрации за последние 14 дней
-    const days = Array.from({ length: 14 }, (_, i) => subDays(new Date(), 13 - i))
+    const days = Array.from({ length: 14 }, (_, i) => subDays(now, 13 - i))
     const registrationData = await Promise.all(
       days.map(async (day) => {
         const start = startOfDay(day)
@@ -53,9 +88,19 @@ export const adminService = {
       totalTutors,
       totalStudents,
       proUsers,
+      activeProUsers,
       blockedUsers,
       pendingWithdrawals,
       totalEarnings,
+      totalLessons,
+      lessonsThisMonth,
+      registrations7d: reg7,
+      registrations30d: reg30,
+      botConnections,
+      botLinked,
+      revenueTotal: revenueAgg._sum.amount ?? 0,
+      revenueThisMonth: revenueMonthAgg._sum.amount ?? 0,
+      paidOrdersCount,
       registrationData,
       recentUsers,
       recentWithdrawals,
@@ -64,7 +109,7 @@ export const adminService = {
 
   // ── Users ──────────────────────────────────────────────────────────────────
 
-  async getUsers({ search, role, page }: { search?: string; role?: string; page: number }) {
+  async getUsers({ search, role, page }: { search?: string | undefined; role?: string | undefined; page: number }) {
     const take = 20
     const skip = (page - 1) * take
 
@@ -141,13 +186,12 @@ export const adminService = {
     })
   },
 
-  async setPlan(userId: string, plan: 'FREE' | 'PRO', months?: number) {
+  async setPlan(userId: string, plan: 'FREE' | 'PRO', months?: number, days?: number) {
+    // Приоритет у точного числа дней, иначе месяцы (×30), иначе дефолт 30 дней.
+    const addDays = plan === 'PRO' ? (days ?? (months ? months * 30 : 30)) : 0
+
     const planExpiresAt =
-      plan === 'PRO' && months
-        ? new Date(Date.now() + months * 30 * 86_400_000)
-        : plan === 'PRO'
-          ? new Date(Date.now() + 30 * 86_400_000) // 1 month default
-          : null
+      plan === 'PRO' ? new Date(Date.now() + addDays * 86_400_000) : null
 
     return prisma.user.update({
       where: { id: userId },
@@ -155,9 +199,18 @@ export const adminService = {
     })
   },
 
+  // Назначение роли (в т.ч. выдача/снятие прав администратора).
+  async setRole(userId: string, role: 'TUTOR' | 'STUDENT' | 'ADMIN') {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: { id: true, name: true, email: true, role: true, plan: true, isBlocked: true },
+    })
+  },
+
   // ── Withdrawals ────────────────────────────────────────────────────────────
 
-  async getWithdrawals({ status, page }: { status?: string; page: number }) {
+  async getWithdrawals({ status, page }: { status?: string | undefined; page: number }) {
     const take = 20
     const skip = (page - 1) * take
     const where: any = {}
@@ -212,5 +265,197 @@ export const adminService = {
       where: { id },
       data: { status: action, processedAt: new Date(), adminNote: adminNote ?? null },
     })
+  },
+
+  // ── Orders / Payments (Robokassa) ────────────────────────────────────────────
+
+  async getOrders({ status, page }: { status?: string | undefined; page: number }) {
+    const take = 20
+    const skip = (page - 1) * take
+    const where: any = {}
+    if (status && status !== 'ALL') where.status = status
+
+    const [items, total, paidAgg, paidCount, pendingCount, failedCount] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        include: { user: { select: { id: true, name: true, email: true } } },
+      }),
+      prisma.order.count({ where }),
+      prisma.order.aggregate({ where: { status: 'PAID' }, _sum: { amount: true } }),
+      prisma.order.count({ where: { status: 'PAID' } }),
+      prisma.order.count({ where: { status: 'PENDING' } }),
+      prisma.order.count({ where: { status: 'FAILED' } }),
+    ])
+
+    return {
+      items,
+      total,
+      pages: Math.ceil(total / take),
+      page,
+      summary: {
+        revenueTotal: paidAgg._sum.amount ?? 0,
+        paidCount,
+        pendingCount,
+        failedCount,
+      },
+    }
+  },
+
+  // ── Telegram bot stats ───────────────────────────────────────────────────────
+
+  async getBotStats() {
+    const [total, linked, tutorConnections, studentConnections, pendingCodes, totalTutors] =
+      await Promise.all([
+        prisma.telegramConnection.count(),
+        prisma.telegramConnection.count({ where: { telegramId: { not: null } } }),
+        prisma.telegramConnection.count({ where: { tutorId: { not: null }, telegramId: { not: null } } }),
+        prisma.telegramConnection.count({ where: { studentId: { not: null }, telegramId: { not: null } } }),
+        // Записи с кодом привязки, но ещё без telegramId — незавершённое подключение
+        prisma.telegramConnection.count({ where: { telegramId: null } }),
+        prisma.tutor.count(),
+      ])
+
+    const recent = await prisma.telegramConnection.findMany({
+      where: { telegramId: { not: null } },
+      orderBy: { connectedAt: 'desc' },
+      take: 15,
+      include: {
+        tutor: { select: { user: { select: { name: true, email: true } } } },
+        student: { select: { name: true } },
+      },
+    })
+
+    return {
+      total,
+      linked,
+      tutorConnections,
+      studentConnections,
+      pendingCodes,
+      totalTutors,
+      // Конверсия: какая доля репетиторов подключила бота
+      tutorConversion: totalTutors > 0 ? Math.round((tutorConnections / totalTutors) * 100) : 0,
+      recent: recent.map((c) => ({
+        id: c.id,
+        username: c.username,
+        firstName: c.firstName,
+        connectedAt: c.connectedAt,
+        target: c.tutorId
+          ? { type: 'tutor' as const, name: c.tutor?.user.name ?? null, email: c.tutor?.user.email ?? null }
+          : { type: 'student' as const, name: c.student?.name ?? null, email: null },
+      })),
+    }
+  },
+
+  // ── Tutors → Students browser ────────────────────────────────────────────────
+
+  async getTutors({ search, page }: { search?: string | undefined; page: number }) {
+    const take = 20
+    const skip = (page - 1) * take
+
+    const where: any = {}
+    if (search) {
+      where.user = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }
+    }
+
+    const [tutors, total] = await Promise.all([
+      prisma.tutor.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+        select: {
+          id: true,
+          subjects: true,
+          createdAt: true,
+          user: { select: { id: true, name: true, email: true, plan: true, planExpiresAt: true, isBlocked: true } },
+          _count: { select: { students: true, lessons: true } },
+        },
+      }),
+      prisma.tutor.count({ where }),
+    ])
+
+    return {
+      tutors: tutors.map((t) => ({
+        id: t.id,
+        userId: t.user.id,
+        name: t.user.name,
+        email: t.user.email,
+        plan: t.user.plan,
+        planExpiresAt: t.user.planExpiresAt,
+        isBlocked: t.user.isBlocked,
+        subjects: t.subjects,
+        createdAt: t.createdAt,
+        studentsCount: t._count.students,
+        lessonsCount: t._count.lessons,
+      })),
+      total,
+      pages: Math.ceil(total / take),
+      page,
+    }
+  },
+
+  async getTutorById(tutorId: string) {
+    const tutor = await prisma.tutor.findUniqueOrThrow({
+      where: { id: tutorId },
+      select: {
+        id: true,
+        subjects: true,
+        hourlyRate: true,
+        timezone: true,
+        createdAt: true,
+        user: { select: { id: true, name: true, email: true, plan: true, planExpiresAt: true, isBlocked: true, createdAt: true } },
+        students: {
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            subject: true,
+            createdAt: true,
+            _count: { select: { lessons: true } },
+          },
+        },
+      },
+    })
+
+    // Агрегаты по урокам: всего, оплачено (сумма по PAID paymentStatus)
+    const [lessonsCount, paidAgg, completedCount] = await Promise.all([
+      prisma.lesson.count({ where: { tutorId } }),
+      prisma.lesson.aggregate({ where: { tutorId, paymentStatus: 'PAID' }, _sum: { price: true } }),
+      prisma.lesson.count({ where: { tutorId, status: 'COMPLETED' } }),
+    ])
+
+    return {
+      id: tutor.id,
+      name: tutor.user.name,
+      email: tutor.user.email,
+      userId: tutor.user.id,
+      plan: tutor.user.plan,
+      planExpiresAt: tutor.user.planExpiresAt,
+      isBlocked: tutor.user.isBlocked,
+      subjects: tutor.subjects,
+      hourlyRate: tutor.hourlyRate,
+      timezone: tutor.timezone,
+      createdAt: tutor.user.createdAt,
+      lessonsCount,
+      completedCount,
+      revenue: paidAgg._sum.price ?? 0,
+      students: tutor.students.map((s) => ({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        subject: s.subject,
+        createdAt: s.createdAt,
+        lessonsCount: s._count.lessons,
+      })),
+    }
   },
 }

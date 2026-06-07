@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, ArrowDownToLine, LogOut, Shield, Tag } from 'lucide-react'
+import { LayoutDashboard, Users, ArrowDownToLine, LogOut, Shield, Tag, CreditCard, Send, GraduationCap } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
@@ -11,7 +11,10 @@ import { cn } from '@/lib/utils'
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/users', label: 'Пользователи', icon: Users },
+  { href: '/admin/tutors', label: 'Репетиторы', icon: GraduationCap },
+  { href: '/admin/orders', label: 'Платежи', icon: CreditCard },
   { href: '/admin/withdrawals', label: 'Выводы средств', icon: ArrowDownToLine },
+  { href: '/admin/bot', label: 'Telegram-бот', icon: Send },
   { href: '/admin/promo', label: 'Промокоды', icon: Tag },
 ]
 

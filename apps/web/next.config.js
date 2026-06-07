@@ -4,6 +4,10 @@ const pwaConfig = withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
+  // Удалять устаревшие precache от прошлых сборок при активации нового SW —
+  // иначе на устройстве копятся старые манифесты и приложение «зависает» на
+  // ссылках на удалённые чанки (классический баг застрявшего PWA).
+  cleanupOutdatedCaches: true,
   disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
     {

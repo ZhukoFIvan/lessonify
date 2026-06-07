@@ -1,6 +1,6 @@
 'use client'
 
-import { Users, GraduationCap, BookOpen, Crown, Ban, Clock, TrendingUp, DollarSign } from 'lucide-react'
+import { Users, GraduationCap, BookOpen, Crown, Ban, Clock, TrendingUp, DollarSign, CreditCard, CalendarDays, Send, UserPlus } from 'lucide-react'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
@@ -97,14 +97,18 @@ export default function AdminDashboard() {
   if (!stats) return null
 
   const statCards = [
-    { label: 'Пользователи', value: stats.totalUsers, icon: <Users size={18} className="text-violet-400" />, color: 'bg-violet-500/15' },
+    { label: 'Пользователи', value: stats.totalUsers, icon: <Users size={18} className="text-violet-400" />, color: 'bg-violet-500/15', sub: `+${stats.registrations7d} за 7 дн · +${stats.registrations30d} за 30 дн` },
     { label: 'Репетиторы', value: stats.totalTutors, icon: <GraduationCap size={18} className="text-blue-400" />, color: 'bg-blue-500/15' },
     { label: 'Ученики', value: stats.totalStudents, icon: <BookOpen size={18} className="text-cyan-400" />, color: 'bg-cyan-500/15' },
-    { label: 'Pro-подписки', value: stats.proUsers, icon: <Crown size={18} className="text-amber-400" />, color: 'bg-amber-500/15' },
-    { label: 'Заблокированы', value: stats.blockedUsers, icon: <Ban size={18} className="text-red-400" />, color: 'bg-red-500/15' },
+    { label: 'Активный PRO', value: stats.activeProUsers, icon: <Crown size={18} className="text-amber-400" />, color: 'bg-amber-500/15', sub: `всего PRO: ${stats.proUsers}` },
+    { label: 'Доход (оплачено)', value: `${Number(stats.revenueTotal).toLocaleString('ru')} ₽`, icon: <DollarSign size={18} className="text-green-400" />, color: 'bg-green-500/15', sub: `${Number(stats.revenueThisMonth).toLocaleString('ru')} ₽ в этом месяце` },
+    { label: 'Платежей', value: stats.paidOrdersCount, icon: <CreditCard size={18} className="text-emerald-400" />, color: 'bg-emerald-500/15', sub: 'успешных заказов' },
+    { label: 'Уроки', value: stats.totalLessons, icon: <CalendarDays size={18} className="text-sky-400" />, color: 'bg-sky-500/15', sub: `${stats.lessonsThisMonth} в этом месяце` },
+    { label: 'Бот подключён', value: stats.botLinked, icon: <Send size={18} className="text-blue-400" />, color: 'bg-blue-500/15', sub: `из ${stats.botConnections} привязок` },
     { label: 'Ожидают вывода', value: stats.pendingWithdrawals, icon: <Clock size={18} className="text-orange-400" />, color: 'bg-orange-500/15' },
-    { label: 'Реферальный доход', value: `${Number(stats.totalEarnings).toLocaleString('ru')} ₽`, icon: <DollarSign size={18} className="text-green-400" />, color: 'bg-green-500/15' },
-    { label: 'Конверсия FREE→PRO', value: stats.totalUsers > 0 ? `${Math.round((stats.proUsers / stats.totalUsers) * 100)}%` : '0%', icon: <TrendingUp size={18} className="text-primary" />, color: 'bg-primary/15' },
+    { label: 'Реферальный доход', value: `${Number(stats.totalEarnings).toLocaleString('ru')} ₽`, icon: <TrendingUp size={18} className="text-fuchsia-400" />, color: 'bg-fuchsia-500/15' },
+    { label: 'Заблокированы', value: stats.blockedUsers, icon: <Ban size={18} className="text-red-400" />, color: 'bg-red-500/15' },
+    { label: 'Конверсия FREE→PRO', value: stats.totalUsers > 0 ? `${Math.round((stats.activeProUsers / stats.totalUsers) * 100)}%` : '0%', icon: <UserPlus size={18} className="text-primary" />, color: 'bg-primary/15' },
   ]
 
   return (

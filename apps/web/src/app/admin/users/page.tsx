@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, ChevronLeft, ChevronRight, ShieldOff, Shield, Crown, UserMinus } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, ShieldOff, Shield, Crown, UserCog } from 'lucide-react'
 import { useAdminUsers, type AdminUser } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
 
@@ -38,16 +38,22 @@ function PlanModal({
 }: {
   user: AdminUser
   onClose: () => void
-  onSave: (plan: 'FREE' | 'PRO', months?: number) => Promise<void>
+  onSave: (plan: 'FREE' | 'PRO', opts?: { months?: number; days?: number }) => Promise<void>
 }) {
   const [plan, setPlan] = useState<'FREE' | 'PRO'>(user.plan)
-  const [months, setMonths] = useState(1)
+  const [months, setMonths] = useState<number>(1)
+  const [customDays, setCustomDays] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSave = async () => {
     setLoading(true)
     try {
-      await onSave(plan, plan === 'PRO' ? months : undefined)
+      if (plan === 'PRO') {
+        const days = customDays ? Number(customDays) : undefined
+        await onSave('PRO', days && days > 0 ? { days } : { months })
+      } else {
+        await onSave('FREE')
+      }
       onClose()
     } finally {
       setLoading(false)
@@ -82,14 +88,14 @@ function PlanModal({
         {plan === 'PRO' && (
           <div className="mb-5">
             <label className="text-white/50 text-xs font-medium block mb-2">Срок (месяцев)</label>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap mb-3">
               {[1, 3, 6, 12].map(m => (
                 <button
                   key={m}
-                  onClick={() => setMonths(m)}
+                  onClick={() => { setMonths(m); setCustomDays('') }}
                   className={cn(
                     'px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border',
-                    months === m
+                    !customDays && months === m
                       ? 'bg-primary/20 text-primary border-primary/30'
                       : 'border-white/[0.06] text-white/35 hover:text-white/60',
                   )}
@@ -98,7 +104,95 @@ function PlanModal({
                 </button>
               ))}
             </div>
+            <label className="text-white/50 text-xs font-medium block mb-2">…или точное число дней</label>
+            <input
+              type="number"
+              min={1}
+              placeholder="Напр. 45"
+              value={customDays}
+              onChange={e => setCustomDays(e.target.value)}
+              className="w-full px-3 py-2.5 bg-[#1a1830] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-primary/40 transition-colors"
+            />
           </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white/50 border border-white/[0.06] hover:text-white transition-colors"
+          >
+            Отмена
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Сохранение...' : 'Сохранить'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Role modal ────────────────────────────────────────────────────────────────
+
+function RoleModal({
+  user,
+  onClose,
+  onSave,
+}: {
+  user: AdminUser
+  onClose: () => void
+  onSave: (role: 'TUTOR' | 'STUDENT' | 'ADMIN') => Promise<void>
+}) {
+  const [role, setRole] = useState<'TUTOR' | 'STUDENT' | 'ADMIN'>(user.role)
+  const [loading, setLoading] = useState(false)
+
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      await onSave(role)
+      onClose()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const OPTIONS: { value: 'TUTOR' | 'STUDENT' | 'ADMIN'; label: string }[] = [
+    { value: 'TUTOR', label: 'Репетитор' },
+    { value: 'STUDENT', label: 'Ученик' },
+    { value: 'ADMIN', label: 'Администратор' },
+  ]
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-[#13121f] border border-white/[0.08] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <h3 className="text-white font-bold text-lg mb-1">Изменить роль</h3>
+        <p className="text-white/40 text-sm mb-6">{user.name} · {user.email}</p>
+
+        <div className="space-y-2 mb-5">
+          {OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setRole(opt.value)}
+              className={cn(
+                'w-full py-2.5 rounded-xl text-sm font-bold transition-all border text-left px-4',
+                role === opt.value
+                  ? 'bg-primary/20 text-primary border-primary/30'
+                  : 'border-white/[0.06] text-white/45 hover:text-white/70',
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {role === 'ADMIN' && user.role !== 'ADMIN' && (
+          <p className="text-amber-400/80 text-xs mb-4">
+            Внимание: пользователь получит полный доступ к админ-панели.
+          </p>
         )}
 
         <div className="flex gap-3">
@@ -127,6 +221,7 @@ const ROLE_TABS = [
   { value: 'ALL', label: 'Все' },
   { value: 'TUTOR', label: 'Репетиторы' },
   { value: 'STUDENT', label: 'Ученики' },
+  { value: 'ADMIN', label: 'Админы' },
 ]
 
 export default function AdminUsersPage() {
@@ -134,8 +229,9 @@ export default function AdminUsersPage() {
   const [role, setRole] = useState('ALL')
   const [page, setPage] = useState(1)
   const [planModal, setPlanModal] = useState<AdminUser | null>(null)
+  const [roleModal, setRoleModal] = useState<AdminUser | null>(null)
 
-  const { data, loading, blockUser, setPlan } = useAdminUsers(search, role, page)
+  const { data, loading, blockUser, setPlan, setRole: saveRole } = useAdminUsers(search, role, page)
 
   return (
     <div className="p-8">
@@ -246,6 +342,13 @@ export default function AdminUsersPage() {
                     <Crown size={15} />
                   </button>
                   <button
+                    onClick={() => setRoleModal(user)}
+                    title="Изменить роль"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white/35 hover:text-primary hover:bg-primary/10 transition-all"
+                  >
+                    <UserCog size={15} />
+                  </button>
+                  <button
                     onClick={() => blockUser(user.id)}
                     title={user.isBlocked ? 'Разблокировать' : 'Заблокировать'}
                     className={cn(
@@ -298,8 +401,19 @@ export default function AdminUsersPage() {
         <PlanModal
           user={planModal}
           onClose={() => setPlanModal(null)}
-          onSave={async (plan, months) => {
-            await setPlan(planModal.id, plan, months)
+          onSave={async (plan, opts) => {
+            await setPlan(planModal.id, plan, opts)
+          }}
+        />
+      )}
+
+      {/* Role modal */}
+      {roleModal && (
+        <RoleModal
+          user={roleModal}
+          onClose={() => setRoleModal(null)}
+          onSave={async (r) => {
+            await saveRole(roleModal.id, r)
           }}
         />
       )}

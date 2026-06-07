@@ -1,18 +1,10 @@
 import { Router } from 'express'
 import { z } from 'zod'
-import { requireAuth } from '../../middleware/auth'
+import { requireAuth, requireAdmin } from '../../middleware/auth'
 import { adminService } from './admin.service'
 import { createPromoCode, getAllPromoCodes, togglePromoCode, adminApplyPro } from '../promo/promo.service'
 
 export const adminRouter = Router()
-
-function requireAdmin(req: any, res: any, next: any) {
-  if (req.user?.role !== 'ADMIN') {
-    res.status(403).json({ error: 'Admin access required' })
-    return
-  }
-  next()
-}
 
 adminRouter.use(requireAuth, requireAdmin)
 
@@ -57,13 +49,32 @@ adminRouter.patch('/users/:id/block', async (req, res) => {
 const planSchema = z.object({
   plan: z.enum(['FREE', 'PRO']),
   months: z.number().int().min(1).max(24).optional(),
+  days: z.number().int().min(1).max(1095).optional(), // до 3 лет точным числом дней
 })
 
 adminRouter.patch('/users/:id/plan', async (req, res) => {
   const parsed = planSchema.safeParse(req.body)
   if (!parsed.success) { res.status(400).json({ error: 'Invalid data' }); return }
   try {
-    res.json(await adminService.setPlan(req.params.id!, parsed.data.plan, parsed.data.months))
+    res.json(await adminService.setPlan(req.params.id!, parsed.data.plan, parsed.data.months, parsed.data.days))
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// PATCH /admin/users/:id/role — назначить роль (в т.ч. ADMIN)
+const roleSchema = z.object({ role: z.enum(['TUTOR', 'STUDENT', 'ADMIN']) })
+
+adminRouter.patch('/users/:id/role', async (req, res) => {
+  const parsed = roleSchema.safeParse(req.body)
+  if (!parsed.success) { res.status(400).json({ error: 'Invalid role' }); return }
+  // Защита от самоблокировки: нельзя снять с себя права администратора
+  if (req.params.id === req.user?.sub && parsed.data.role !== 'ADMIN') {
+    res.status(400).json({ error: 'Нельзя снять права администратора с самого себя' })
+    return
+  }
+  try {
+    res.json(await adminService.setRole(req.params.id!, parsed.data.role))
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
@@ -90,6 +101,50 @@ adminRouter.patch('/withdrawals/:id/process', async (req, res) => {
     res.json(await adminService.processWithdrawal(req.params.id!, action, adminNote))
   } catch (err: any) {
     res.status(500).json({ error: err.message })
+  }
+})
+
+// ── Заказы / платежи (Robokassa) ──────────────────────────────────────────────
+
+// GET /admin/orders
+adminRouter.get('/orders', async (req, res) => {
+  try {
+    const { status, page = '1' } = req.query as Record<string, string>
+    res.json(await adminService.getOrders({ status, page: Number(page) }))
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// ── Статистика Telegram-бота ──────────────────────────────────────────────────
+
+// GET /admin/bot-stats
+adminRouter.get('/bot-stats', async (_req, res) => {
+  try {
+    res.json(await adminService.getBotStats())
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// ── Репетиторы → ученики ──────────────────────────────────────────────────────
+
+// GET /admin/tutors
+adminRouter.get('/tutors', async (req, res) => {
+  try {
+    const { search, page = '1' } = req.query as Record<string, string>
+    res.json(await adminService.getTutors({ search, page: Number(page) }))
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// GET /admin/tutors/:id
+adminRouter.get('/tutors/:id', async (req, res) => {
+  try {
+    res.json(await adminService.getTutorById(req.params.id!))
+  } catch (err: any) {
+    res.status(404).json({ error: 'Tutor not found' })
   }
 })
 
