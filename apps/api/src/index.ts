@@ -82,28 +82,22 @@ app.listen(PORT, async () => {
   if (process.env.TELEGRAM_BOT_TOKEN) {
     startCronJobs()
 
-    if (IS_PROD && process.env.TELEGRAM_WEBHOOK_URL) {
-      // Production: webhook
-      await bot.telegram.setWebhook(`${process.env.TELEGRAM_WEBHOOK_URL}/telegram/webhook`)
-      // Кэшируем профиль бота при старте, чтобы handleUpdate не дёргал getMe
-      // на КАЖДЫЙ апдейт (при нестабильной связи с Telegram это вешало webhook).
-      bot.botInfo = await bot.telegram.getMe()
-      console.log('[telegram] Webhook set')
+    // Long-polling во ВСЕХ окружениях: наш сервер САМ забирает апдейты у Telegram
+    // (исходящее соединение по IPv6 — быстрое и надёжное, ~130мс). Webhook НЕ
+    // используем: входящая доставка Telegram → наш московский сервер режется
+    // РФ-фильтром (ТСПУ по SNI), из-за чего ответы приходили с задержкой.
+    // bot.launch() сам снимает webhook (deleteWebhook) перед стартом polling.
+    bot.launch({ dropPendingUpdates: true }).catch((err) =>
+      console.error('[telegram] launch failed:', err),
+    )
+    console.log('[telegram] Bot started (polling)')
 
-      // Профиль бота (описание, команды, кнопка меню) — best-effort.
-      await configureBotProfile()
-    } else {
-      // Development: long polling
-      bot.launch({ dropPendingUpdates: true })
-      console.log('[telegram] Bot started (polling)')
+    // Профиль бота (описание, команды, кнопка меню) — best-effort.
+    await configureBotProfile()
 
-      // Профиль бота (описание, команды, кнопка меню) — best-effort.
-      await configureBotProfile()
-
-      // Graceful stop
-      process.once('SIGINT', () => bot.stop('SIGINT'))
-      process.once('SIGTERM', () => bot.stop('SIGTERM'))
-    }
+    // Graceful stop
+    process.once('SIGINT', () => bot.stop('SIGINT'))
+    process.once('SIGTERM', () => bot.stop('SIGTERM'))
   } else {
     console.warn('[telegram] TELEGRAM_BOT_TOKEN not set — bot and cron disabled')
   }
