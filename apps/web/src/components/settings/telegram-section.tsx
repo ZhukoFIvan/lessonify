@@ -1,37 +1,55 @@
 'use client'
 
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { useTelegramStatus, useGetTelegramLink, useDisconnectTelegram } from '@/hooks/use-telegram'
 import { toast } from '@/components/ui/use-toast'
+import { cn } from '@/lib/utils'
 import { MessageCircle, ExternalLink, Unlink } from 'lucide-react'
 
 export function TelegramSection() {
   const { status, loading, refetch } = useTelegramStatus()
-  const { getLink, loading: linkLoading } = useGetTelegramLink()
+  const { getLink } = useGetTelegramLink()
   const { disconnect, loading: disconnectLoading } = useDisconnectTelegram()
+  const [deepLink, setDeepLink] = useState<string | null>(null)
+  const requested = useRef(false)
 
-  async function handleConnect() {
-    try {
-      const { deepLink } = await getLink()
-      // Открываем deep link в новой вкладке (в PWA — приложение Telegram)
-      window.open(deepLink, '_blank')
-      toast({
-        variant: 'default',
-        title: 'Откройте Telegram',
-        description: 'Нажмите Start в боте для привязки аккаунта',
+  // Заранее получаем deep-link с кодом привязки, чтобы кнопка была НАСТОЯЩЕЙ ссылкой
+  // <a href>. window.open после await часто блокируется браузером/PWA и теряет код —
+  // тогда человек жмёт Start без кода, и привязка не происходит.
+  useEffect(() => {
+    if (loading || status?.connected || deepLink || requested.current) return
+    requested.current = true
+    getLink()
+      .then((r) => setDeepLink(r.deepLink))
+      .catch(() => {
+        requested.current = false
       })
-      // Через 5 сек проверяем статус
-      setTimeout(refetch, 5000)
-    } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось получить ссылку' })
-    }
+    // getLink стабилен по смыслу; не включаем в deps, чтобы не дёргать новый код каждый рендер.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, status?.connected, deepLink])
+
+  // После клика по ссылке опрашиваем статус, чтобы автоматически поймать привязку.
+  function handleConnectClick() {
+    toast({
+      title: 'Открываем Telegram',
+      description: 'Нажмите «Start» в боте — привязка определится автоматически.',
+    })
+    let tries = 0
+    const id = setInterval(async () => {
+      tries += 1
+      await refetch()
+      if (tries >= 12) clearInterval(id)
+    }, 2500)
   }
 
   async function handleDisconnect() {
     try {
       await disconnect()
+      setDeepLink(null)
+      requested.current = false
       toast({ variant: 'success', title: 'Telegram отключён' })
       refetch()
     } catch {
@@ -81,15 +99,20 @@ export function TelegramSection() {
                 {disconnectLoading ? 'Отключение...' : 'Отключить'}
               </Button>
             ) : (
-              <Button
-                size="sm"
-                className="gap-1.5 bg-[#229ED9] hover:bg-[#1a8bc4]"
-                onClick={handleConnect}
-                disabled={linkLoading}
+              <a
+                href={deepLink ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={deepLink ? handleConnectClick : undefined}
+                aria-disabled={!deepLink}
+                className={cn(
+                  'inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-sm font-medium text-white transition-colors bg-[#229ED9] hover:bg-[#1a8bc4]',
+                  !deepLink && 'pointer-events-none opacity-60',
+                )}
               >
                 <ExternalLink size={13} />
-                {linkLoading ? 'Загрузка...' : 'Подключить'}
-              </Button>
+                {deepLink ? 'Открыть бота и подключить' : 'Загрузка...'}
+              </a>
             )}
           </div>
         </div>
