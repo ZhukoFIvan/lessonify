@@ -1,5 +1,6 @@
 import { Telegraf, Markup } from 'telegraf'
 import { Agent } from 'https'
+import * as dns from 'dns'
 import { prisma } from '../../lib/prisma'
 import { voiceService, type DraftRender } from './voice.service'
 
@@ -7,16 +8,72 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
   console.warn('[telegram] TELEGRAM_BOT_TOKEN is not set — bot disabled')
 }
 
-// С этого сервера часть IPv4-узлов api.telegram.org недоступна (ETIMEDOUT),
-// из-за чего ответы бота/getMe зависали. IPv6 к Telegram стабилен — форсим его
-// агентом только для запросов к Telegram (на Gemini/оплаты не влияет).
-const telegramAgent = new Agent({ family: 6, keepAlive: true })
+// ── Надёжный исходящий канал к api.telegram.org ────────────────────────────────
+// Сервер в МСК; РФ-фильтр (ТСПУ) блэкхолит бóльшую часть IP Telegram, а системный
+// DNS отдаёт этому серверу как раз нерабочие адреса: IPv4 149.154.166.110 — мёртв
+// (timeout), единственный IPv6 2001:67c:4e8:f004::9 — флапает (~1 дроп из 10).
+// Поэтому НЕ доверяем DNS: резолвим api.telegram.org сами в пул проверенных живых
+// IP и включаем Happy Eyeballs — нода гоняет адреса параллельно и берёт первый
+// ответивший, мгновенно фейловерясь с задушенного IP на живой. Замер с сервера:
+// 149.154.167.220 = 10/10 OK ~130мс (стабилен), 2001:67c:4e8:f004::9 = 9/10 (бэкап).
+// Перебор IP можно расширить из env TELEGRAM_API_IPS (csv) без передеплоя кода.
+// Затрагивает ТОЛЬКО запросы к Telegram (агент привязан к боту), не Gemini/оплаты.
+const TELEGRAM_API_IPS: { address: string; family: number }[] = (
+  process.env.TELEGRAM_API_IPS
+    ? process.env.TELEGRAM_API_IPS.split(',').map((s) => s.trim()).filter(Boolean)
+    : ['149.154.167.220', '2001:67c:4e8:f004::9']
+).map((address) => ({ address, family: address.includes(':') ? 6 : 4 }))
+
+// Первый IP пула (стабильный IPv4) — на случай single-резолва без Happy Eyeballs.
+const TELEGRAM_PRIMARY = TELEGRAM_API_IPS[0] ?? { address: '149.154.167.220', family: 4 }
+
+const telegramLookup = ((hostname: string, options: any, cb: any) => {
+  const callback = typeof options === 'function' ? options : cb
+  const opts = typeof options === 'function' ? {} : options ?? {}
+  if (hostname === 'api.telegram.org') {
+    if (opts.all) return callback(null, TELEGRAM_API_IPS)
+    return callback(null, TELEGRAM_PRIMARY.address, TELEGRAM_PRIMARY.family)
+  }
+  return dns.lookup(hostname, options, cb)
+}) as unknown as typeof dns.lookup
+
+const telegramAgent = new Agent({
+  keepAlive: true,
+  lookup: telegramLookup,
+  // Happy Eyeballs: пробуем IP из пула, переходя к следующему через 600мс, —
+  // живой IPv4 (~130мс) выигрывает сразу, при его дропе подхватывает IPv6.
+  autoSelectFamily: true,
+  autoSelectFamilyAttemptTimeout: 600,
+} as any)
 
 export const bot = process.env.TELEGRAM_BOT_TOKEN
   ? new Telegraf(process.env.TELEGRAM_BOT_TOKEN, {
       telegram: { agent: telegramAgent },
     })
   : (null as unknown as Telegraf)
+
+// Небольшой ретрай для исходящих к Telegram. Быстрый фейловер по IP уже даёт агент,
+// но редкий одиночный дроп возможен — критичные отправки повторяем пару раз.
+async function withTgRetry<T>(
+  label: string,
+  fn: () => Promise<T>,
+  attempts = 3,
+): Promise<T | null> {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      const last = i === attempts
+      console.error(
+        `[telegram] ${label} attempt ${i}/${attempts} failed${last ? '' : ', retry'}:`,
+        (err as any)?.message ?? err,
+      )
+      if (last) return null
+      await new Promise((r) => setTimeout(r, 300 * i))
+    }
+  }
+  return null
+}
 
 
 // URL веб-приложения для кнопок/меню бота.
@@ -89,10 +146,12 @@ bot?.command('start', async (ctx) => {
         ? connection.tutor?.user.name ?? 'Репетитор'
         : connection.student?.user?.name ?? connection.student?.name ?? 'Ученик'
 
-    await ctx.reply(
-      `✅ *Аккаунт успешно привязан!*\n\nПривет, ${name}! Теперь вы будете получать уведомления о занятиях и оплатах прямо в Telegram.`,
-      // Убираем постоянную нижнюю клавиатуру (если оставалась от старых версий).
-      { parse_mode: 'Markdown', reply_markup: { remove_keyboard: true } },
+    await withTgRetry('start-confirm', () =>
+      ctx.reply(
+        `✅ *Аккаунт успешно привязан!*\n\nПривет, ${name}! Теперь вы будете получать уведомления о занятиях и оплатах прямо в Telegram.`,
+        // Убираем постоянную нижнюю клавиатуру (если оставалась от старых версий).
+        { parse_mode: 'Markdown', reply_markup: { remove_keyboard: true } },
+      ),
     )
     return
   }
@@ -503,11 +562,10 @@ bot?.action(/^v:newstud:(.+)$/, async (ctx) => {
 
 export async function sendMessage(telegramId: string, text: string): Promise<void> {
   if (!bot) return
-  try {
-    await bot.telegram.sendMessage(telegramId, text, { parse_mode: 'Markdown' })
-  } catch (err) {
-    console.error(`[telegram] Failed to send to ${telegramId}:`, err)
-  }
+  // Ретрай: единичный IP-дроп РФ-фильтра не должен «съедать» напоминание/уведомление.
+  await withTgRetry(`send→${telegramId}`, () =>
+    bot.telegram.sendMessage(telegramId, text, { parse_mode: 'Markdown' }),
+  )
 }
 
 export async function sendLessonReminder(
