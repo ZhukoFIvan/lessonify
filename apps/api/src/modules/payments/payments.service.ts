@@ -87,8 +87,8 @@ export const paymentsService = {
     const monthEnd = endOfMonth(targetMonth)
 
     // ── Текущий месяц ────────────────────────────────────────────────────────
-    const [paid, pending] = await prisma.$transaction([
-      // Оплаченные уроки
+    const [paid, pendingMonth, pendingAll] = await prisma.$transaction([
+      // Оплаченные уроки за месяц → «Доход за месяц»
       prisma.lesson.aggregate({
         where: {
           tutorId,
@@ -98,7 +98,7 @@ export const paymentsService = {
         _sum: { price: true },
         _count: true,
       }),
-      // Ожидающие оплаты (завершённые в этом месяце)
+      // Неоплаченные завершённые уроки ЗА ЭТОТ МЕСЯЦ — только для счётчика «X/Y уроков»
       prisma.lesson.aggregate({
         where: {
           tutorId,
@@ -106,17 +106,32 @@ export const paymentsService = {
           status: 'COMPLETED',
           startTime: { gte: monthStart, lte: monthEnd },
         },
+        _count: true,
+      }),
+      // Вся непогашенная задолженность ЗА ВСЁ ВРЕМЯ → «ожидает».
+      // Совпадает с блоком «Должны заплатить» (getDebtors) при minDebt=0 — это дефолт
+      // и единственный вызов из UI (useDebtors без параметров). getDebtors группирует по
+      // ученику с having _sum.price > minDebt; при minDebt=0 и неотрицательных ценах
+      // исключаются лишь нулевые группы, которые на сумму всё равно не влияют.
+      prisma.lesson.aggregate({
+        where: {
+          tutorId,
+          paymentStatus: { in: ['PENDING', 'OVERDUE'] },
+          status: 'COMPLETED',
+        },
         _sum: { price: true },
         _count: true,
       }),
     ])
 
-    const totalLessons = paid._count + pending._count
+    const totalLessons = paid._count + pendingMonth._count
 
     const current: PaymentSummary = {
       month: format(targetMonth, 'yyyy-MM'),
       totalEarned: paid._sum.price ?? 0,
-      totalPending: pending._sum.price ?? 0,
+      // Вся задолженность (за всё время), а не только за текущий месяц —
+      // чтобы «ожидает» сходилось с блоком «Должны заплатить» на странице Финансы.
+      totalPending: pendingAll._sum.price ?? 0,
       lessonsCount: totalLessons,
       paidLessonsCount: paid._count,
     }

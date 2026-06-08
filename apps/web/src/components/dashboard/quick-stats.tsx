@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { startOfWeek, endOfWeek } from 'date-fns'
 import { Users, BookOpen, Wallet, ClipboardCheck, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import api from '@/lib/api'
@@ -106,24 +107,36 @@ export function QuickStats() {
 
   const load = useCallback(async () => {
       try {
-        const [studentsRes, summaryRes, homeworkRes] = await Promise.allSettled([
+        // Уроки за текущую неделю (Пн–Вс)
+        const now = new Date()
+        const weekFrom = startOfWeek(now, { weekStartsOn: 1 }).toISOString()
+        const weekTo = endOfWeek(now, { weekStartsOn: 1 }).toISOString()
+
+        const [studentsRes, summaryRes, homeworkRes, lessonsRes] = await Promise.allSettled([
           api.get('/students?limit=1'),
           api.get('/payments/summary?months=1'),
           api.get('/homework/stats'),
+          api.get('/lessons', { params: { from: weekFrom, to: weekTo, limit: 1 } }),
         ])
 
+        // Список учеников отдаёт { data, total, ... } — берём total (а не meta.total)
         const studentsCount =
           studentsRes.status === 'fulfilled'
-            ? (studentsRes.value.data.meta?.total ?? studentsRes.value.data.data?.length ?? 0)
+            ? (studentsRes.value.data.total ?? studentsRes.value.data.data?.length ?? 0)
             : 0
 
+        // /payments/summary → data.current.totalEarned (а не received)
         let monthIncome = 0
-        let weekLessons = 0
         if (summaryRes.status === 'fulfilled') {
           const current = summaryRes.value.data.data?.current
-          monthIncome = current?.received ?? 0
-          weekLessons = current?.lessonsCompleted ?? current?.lessonsTotal ?? 0
+          monthIncome = current?.totalEarned ?? 0
         }
+
+        // /lessons за неделю отдаёт { data, total, ... } — берём total
+        const weekLessons =
+          lessonsRes.status === 'fulfilled'
+            ? (lessonsRes.value.data.total ?? lessonsRes.value.data.data?.length ?? 0)
+            : 0
 
         const pendingHomework =
           homeworkRes.status === 'fulfilled'
