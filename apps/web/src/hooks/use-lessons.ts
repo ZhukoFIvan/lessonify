@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { format } from 'date-fns'
 import api from '@/lib/api'
 import { useRefreshOnTick } from '@/hooks/use-refresh-tick'
@@ -9,6 +10,7 @@ import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
 // ── Уроки на конкретный день ─────────────────────────────────────────────────
 
 export function useDayLessons(date: Date) {
+  const t = useTranslations('toasts')
   const [lessons, setLessons] = useState<LessonWithStudent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +24,7 @@ export function useDayLessons(date: Date) {
       const { data } = await api.get(`/lessons?date=${dateStr}&limit=50`)
       setLessons(data.data)
     } catch {
-      setError('Не удалось загрузить уроки')
+      setError(t('loadLessonsError'))
     } finally {
       if (!silent) setLoading(false)
     }

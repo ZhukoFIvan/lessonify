@@ -10,10 +10,12 @@ import { GoogleCalendarSection } from '@/components/settings/google-calendar-sec
 import { AvailabilitySection } from '@/components/settings/availability-section'
 import { BookingRequestsSection } from '@/components/settings/booking-requests-section'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageToggle } from '@/components/language-toggle'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-auth'
 import { useAuthStore } from '@/store/auth.store'
-import { LogOut, Palette } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { Languages, LogOut, Palette } from 'lucide-react'
 import { useState, Suspense } from 'react'
 import { fadeUp } from '@/lib/motion'
 
@@ -22,6 +24,7 @@ export default function SettingsPage() {
   const role = useAuthStore((s) => s.user?.role)
   const isTutor = role === 'TUTOR'
   const [loggingOut, setLoggingOut] = useState(false)
+  const t = useTranslations('settings')
 
   async function handleLogout() {
     setLoggingOut(true)
@@ -41,9 +44,9 @@ export default function SettingsPage() {
             <Palette size={18} />
           </span>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-foreground">Тема оформления</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t('themeTitle')}</h3>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              Системная, светлая или тёмная
+              {t('themeSubtitle')}
             </p>
           </div>
         </div>
@@ -52,10 +55,31 @@ export default function SettingsPage() {
     </div>
   )
 
-  // Левая колонка — личное (профиль, тема, тариф).
+  // Язык интерфейса — выбор RU/EN/UK пишется в куку и применяется сразу.
+  const languageCard = (
+    <div className="surface-1 rounded-lg p-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/12 text-primary">
+            <Languages size={18} />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground">{t('languageTitle')}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {t('languageSubtitle')}
+            </p>
+          </div>
+        </div>
+        <LanguageToggle />
+      </div>
+    </div>
+  )
+
+  // Левая колонка — личное (профиль, тема, язык, тариф).
   const leftColumn = [
     <ProfileSection key="profile" />,
     <div key="theme">{themeCard}</div>,
+    <div key="language">{languageCard}</div>,
     ...(isTutor ? [<TariffSection key="tariff" />] : []),
   ]
 
@@ -76,9 +100,9 @@ export default function SettingsPage() {
       <div className="w-full max-w-5xl mx-auto">
         {/* Header */}
         <motion.div variants={fadeUp(0)} initial="hidden" animate="show" className="px-4 lg:px-0 pt-5 lg:pt-0 pb-5">
-          <h1 className="text-h1 lg:text-display text-foreground">Настройки</h1>
+          <h1 className="text-h1 lg:text-display text-foreground">{t('title')}</h1>
           <p className="text-sm text-muted-foreground mt-1.5">
-            Профиль, оформление, тариф и интеграции
+            {t('subtitle')}
           </p>
         </motion.div>
 
@@ -116,15 +140,15 @@ export default function SettingsPage() {
               disabled={loggingOut}
             >
               <LogOut size={16} />
-              {loggingOut ? 'Выход...' : 'Выйти из аккаунта'}
+              {loggingOut ? t('loggingOut') : t('logout')}
             </Button>
 
             <div className="flex items-center justify-center gap-3 pb-2 mt-5">
               <p className="text-xs text-muted-foreground">Lessonify · MVP</p>
               <span className="text-border text-xs">·</span>
-              <a href="/offer" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Оферта</a>
+              <a href="/offer" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('offer')}</a>
               <span className="text-border text-xs">·</span>
-              <a href="/privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Конфиденциальность</a>
+              <a href="/privacy" target="_blank" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t('privacy')}</a>
             </div>
           </motion.div>
         </div>

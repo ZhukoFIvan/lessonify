@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { startOfWeek, endOfWeek } from 'date-fns'
 import { Users, BookOpen, Wallet, ClipboardCheck, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -60,44 +61,46 @@ interface CardDef {
   accent?: boolean
 }
 
-const CARDS: CardDef[] = [
-  {
-    key: 'income',
-    label: 'Доход за месяц',
-    icon: Wallet,
-    color: 'text-emerald-400',
-    bg: 'bg-emerald-500/10',
-    getValue: (s: Stats) => s.monthIncome,
-    unit: '₽',
-    accent: true,
-  },
-  {
-    key: 'students',
-    label: 'Учеников',
-    icon: Users,
-    color: 'text-violet-400',
-    bg: 'bg-violet-500/10',
-    getValue: (s: Stats) => s.studentsCount,
-  },
-  {
-    key: 'lessons',
-    label: 'Уроков за неделю',
-    icon: BookOpen,
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10',
-    getValue: (s: Stats) => s.weekLessons,
-  },
-  {
-    key: 'homework',
-    label: 'ДЗ на проверке',
-    icon: ClipboardCheck,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    getValue: (s: Stats) => s.pendingHomework,
-  },
-]
-
 export function QuickStats() {
+  const t = useTranslations('dashboard')
+
+  const CARDS: CardDef[] = [
+    {
+      key: 'income',
+      label: t('stats.income'),
+      icon: Wallet,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10',
+      getValue: (s: Stats) => s.monthIncome,
+      unit: '₽',
+      accent: true,
+    },
+    {
+      key: 'students',
+      label: t('stats.students'),
+      icon: Users,
+      color: 'text-violet-400',
+      bg: 'bg-violet-500/10',
+      getValue: (s: Stats) => s.studentsCount,
+    },
+    {
+      key: 'lessons',
+      label: t('stats.weekLessons'),
+      icon: BookOpen,
+      color: 'text-blue-400',
+      bg: 'bg-blue-500/10',
+      getValue: (s: Stats) => s.weekLessons,
+    },
+    {
+      key: 'homework',
+      label: t('stats.pendingHomework'),
+      icon: ClipboardCheck,
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10',
+      getValue: (s: Stats) => s.pendingHomework,
+    },
+  ]
+
   const [stats, setStats] = useState<Stats>({
     studentsCount: 0,
     weekLessons: 0,

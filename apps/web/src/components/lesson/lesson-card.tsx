@@ -4,33 +4,22 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { getLessonTimeRange, formatDuration, getInitials } from '@tutorflow/utils'
+import { getLessonTimeRange, getInitials } from '@tutorflow/utils'
 import { formatRub } from '@tutorflow/utils'
 import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
 import { cn } from '@/lib/utils'
 import { Bell, BookPlus, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 import { useAuthStore } from '@/store/auth.store'
 import { LessonNotesPanel } from '@/components/lesson/lesson-notes-panel'
 
 type CalendarLesson = LessonWithStudent | LessonWithTutor
 
-const STATUS_LABELS: Record<string, string> = {
-  SCHEDULED: 'Запланирован',
-  COMPLETED: 'Завершён',
-  CANCELLED: 'Отменён',
-  RESCHEDULED: 'Перенесён',
-}
-
 const PAYMENT_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
   PAID: 'success',
   PENDING: 'warning',
   OVERDUE: 'danger',
-}
-
-const PAYMENT_LABELS: Record<string, string> = {
-  PAID: 'Оплачено',
-  PENDING: 'Ожидает',
-  OVERDUE: 'Просрочено',
 }
 
 interface LessonCardProps {
@@ -44,6 +33,8 @@ interface LessonCardProps {
 }
 
 export function LessonCard({ lesson, onPay, payLoading, onRemind, remindLoading, onAddHomework, className }: LessonCardProps) {
+  const t = useTranslations('lesson')
+  const f = useFormatters()
   const role = useAuthStore((s) => s.user?.role)
   const isPending = lesson.paymentStatus === 'PENDING' || lesson.paymentStatus === 'OVERDUE'
   const isCompleted = lesson.status === 'COMPLETED'
@@ -73,7 +64,7 @@ export function LessonCard({ lesson, onPay, payLoading, onRemind, remindLoading,
               {new Date(lesson.startTime).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
             </p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              {formatDuration(lesson.durationMinutes)}
+              {f.duration(lesson.durationMinutes)}
             </p>
           </div>
 
@@ -100,7 +91,7 @@ export function LessonCard({ lesson, onPay, payLoading, onRemind, remindLoading,
           {/* Правая часть */}
           <div className="flex flex-col items-end gap-1.5 shrink-0">
             <Badge variant={PAYMENT_VARIANT[lesson.paymentStatus] ?? 'secondary'}>
-              {PAYMENT_LABELS[lesson.paymentStatus]}
+              {t(`paymentStatus.${lesson.paymentStatus}`)}
             </Badge>
             <span className="text-xs text-muted-foreground font-medium">{formatRub(lesson.price)}</span>
           </div>
@@ -117,8 +108,8 @@ export function LessonCard({ lesson, onPay, payLoading, onRemind, remindLoading,
               disabled={payLoading}
             >
               {payLoading
-                ? 'Сохранение...'
-                : <><Check size={13} className="mr-1.5 inline" />Отметить оплаченным · {formatRub(lesson.price)}</>}
+                ? t('card.saving')
+                : <><Check size={13} className="mr-1.5 inline" />{t('card.markPaid')} · {formatRub(lesson.price)}</>}
             </Button>
           </div>
         )}
@@ -134,7 +125,7 @@ export function LessonCard({ lesson, onPay, payLoading, onRemind, remindLoading,
               disabled={remindLoading}
             >
               <Bell size={14} />
-              {remindLoading ? 'Отправка...' : 'Напомнить ученику'}
+              {remindLoading ? t('card.sending') : t('card.remind')}
             </Button>
           </div>
         )}
@@ -149,7 +140,7 @@ export function LessonCard({ lesson, onPay, payLoading, onRemind, remindLoading,
               onClick={() => onAddHomework(lesson.id)}
             >
               <BookPlus size={14} />
-              Добавить ДЗ
+              {t('card.addHomework')}
             </Button>
           </div>
         )}

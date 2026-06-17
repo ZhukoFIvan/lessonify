@@ -3,10 +3,12 @@
 import { motion } from 'framer-motion'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { getInitials, formatRub, pluralize } from '@tutorflow/utils'
+import { getInitials, formatRub } from '@tutorflow/utils'
 import { MessageCircle, BookOpen, Wallet, ArrowUpRight } from 'lucide-react'
 import type { StudentListItem } from '@tutorflow/types'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 
 interface StudentCardProps {
   student: StudentListItem
@@ -14,6 +16,8 @@ interface StudentCardProps {
 }
 
 export function StudentCard({ student, onClick }: StudentCardProps) {
+  const t = useTranslations('students')
+  const f = useFormatters()
   const hasDebt = student.debtAmount > 0
   const accent = student.color ?? '#6C63FF'
 
@@ -59,12 +63,12 @@ export function StudentCard({ student, onClick }: StudentCardProps) {
               <MessageCircle
                 size={13}
                 className="shrink-0 text-primary"
-                aria-label="Telegram подключён"
+                aria-label={t('card.telegramConnected')}
               />
             )}
           </div>
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            {student.subject || 'Без предмета'}
+            {student.subject || t('card.noSubject')}
           </p>
         </div>
 
@@ -81,8 +85,8 @@ export function StudentCard({ student, onClick }: StudentCardProps) {
           <BookOpen size={13} className="shrink-0 text-muted-foreground/70" />
           <span className="font-medium text-foreground/80 tnum">
             {student.lessonsCount > 0
-              ? pluralize(student.lessonsCount, ['урок', 'урока', 'уроков'])
-              : 'Нет уроков'}
+              ? f.count(student.lessonsCount, 'lessons')
+              : t('card.noLessons')}
           </span>
         </div>
 
@@ -90,13 +94,13 @@ export function StudentCard({ student, onClick }: StudentCardProps) {
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="text-muted-foreground/40">·</span>
             <Wallet size={13} className="shrink-0 text-muted-foreground/70" />
-            <span className="font-medium text-foreground/80 tnum">{formatRub(student.hourlyRate)}/ч</span>
+            <span className="font-medium text-foreground/80 tnum">{formatRub(student.hourlyRate)}{t('perHour')}</span>
           </div>
         ) : null}
 
         {hasDebt && (
           <Badge variant="danger" className="ml-auto tnum">
-            Долг {formatRub(student.debtAmount)}
+            {t('card.debt', { amount: formatRub(student.debtAmount) })}
           </Badge>
         )}
       </div>

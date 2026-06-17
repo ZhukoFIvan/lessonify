@@ -85,6 +85,7 @@ model User {
   name         String
   avatarUrl    String?
   gender       Gender?
+  locale       String?   // ru | en | uk; null → определяем по Accept-Language браузера
   role         UserRole
   googleId     String?   @unique
   isBlocked    Boolean   @default(false)

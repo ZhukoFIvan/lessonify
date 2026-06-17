@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { BrandLogo } from '@/components/ui/brand-logo'
@@ -41,6 +42,7 @@ const floatingOrbDelayed = {
 }
 
 export function StepWelcome({ onNext, userName }: StepWelcomeProps) {
+  const t = useTranslations('onboarding')
   const firstName = userName?.split(' ')[0]
 
   return (
@@ -80,20 +82,19 @@ export function StepWelcome({ onNext, userName }: StepWelcomeProps) {
         variants={item}
         className="text-3xl font-bold text-foreground tracking-tight"
       >
-        {firstName ? `${firstName}, добро пожаловать!` : 'Добро пожаловать!'}
+        {firstName ? t('welcome.greetingNamed', { name: firstName }) : t('welcome.greeting')}
       </motion.h1>
 
       <motion.p
         variants={item}
         className="text-muted-foreground mt-3 text-base max-w-sm leading-relaxed"
       >
-        Настроим приложение под вас за пару минут. Расскажите немного о себе — и
-        вперёд!
+        {t('welcome.subtitle')}
       </motion.p>
 
       {/* Feature pills */}
       <motion.div variants={item} className="flex flex-wrap justify-center gap-2 mt-8">
-        {['Расписание', 'Оплаты', 'ДЗ', 'Telegram'].map((label, i) => (
+        {[t('welcome.pillSchedule'), t('welcome.pillPayments'), t('welcome.pillHomework'), 'Telegram'].map((label, i) => (
           <motion.span
             key={label}
             initial={{ opacity: 0, scale: 0.8 }}
@@ -113,7 +114,7 @@ export function StepWelcome({ onNext, userName }: StepWelcomeProps) {
           size="lg"
           className="w-full group"
         >
-          Поехали
+          {t('welcome.cta')}
           <ArrowRight
             size={18}
             className="ml-2 transition-transform group-hover:translate-x-1"

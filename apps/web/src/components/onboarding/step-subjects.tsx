@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -16,21 +17,21 @@ interface StepSubjectsProps {
 }
 
 const POPULAR_SUBJECTS = [
-  { label: 'Математика', emoji: '📐' },
-  { label: 'Английский', emoji: '🇬🇧' },
-  { label: 'Русский язык', emoji: '📝' },
-  { label: 'Физика', emoji: '⚛️' },
-  { label: 'Химия', emoji: '🧪' },
-  { label: 'Биология', emoji: '🧬' },
-  { label: 'Информатика', emoji: '💻' },
-  { label: 'История', emoji: '📜' },
-  { label: 'Обществознание', emoji: '🏛️' },
-  { label: 'Литература', emoji: '📚' },
-  { label: 'Немецкий', emoji: '🇩🇪' },
-  { label: 'Французский', emoji: '🇫🇷' },
-  { label: 'Музыка', emoji: '🎵' },
-  { label: 'Рисование', emoji: '🎨' },
-  { label: 'География', emoji: '🌍' },
+  { key: 'subjects.list.math', emoji: '📐' },
+  { key: 'subjects.list.english', emoji: '🇬🇧' },
+  { key: 'subjects.list.russian', emoji: '📝' },
+  { key: 'subjects.list.physics', emoji: '⚛️' },
+  { key: 'subjects.list.chemistry', emoji: '🧪' },
+  { key: 'subjects.list.biology', emoji: '🧬' },
+  { key: 'subjects.list.computerScience', emoji: '💻' },
+  { key: 'subjects.list.history', emoji: '📜' },
+  { key: 'subjects.list.socialStudies', emoji: '🏛️' },
+  { key: 'subjects.list.literature', emoji: '📚' },
+  { key: 'subjects.list.german', emoji: '🇩🇪' },
+  { key: 'subjects.list.french', emoji: '🇫🇷' },
+  { key: 'subjects.list.music', emoji: '🎵' },
+  { key: 'subjects.list.drawing', emoji: '🎨' },
+  { key: 'subjects.list.geography', emoji: '🌍' },
 ]
 
 const container = {
@@ -44,6 +45,7 @@ const item = {
 }
 
 export function StepSubjects({ data, onChange, onNext, onBack }: StepSubjectsProps) {
+  const t = useTranslations('onboarding')
   const [customSubject, setCustomSubject] = useState('')
 
   function toggleSubject(subject: string) {
@@ -72,20 +74,21 @@ export function StepSubjects({ data, onChange, onNext, onBack }: StepSubjectsPro
     >
       <motion.div variants={item}>
         <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          Что вы преподаёте?
+          {t('subjects.title')}
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Выберите предметы — можно несколько
+          {t('subjects.subtitle')}
         </p>
       </motion.div>
 
       {/* Subject chips */}
       <motion.div variants={item} className="flex flex-wrap gap-2 mt-6">
-        {POPULAR_SUBJECTS.map(({ label, emoji }) => {
+        {POPULAR_SUBJECTS.map(({ key, emoji }) => {
+          const label = t(key)
           const selected = data.subjects.includes(label)
           return (
             <motion.button
-              key={label}
+              key={key}
               type="button"
               onClick={() => toggleSubject(label)}
               whileTap={{ scale: 0.92 }}
@@ -111,7 +114,7 @@ export function StepSubjects({ data, onChange, onNext, onBack }: StepSubjectsPro
           value={customSubject}
           onChange={(e) => setCustomSubject(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustom())}
-          placeholder="Свой предмет..."
+          placeholder={t('subjects.customPlaceholder')}
           className="h-10"
         />
         <Button
@@ -129,7 +132,7 @@ export function StepSubjects({ data, onChange, onNext, onBack }: StepSubjectsPro
       {/* Hourly rate */}
       <motion.div variants={item} className="mt-6">
         <label htmlFor="ob-rate" className="text-sm font-medium text-foreground mb-1.5 block">
-          Ставка за час (₽)
+          {t('subjects.rateLabel')}
         </label>
         <Input
           id="ob-rate"
@@ -141,7 +144,7 @@ export function StepSubjects({ data, onChange, onNext, onBack }: StepSubjectsPro
           min={0}
         />
         <p className="text-xs text-muted-foreground mt-1.5">
-          Можно указать позже в настройках
+          {t('subjects.rateHint')}
         </p>
       </motion.div>
 
@@ -156,7 +159,7 @@ export function StepSubjects({ data, onChange, onNext, onBack }: StepSubjectsPro
           size="lg"
           className="flex-1 group"
         >
-          Далее
+          {t('next')}
           <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
         </Button>
       </motion.div>

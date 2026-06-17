@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useStudents } from '@/hooks/use-students'
 import { useDownloadInvoice } from '@/hooks/use-invoice'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslations } from 'next-intl'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 
 interface InvoiceModalProps {
@@ -18,6 +19,7 @@ interface InvoiceModalProps {
 }
 
 export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
+  const t = useTranslations('finances')
   const { students } = useStudents()
   const { downloadInvoice, loading } = useDownloadInvoice()
 
@@ -30,16 +32,16 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
 
   async function handleDownload() {
     if (!studentId) {
-      toast({ variant: 'destructive', title: 'Выберите ученика' })
+      toast({ variant: 'destructive', title: t('selectStudent') })
       return
     }
     const all = studentId === 'ALL'
     try {
-      await downloadInvoice(all ? undefined : studentId, all ? 'все-ученики' : (selectedStudent?.name ?? 'ученик'), from, to)
-      toast({ variant: 'success', title: 'Счёт скачан' })
+      await downloadInvoice(all ? undefined : studentId, all ? t('allStudentsFilename') : (selectedStudent?.name ?? t('studentFilename')), from, to)
+      toast({ variant: 'success', title: t('invoiceDownloaded') })
       onClose()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось сформировать PDF' })
+      toast({ variant: 'destructive', title: t('error'), description: t('pdfFailed') })
     }
   }
 
@@ -49,20 +51,20 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileDown size={18} className="text-primary" />
-            Сформировать счёт
+            {t('generateInvoice')}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           {/* Ученик */}
           <div className="flex flex-col gap-1.5">
-            <Label>Ученик</Label>
+            <Label>{t('student')}</Label>
             <Select value={studentId} onValueChange={setStudentId}>
               <SelectTrigger>
-                <SelectValue placeholder="Выберите ученика..." />
+                <SelectValue placeholder={t('selectStudentPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Все ученики (общий счёт)</SelectItem>
+                <SelectItem value="ALL">{t('allStudentsOption')}</SelectItem>
                 {students.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.name}{s.subject ? ` · ${s.subject}` : ''}
@@ -75,7 +77,7 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
           {/* Период */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5 min-w-0">
-              <Label>С</Label>
+              <Label>{t('dateFrom')}</Label>
               <Input
                 type="date"
                 value={from}
@@ -84,7 +86,7 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
               />
             </div>
             <div className="flex flex-col gap-1.5 min-w-0">
-              <Label>По</Label>
+              <Label>{t('dateTo')}</Label>
               <Input
                 type="date"
                 value={to}
@@ -98,11 +100,11 @@ export function InvoiceModal({ open, onClose }: InvoiceModalProps) {
           <div className="flex gap-2 pt-1">
             <Button variant="outline" className="flex-1" onClick={onClose}>
               <X size={14} className="mr-1.5" />
-              Отмена
+              {t('cancel')}
             </Button>
             <Button className="flex-1 gap-1.5" onClick={handleDownload} disabled={loading || !studentId}>
               <FileDown size={14} />
-              {loading ? 'Формируем...' : 'Скачать PDF'}
+              {loading ? t('generating') : t('downloadPdf')}
             </Button>
           </div>
         </div>

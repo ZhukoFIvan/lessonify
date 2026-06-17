@@ -5,7 +5,9 @@ import { TrendingUp, Clock, BookOpen } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatNumber } from '@/components/ui/stat'
 import { EASE_OUT } from '@/lib/motion'
-import { formatRub, pluralize } from '@tutorflow/utils'
+import { formatRub } from '@tutorflow/utils'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 import type { PaymentSummary } from '@tutorflow/types'
 
 interface SummaryCardProps {
@@ -14,6 +16,8 @@ interface SummaryCardProps {
 }
 
 export function SummaryCard({ summary, loading }: SummaryCardProps) {
+  const t = useTranslations('finances')
+  const f = useFormatters()
   if (loading) return <Skeleton className="h-[176px] rounded-xl" />
 
   const total = (summary?.totalEarned ?? 0) + (summary?.totalPending ?? 0)
@@ -40,7 +44,7 @@ export function SummaryCard({ summary, loading }: SummaryCardProps) {
             <TrendingUp size={15} />
           </span>
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/80">
-            Доход за месяц
+            {t('monthlyIncome')}
           </p>
         </div>
 
@@ -53,7 +57,9 @@ export function SummaryCard({ summary, loading }: SummaryCardProps) {
             className="text-white [&_.hero-unit]:text-white/70"
           />
           <p className="mt-1 text-xs text-white/70">
-            получено из <span className="tnum font-medium text-white/90">{formatRub(total)}</span>
+            {t.rich('receivedOf', {
+              total: () => <span className="tnum font-medium text-white/90">{formatRub(total)}</span>,
+            })}
           </p>
         </div>
 
@@ -72,7 +78,9 @@ export function SummaryCard({ summary, loading }: SummaryCardProps) {
           <div className="flex items-center gap-1.5">
             <Clock size={13} className="text-white/70" />
             <span className="text-xs text-white/85">
-              <span className="tnum font-semibold text-white">{formatRub(pending)}</span> ожидает
+              {t.rich('pendingAmount', {
+                amount: () => <span className="tnum font-semibold text-white">{formatRub(pending)}</span>,
+              })}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -81,7 +89,7 @@ export function SummaryCard({ summary, loading }: SummaryCardProps) {
               <span className="tnum font-semibold text-white">
                 {paidCount}/{lessonsCount}
               </span>{' '}
-              {pluralize(lessonsCount, ['урок', 'урока', 'уроков'])}
+              {f.count(lessonsCount, 'lessons')}
             </span>
           </div>
         </div>

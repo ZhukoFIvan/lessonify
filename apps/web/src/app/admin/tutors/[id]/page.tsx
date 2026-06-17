@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { ArrowLeft, Users, CalendarDays, CheckCircle, DollarSign, BookOpen } from 'lucide-react'
 import { useAdminTutor } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
@@ -22,6 +23,7 @@ function PlanBadge({ plan }: { plan: string }) {
 }
 
 export default function AdminTutorDetailPage({ params }: { params: { id: string } }) {
+  const t = useTranslations('admin')
   const { tutor, loading } = useAdminTutor(params.id)
 
   if (loading) {
@@ -41,9 +43,9 @@ export default function AdminTutorDetailPage({ params }: { params: { id: string 
     return (
       <div className="p-8">
         <Link href="/admin/tutors" className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6">
-          <ArrowLeft size={16} /> К списку репетиторов
+          <ArrowLeft size={16} /> {t('tutorDetail.back')}
         </Link>
-        <p className="text-white/30 text-sm">Репетитор не найден</p>
+        <p className="text-white/30 text-sm">{t('tutorDetail.notFound')}</p>
       </div>
     )
   }
@@ -52,7 +54,7 @@ export default function AdminTutorDetailPage({ params }: { params: { id: string 
     <div className="p-8">
       {/* Back */}
       <Link href="/admin/tutors" className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6">
-        <ArrowLeft size={16} /> К списку репетиторов
+        <ArrowLeft size={16} /> {t('tutorDetail.back')}
       </Link>
 
       {/* Header */}
@@ -65,7 +67,7 @@ export default function AdminTutorDetailPage({ params }: { params: { id: string 
             <h1 className="text-2xl font-black text-white truncate">{tutor.name}</h1>
             <PlanBadge plan={tutor.plan} />
             {tutor.isBlocked && (
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">Блок</span>
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">{t('blockedShort')}</span>
             )}
           </div>
           <p className="text-white/40 text-sm mt-0.5">
@@ -73,9 +75,9 @@ export default function AdminTutorDetailPage({ params }: { params: { id: string 
             {tutor.subjects.length > 0 && <span className="ml-2 text-white/30">· {tutor.subjects.join(', ')}</span>}
           </p>
           <p className="text-white/25 text-xs mt-0.5">
-            Регистрация: {new Date(tutor.createdAt).toLocaleDateString('ru')}
+            {t('tutorDetail.registered', { date: new Date(tutor.createdAt).toLocaleDateString('ru') })}
             {tutor.plan === 'PRO' && tutor.planExpiresAt && (
-              <span className="ml-2">· PRO до {new Date(tutor.planExpiresAt).toLocaleDateString('ru')}</span>
+              <span className="ml-2">· {t('tutorDetail.proUntil', { date: new Date(tutor.planExpiresAt).toLocaleDateString('ru') })}</span>
             )}
           </p>
         </div>
@@ -83,16 +85,16 @@ export default function AdminTutorDetailPage({ params }: { params: { id: string 
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Ученики" value={tutor.students.length} icon={<Users size={18} className="text-cyan-400" />} color="bg-cyan-500/15" />
-        <StatCard label="Уроки" value={tutor.lessonsCount} icon={<CalendarDays size={18} className="text-sky-400" />} color="bg-sky-500/15" />
-        <StatCard label="Проведено" value={tutor.completedCount} icon={<CheckCircle size={18} className="text-green-400" />} color="bg-green-500/15" />
-        <StatCard label="Выручка (оплачено)" value={`${Number(tutor.revenue).toLocaleString('ru')} ₽`} icon={<DollarSign size={18} className="text-emerald-400" />} color="bg-emerald-500/15" />
+        <StatCard label={t('tutorDetail.stats.students')} value={tutor.students.length} icon={<Users size={18} className="text-cyan-400" />} color="bg-cyan-500/15" />
+        <StatCard label={t('tutorDetail.stats.lessons')} value={tutor.lessonsCount} icon={<CalendarDays size={18} className="text-sky-400" />} color="bg-sky-500/15" />
+        <StatCard label={t('tutorDetail.stats.completed')} value={tutor.completedCount} icon={<CheckCircle size={18} className="text-green-400" />} color="bg-green-500/15" />
+        <StatCard label={t('tutorDetail.stats.revenue')} value={`${Number(tutor.revenue).toLocaleString('ru')} ₽`} icon={<DollarSign size={18} className="text-emerald-400" />} color="bg-emerald-500/15" />
       </div>
 
       {/* Students */}
       <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-white/[0.06]">
-          <h2 className="text-white font-bold text-sm">Ученики ({tutor.students.length})</h2>
+          <h2 className="text-white font-bold text-sm">{t('tutorDetail.studentsHeading', { count: tutor.students.length })}</h2>
         </div>
         <div className="divide-y divide-white/[0.04]">
           {tutor.students.map(s => (
@@ -103,17 +105,17 @@ export default function AdminTutorDetailPage({ params }: { params: { id: string 
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-medium truncate">{s.name}</p>
                 <p className="text-white/35 text-xs truncate">
-                  {s.email ?? 'без email'}
+                  {s.email ?? t('tutorDetail.noEmail')}
                   {s.subject && <span className="ml-2">· {s.subject}</span>}
                 </p>
               </div>
               <span className="flex items-center gap-1.5 text-white/50 text-sm shrink-0">
-                <BookOpen size={14} className="text-white/30" /> {s.lessonsCount} уроков
+                <BookOpen size={14} className="text-white/30" /> {t('tutorDetail.lessonsCount', { count: s.lessonsCount })}
               </span>
             </div>
           ))}
           {tutor.students.length === 0 && (
-            <p className="px-5 py-8 text-white/30 text-sm text-center">У репетитора пока нет учеников</p>
+            <p className="px-5 py-8 text-white/30 text-sm text-center">{t('tutorDetail.noStudents')}</p>
           )}
         </div>
       </div>

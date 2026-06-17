@@ -1,14 +1,17 @@
 import type { ReactNode } from 'react'
+import { getTranslations } from 'next-intl/server'
 import { CalendarDays, Wallet, BookOpen, Users } from 'lucide-react'
 
-const HIGHLIGHTS = [
-  { icon: CalendarDays, title: 'Расписание без хаоса', desc: 'Все уроки, переносы и напоминания в одном календаре.' },
-  { icon: Wallet, title: 'Деньги под контролем', desc: 'Оплаты, долги и доход за месяц — наглядно и точно.' },
-  { icon: BookOpen, title: 'Домашка и прогресс', desc: 'Задания, проверка и история занятий у каждого ученика.' },
-  { icon: Users, title: 'Ученики рядом', desc: 'Профили, контакты и заметки — ничего не потеряется.' },
-] as const
+export default async function AuthLayout({ children }: { children: ReactNode }) {
+  const t = await getTranslations('auth')
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+  const HIGHLIGHTS = [
+    { icon: CalendarDays, title: t('marketing.scheduleTitle'), desc: t('marketing.scheduleDesc') },
+    { icon: Wallet, title: t('marketing.moneyTitle'), desc: t('marketing.moneyDesc') },
+    { icon: BookOpen, title: t('marketing.homeworkTitle'), desc: t('marketing.homeworkDesc') },
+    { icon: Users, title: t('marketing.studentsTitle'), desc: t('marketing.studentsDesc') },
+  ] as const
+
   return (
     <div className="min-h-screen bg-background lg:grid lg:grid-cols-[1.1fr_minmax(0,0.9fr)] xl:grid-cols-[1.2fr_minmax(0,0.8fr)]">
       {/* Левая брендовая панель — только на десктопе */}
@@ -25,11 +28,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
         <div className="relative max-w-md">
           <h2 className="text-h1 text-white">
-            CRM для репетиторов, в которой приятно работать
+            {t('marketing.heroTitle')}
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-white/75">
-            Расписание, оплаты, домашние задания и ученики — собрано в одном месте.
-            Меньше рутины, больше уроков.
+            {t('marketing.heroDesc')}
           </p>
 
           <ul className="mt-9 grid gap-4 sm:grid-cols-2">
@@ -50,8 +52,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
         <div className="relative flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/55">
           <span>© {new Date().getFullYear()} Lessonify</span>
-          <a href="/offer" className="hover:text-white/80 transition-colors">Публичная оферта</a>
-          <a href="/privacy" className="hover:text-white/80 transition-colors">Политика конфиденциальности</a>
+          <a href="/offer" className="hover:text-white/80 transition-colors">{t('marketing.offer')}</a>
+          <a href="/privacy" className="hover:text-white/80 transition-colors">{t('marketing.privacy')}</a>
         </div>
       </aside>
 

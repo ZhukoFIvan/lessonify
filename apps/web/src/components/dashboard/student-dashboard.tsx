@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useStudentNextLesson } from '@/hooks/use-lessons'
 import { useStudentHomework } from '@/hooks/use-homework'
 import { StudentNextLesson } from './student-next-lesson'
@@ -17,14 +18,15 @@ function getRestIcon(): LucideIcon {
   return Moon
 }
 
-function getRestMessage(): { title: string; sub: string } {
+function getRestMessageKeys(): { title: string; sub: string } {
   const h = new Date().getHours()
-  if (h < 12) return { title: 'Сегодня свободен', sub: 'Хорошее начало дня без занятий' }
-  if (h < 17) return { title: 'Сегодня свободен', sub: 'Можно отдохнуть или заняться чем-то своим' }
-  return { title: 'На сегодня всё', sub: 'Уроков и заданий нет — заслуженный отдых' }
+  if (h < 12) return { title: 'studentRest.morning.title', sub: 'studentRest.morning.sub' }
+  if (h < 17) return { title: 'studentRest.day.title', sub: 'studentRest.day.sub' }
+  return { title: 'studentRest.evening.title', sub: 'studentRest.evening.sub' }
 }
 
 export function StudentDashboard() {
+  const t = useTranslations('dashboard')
   const { lesson, loading: lessonLoading } = useStudentNextLesson()
   const { items: hwItems, loading: hwLoading } = useStudentHomework('ASSIGNED')
 
@@ -48,7 +50,9 @@ export function StudentDashboard() {
 
   if (isEmpty) {
     const RestIcon = getRestIcon()
-    const { title, sub } = getRestMessage()
+    const keys = getRestMessageKeys()
+    const title = t(keys.title)
+    const sub = t(keys.sub)
 
     return (
       <div className="px-4 mt-5">
@@ -68,12 +72,12 @@ export function StudentDashboard() {
             <div className="flex items-center gap-5 mt-2">
               <div className="flex flex-col items-center">
                 <span className="stat-number text-primary">0</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">уроков</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{t('studentRest.lessonsLabel')}</span>
               </div>
               <div className="w-px h-8 bg-[var(--border-strong)]" />
               <div className="flex flex-col items-center">
                 <span className="stat-number text-primary">0</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">заданий</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{t('studentRest.tasksLabel')}</span>
               </div>
             </div>
           </div>

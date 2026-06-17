@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import api from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
 
 export function usePromo() {
+  const t = useTranslations('toasts')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const setUser = useAuthStore((s) => s.setUser)
@@ -19,7 +21,7 @@ export function usePromo() {
       if (user) setUser({ ...user, plan: 'PRO', planExpiresAt: data.data.planExpiresAt })
       return data.data
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Ошибка применения промокода')
+      setError(e.response?.data?.error ?? t('promoApplyError'))
       return null
     } finally {
       setLoading(false)

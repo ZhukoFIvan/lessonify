@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus, Trash2, ToggleLeft, ToggleRight, CalendarClock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -9,8 +10,7 @@ import { useAvailabilitySlots } from '@/hooks/use-availability'
 import { toast } from '@/components/ui/use-toast'
 import type { AvailabilitySlot } from '@tutorflow/types'
 
-const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
-const DAY_NAMES_FULL = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
+const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
 function pad(n: number) { return String(n).padStart(2, '0') }
 
@@ -21,6 +21,7 @@ interface AddSlotFormProps {
 }
 
 function AddSlotForm({ dayOfWeek, onSave, onCancel }: AddSlotFormProps) {
+  const t = useTranslations('settingsSections')
   const [hour, setHour] = useState('10')
   const [minute, setMinute] = useState('00')
   const [duration, setDuration] = useState('60')
@@ -64,23 +65,24 @@ function AddSlotForm({ dayOfWeek, onSave, onCancel }: AddSlotFormProps) {
         </SelectTrigger>
         <SelectContent>
           {[30, 45, 60, 90, 120].map((d) => (
-            <SelectItem key={d} value={String(d)}>{d} мин</SelectItem>
+            <SelectItem key={d} value={String(d)}>{t('minutesShort', { m: d })}</SelectItem>
           ))}
         </SelectContent>
       </Select>
       <div className="flex gap-1.5 ml-auto">
-        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={onCancel}>Отмена</Button>
-        <Button size="sm" className="h-7 px-3 text-xs" onClick={handleSave} disabled={saving}>Добавить</Button>
+        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={onCancel}>{t('cancel')}</Button>
+        <Button size="sm" className="h-7 px-3 text-xs" onClick={handleSave} disabled={saving}>{t('add')}</Button>
       </div>
     </div>
   )
 }
 
 export function AvailabilitySection() {
+  const t = useTranslations('settingsSections')
   const { slots, loading, createSlot, updateSlot, deleteSlot } = useAvailabilitySlots()
   const [addingDay, setAddingDay] = useState<number | null>(null)
 
-  const slotsByDay = DAY_NAMES.reduce((acc, _, i) => {
+  const slotsByDay = DAY_KEYS.reduce((acc, _, i) => {
     acc[i] = slots.filter((s) => s.dayOfWeek === i)
     return acc
   }, {} as Record<number, AvailabilitySlot[]>)
@@ -92,9 +94,9 @@ export function AvailabilitySection() {
     try {
       await createSlot(payload)
       setAddingDay(null)
-      toast({ variant: 'success', title: 'Слот добавлен' })
+      toast({ variant: 'success', title: t('slotAdded') })
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось добавить слот' })
+      toast({ variant: 'destructive', title: t('error'), description: t('slotAddFailed') })
     }
   }
 
@@ -102,16 +104,16 @@ export function AvailabilitySection() {
     try {
       await updateSlot(slot.id, { isActive: !slot.isActive })
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка' })
+      toast({ variant: 'destructive', title: t('error') })
     }
   }
 
   async function handleDelete(slotId: string) {
     try {
       await deleteSlot(slotId)
-      toast({ variant: 'success', title: 'Слот удалён' })
+      toast({ variant: 'success', title: t('slotDeleted') })
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка' })
+      toast({ variant: 'destructive', title: t('error') })
     }
   }
 
@@ -122,8 +124,8 @@ export function AvailabilitySection() {
           <CalendarClock size={20} className="text-primary" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Расписание записи</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Укажите, когда ученики могут записаться</p>
+          <h3 className="text-sm font-semibold text-foreground">{t('availabilityTitle')}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('availabilitySubtitle')}</p>
         </div>
       </div>
 
@@ -137,20 +139,20 @@ export function AvailabilitySection() {
           {orderedDays.map((dayIdx) => (
             <div key={dayIdx}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-medium text-foreground">{DAY_NAMES_FULL[dayIdx]}</span>
+                <span className="text-xs font-medium text-foreground">{t(`days.${DAY_KEYS[dayIdx]}`)}</span>
                 <button
                   onClick={() => setAddingDay(addingDay === dayIdx ? null : dayIdx)}
                   className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Plus size={11} />
-                  Добавить
+                  {t('add')}
                 </button>
               </div>
 
               {slotsByDay[dayIdx]!.map((slot) => (
                 <div key={slot.id} className={`flex items-center justify-between px-3 py-2 rounded-md border border-subtle mb-1 transition-opacity ${slot.isActive ? 'bg-surface-0' : 'bg-surface-0 opacity-50'}`}>
                   <span className="tnum text-sm font-medium">
-                    {pad(slot.startHour)}:{pad(slot.startMinute)} · {slot.durationMinutes} мин
+                    {pad(slot.startHour)}:{pad(slot.startMinute)} · {t('minutesShort', { m: slot.durationMinutes })}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
@@ -172,7 +174,7 @@ export function AvailabilitySection() {
               ))}
 
               {slotsByDay[dayIdx]!.length === 0 && addingDay !== dayIdx && (
-                <p className="text-xs text-muted-foreground pl-1">Нет слотов</p>
+                <p className="text-xs text-muted-foreground pl-1">{t('noSlots')}</p>
               )}
 
               {addingDay === dayIdx && (

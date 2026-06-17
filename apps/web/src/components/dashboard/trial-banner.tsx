@@ -2,12 +2,14 @@
 
 import { Crown, Sparkles, X } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useAuthStore } from '@/store/auth.store'
 import { useBilling } from '@/hooks/use-billing'
 import { toast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 
 export function TrialBanner() {
+  const t = useTranslations('dashboard')
   const user = useAuthStore((s) => s.user)
   const [dismissed, setDismissed] = useState(false)
   const { activateTrial, loading } = useBilling()
@@ -21,21 +23,21 @@ export function TrialBanner() {
   if (canTrial) {
     const handleTrial = async () => {
       const ok = await activateTrial()
-      if (ok) toast({ variant: 'success', title: 'PRO на 30 дней активирован!' })
+      if (ok) toast({ variant: 'success', title: t('trial.activated') })
     }
 
     return (
       <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-lg border bg-amber-500/10 border-amber-500/20">
         <Sparkles size={16} className="text-amber-500 shrink-0" />
         <p className="text-xs font-medium flex-1 text-amber-700 dark:text-amber-400">
-          Попробуйте PRO бесплатно — 30 дней без ограничений
+          {t('trial.cta')}
         </p>
         <button
           onClick={handleTrial}
           disabled={loading}
           className="text-xs font-semibold shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-colors disabled:opacity-50"
         >
-          {loading ? '...' : 'Активировать'}
+          {loading ? '...' : t('trial.activate')}
         </button>
         <button onClick={() => setDismissed(true)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
           <X size={14} />
@@ -62,14 +64,14 @@ export function TrialBanner() {
       <Crown size={16} className={isUrgent ? 'text-red-500 shrink-0' : 'text-amber-500 shrink-0'} />
       <p className={`text-xs font-medium flex-1 ${isUrgent ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'}`}>
         {isExpired
-          ? 'PRO-план истёк. Продлите чтобы не потерять функции.'
-          : `PRO-план заканчивается через ${daysLeft} дн.`}
+          ? t('trial.expired')
+          : t('trial.expiresIn', { count: daysLeft })}
       </p>
       <Link
         href="/settings"
         className={`text-xs font-semibold shrink-0 underline ${isUrgent ? 'text-red-600' : 'text-amber-600'}`}
       >
-        Продлить
+        {t('trial.renew')}
       </Link>
       <button onClick={() => setDismissed(true)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
         <X size={14} />

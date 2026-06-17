@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { HomeworkCard } from '@/components/homework/homework-card'
@@ -13,16 +14,17 @@ import type { HomeworkStatus } from '@tutorflow/types'
 import { cn } from '@/lib/utils'
 import { fadeUp } from '@/lib/motion'
 
-const FILTERS: { label: string; value: HomeworkStatus | undefined }[] = [
-  { label: 'Все', value: undefined },
-  { label: 'Задано', value: 'ASSIGNED' },
-  { label: 'Сдано', value: 'SUBMITTED' },
-  { label: 'Проверено', value: 'REVIEWED' },
+const FILTERS: { labelKey: string; value: HomeworkStatus | undefined }[] = [
+  { labelKey: 'filters.all', value: undefined },
+  { labelKey: 'filters.assigned', value: 'ASSIGNED' },
+  { labelKey: 'filters.submitted', value: 'SUBMITTED' },
+  { labelKey: 'filters.reviewed', value: 'REVIEWED' },
 ]
 
 // ── Страница для ученика ───────────────────────────────────────────────────────
 
 function StudentHomeworkPage() {
+  const t = useTranslations('homework')
   const [filter, setFilter] = useState<HomeworkStatus | undefined>(undefined)
   const { items, loading, refetch } = useStudentHomework(filter)
   const { submit, loadingId } = useSubmitHomework()
@@ -30,10 +32,10 @@ function StudentHomeworkPage() {
   async function handleSubmit(id: string, submissionText?: string, fileUrls?: string[]) {
     try {
       await submit(id, submissionText, fileUrls)
-      toast({ variant: 'success', title: 'Задание сдано' })
+      toast({ variant: 'success', title: t('toast.submitted') })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось отправить задание' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('toast.submitFailed') })
     }
   }
 
@@ -59,6 +61,7 @@ function StudentHomeworkPage() {
 // ── Страница для репетитора ───────────────────────────────────────────────────
 
 function TutorHomeworkPage() {
+  const t = useTranslations('homework')
   const [filter, setFilter] = useState<HomeworkStatus | undefined>(undefined)
   const { items, loading, refetch } = useTutorHomework(filter)
   const { reviewHomework, loadingId } = useReviewHomework()
@@ -66,10 +69,10 @@ function TutorHomeworkPage() {
   async function handleReview(id: string, feedback: string) {
     try {
       await reviewHomework(id, feedback)
-      toast({ variant: 'success', title: 'Задание проверено' })
+      toast({ variant: 'success', title: t('toast.reviewed') })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось сохранить проверку' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('toast.reviewFailed') })
     }
   }
 
@@ -107,6 +110,7 @@ function HomeworkLayout({
   loading: boolean
   children: React.ReactNode
 }) {
+  const t = useTranslations('homework')
   // Показываем скелетоны только при первой загрузке; при смене фильтра — просто затемняем
   const [everLoaded, setEverLoaded] = useState(false)
   useEffect(() => {
@@ -121,9 +125,9 @@ function HomeworkLayout({
       <div className="w-full max-w-6xl mx-auto flex flex-col flex-1">
         <motion.div variants={fadeUp(0)} initial="hidden" animate="show" className="px-4 lg:px-0 pt-5 lg:pt-0 pb-3 flex items-end justify-between gap-3">
           <div>
-            <h1 className="text-h2 lg:text-h1 text-foreground">Домашние задания</h1>
+            <h1 className="text-h2 lg:text-h1 text-foreground">{t('title')}</h1>
             <p className="text-xs lg:text-sm text-muted-foreground mt-1 min-h-[1em]">
-              {!showSkeleton && (count === 0 ? 'Нет заданий' : `${count} задан${count === 1 ? 'ие' : 'ия'}`)}
+              {!showSkeleton && (count === 0 ? t('noTasks') : t('taskCount', { count }))}
             </p>
           </div>
         </motion.div>
@@ -131,11 +135,11 @@ function HomeworkLayout({
         {/* Сегментированный фильтр — утопленная дорожка с активным брендовым чипом */}
         <motion.div variants={fadeUp(0.08)} initial="hidden" animate="show" className="px-4 lg:px-0 pb-4">
           <div className="inline-flex max-w-full gap-1 rounded-full bg-surface-0 border border-[var(--border-subtle)] p-1 scroll-x">
-            {FILTERS.map(({ label, value }) => {
+            {FILTERS.map(({ labelKey, value }) => {
               const active = filter === value
               return (
                 <button
-                  key={label}
+                  key={labelKey}
                   onClick={() => onFilter(value)}
                   className={cn(
                     'shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200',
@@ -144,7 +148,7 @@ function HomeworkLayout({
                       : 'text-muted-foreground hover:text-foreground border border-transparent',
                   )}
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               )
             })}
@@ -163,10 +167,10 @@ function HomeworkLayout({
               </div>
               <div className="text-center">
                 <p className="text-sm font-semibold text-foreground">
-                  {filter ? 'Нет заданий с таким статусом' : 'Заданий нет'}
+                  {filter ? t('emptyState.filteredTitle') : t('emptyState.title')}
                 </p>
                 <p className="text-xs mt-1">
-                  {filter ? 'Попробуйте другой фильтр' : 'Задания появятся здесь после создания'}
+                  {filter ? t('emptyState.filteredHint') : t('emptyState.hint')}
                 </p>
               </div>
             </div>

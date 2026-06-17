@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,12 +15,7 @@ import { useCreateHomework, uploadFiles } from '@/hooks/use-homework'
 import { toast } from '@/components/ui/use-toast'
 import { Paperclip, X, Loader2 } from 'lucide-react'
 
-const schema = z.object({
-  description: z.string().min(1, 'Описание обязательно').max(2000).trim(),
-  deadline: z.string().optional(),
-})
-
-type FormData = z.infer<typeof schema>
+type FormData = { description: string; deadline?: string }
 
 interface AddHomeworkModalProps {
   open: boolean
@@ -29,6 +25,11 @@ interface AddHomeworkModalProps {
 }
 
 export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHomeworkModalProps) {
+  const t = useTranslations('homework')
+  const schema = z.object({
+    description: z.string().min(1, t('validation.descriptionRequired')).max(2000).trim(),
+    deadline: z.string().optional(),
+  })
   const { createHomework, loading } = useCreateHomework()
   const [files, setFiles] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
@@ -60,7 +61,7 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
       try {
         attachmentUrls = await uploadFiles(files)
       } catch {
-        toast({ variant: 'destructive', title: 'Ошибка загрузки файлов' })
+        toast({ variant: 'destructive', title: t('toast.uploadFailed') })
         setUploading(false)
         return
       }
@@ -73,12 +74,12 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
         deadline: data.deadline ? new Date(data.deadline).toISOString() : undefined,
         attachmentUrls,
       })
-      toast({ variant: 'success', title: 'Домашнее задание добавлено' })
+      toast({ variant: 'success', title: t('toast.created') })
       handleClose()
       onCreated?.()
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Не удалось создать задание'
-      toast({ variant: 'destructive', title: 'Ошибка', description: message })
+      const message = err?.response?.data?.error || t('toast.createFailed')
+      toast({ variant: 'destructive', title: t('toast.error'), description: message })
     }
   }
 
@@ -94,16 +95,16 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Домашнее задание</DialogTitle>
+          <DialogTitle>{t('modal.title')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Описание */}
           <div className="flex flex-col gap-1.5">
-            <Label>Задание</Label>
+            <Label>{t('modal.taskLabel')}</Label>
             <textarea
               {...register('description')}
-              placeholder="Опишите задание для ученика..."
+              placeholder={t('modal.descriptionPlaceholder')}
               rows={4}
               className="w-full rounded-md border border-[var(--border-subtle)] bg-surface-0 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-colors"
             />
@@ -114,7 +115,7 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
 
           {/* Дедлайн */}
           <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
-            <Label>Дедлайн (необязательно)</Label>
+            <Label>{t('modal.deadlineLabel')}</Label>
             <Input
               type="date"
               className="w-full max-w-full overflow-hidden"
@@ -125,7 +126,7 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
 
           {/* Файлы */}
           <div className="flex flex-col gap-2">
-            <Label>Материалы (необязательно, до 5)</Label>
+            <Label>{t('modal.materialsLabel')}</Label>
 
             {files.length > 0 && (
               <div className="flex flex-col gap-1">
@@ -161,7 +162,7 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
                   className="flex items-center gap-2 rounded-md border-2 border-dashed border-[var(--border-strong)] px-4 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                 >
                   <Paperclip size={15} />
-                  Прикрепить файл
+                  {t('attachFile')}
                 </button>
               </>
             )}
@@ -169,8 +170,8 @@ export function AddHomeworkModal({ open, lessonId, onClose, onCreated }: AddHome
 
           <Button type="submit" className="w-full mt-2" disabled={isBusy}>
             {isBusy
-              ? <><Loader2 size={14} className="animate-spin mr-2" />{uploading ? 'Загрузка...' : 'Сохранение...'}</>
-              : 'Добавить задание'
+              ? <><Loader2 size={14} className="animate-spin mr-2" />{uploading ? t('uploading') : t('saving')}</>
+              : t('modal.submit')
             }
           </Button>
         </form>

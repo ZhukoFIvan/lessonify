@@ -1,22 +1,23 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { format, differenceInDays } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import { getInitials } from '@tutorflow/utils'
 import { Clock, CheckCircle2, MessageSquare, Paperclip, FileText } from 'lucide-react'
 import type { HomeworkWithDetails } from '@tutorflow/types'
+import { useFormatters } from '@/i18n/use-formatters'
 import { cn } from '@/lib/utils'
 
-const STATUS_CONFIG: Record<string, { label: string; variant: 'secondary' | 'warning' | 'success' | 'default' }> = {
-  ASSIGNED: { label: 'Задано', variant: 'warning' },
-  SUBMITTED: { label: 'Сдано', variant: 'default' },
-  REVIEWED: { label: 'Проверено', variant: 'success' },
+const STATUS_VARIANT: Record<string, 'secondary' | 'warning' | 'success' | 'default'> = {
+  ASSIGNED: 'warning',
+  SUBMITTED: 'default',
+  REVIEWED: 'success',
 }
 
 interface TutorHomeworkCardProps {
@@ -26,10 +27,13 @@ interface TutorHomeworkCardProps {
 }
 
 export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomeworkCardProps) {
+  const t = useTranslations('homework')
+  const f = useFormatters()
   const [reviewOpen, setReviewOpen] = useState(false)
   const [feedback, setFeedback] = useState('')
 
-  const config = STATUS_CONFIG[item.status] ?? STATUS_CONFIG['ASSIGNED']!
+  const statusVariant = STATUS_VARIANT[item.status] ?? STATUS_VARIANT['ASSIGNED']!
+  const statusLabel = t(`status.${item.status}`)
   const isSubmitted = item.status === 'SUBMITTED'
   const isReviewed = item.status === 'REVIEWED'
   const isOverdue = item.isOverdue
@@ -39,10 +43,10 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
 
   function deadlineLabel(): string {
     if (!deadlineDate) return ''
-    if (isOverdue && item.status === 'ASSIGNED') return 'Просрочено'
-    if (daysLeft === 0) return 'Сегодня'
-    if (daysLeft === 1) return 'Завтра'
-    return format(deadlineDate, 'd MMM', { locale: ru })
+    if (isOverdue && item.status === 'ASSIGNED') return t('deadline.overdue')
+    if (daysLeft === 0) return t('deadline.today')
+    if (daysLeft === 1) return t('deadline.tomorrow')
+    return format(deadlineDate, 'd MMM', { locale: f.dateFnsLocale })
   }
 
   async function handleReview() {
@@ -52,7 +56,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
   }
 
   function getFileName(url: string) {
-    return decodeURIComponent(url.split('/').pop() ?? url).replace(/^[a-f0-9]{32}/, '').replace(/^[-_]/, '') || 'Файл'
+    return decodeURIComponent(url.split('/').pop() ?? url).replace(/^[a-f0-9]{32}/, '').replace(/^[-_]/, '') || t('file')
   }
 
   const isOverdueAssigned = isOverdue && item.status === 'ASSIGNED'
@@ -81,12 +85,12 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
             {/* Имя + статус */}
             <div className="flex items-center justify-between gap-2 mb-0.5">
               <p className="text-sm font-semibold text-foreground truncate">{item.student.name}</p>
-              <Badge variant={config.variant} className="shrink-0">{config.label}</Badge>
+              <Badge variant={statusVariant} className="shrink-0">{statusLabel}</Badge>
             </div>
 
             {/* Предмет + дата урока */}
             <p className="text-xs text-muted-foreground tnum">
-              {item.lesson.subject} · {format(new Date(item.lesson.startTime), 'd MMM', { locale: ru })}
+              {item.lesson.subject} · {format(new Date(item.lesson.startTime), 'd MMM', { locale: f.dateFnsLocale })}
             </p>
 
             {/* Дедлайн */}
@@ -123,7 +127,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
         {/* Ответ ученика */}
         {(isSubmitted || isReviewed) && (item.submissionText || item.fileUrls.length > 0) && (
           <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3 mt-3 space-y-2">
-            <p className="text-xs text-muted-foreground font-semibold">Ответ ученика</p>
+            <p className="text-xs text-muted-foreground font-semibold">{t('studentAnswer')}</p>
             {item.submissionText && (
               <p className="text-sm text-foreground leading-snug">{item.submissionText}</p>
             )}
@@ -151,7 +155,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
           <div className="rounded-md bg-success/[0.07] border border-success/20 p-3 mt-3">
             <div className="flex items-center gap-1.5 mb-1">
               <MessageSquare size={12} className="text-success" />
-              <span className="text-xs font-semibold text-success">Ваш отзыв</span>
+              <span className="text-xs font-semibold text-success">{t('yourReview')}</span>
             </div>
             <p className="text-xs text-foreground leading-snug">{item.feedback}</p>
           </div>
@@ -167,7 +171,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
             disabled={reviewLoading}
           >
             <CheckCircle2 size={14} />
-            Проверить задание
+            {t('reviewTask')}
           </Button>
         )}
       </CardContent>
@@ -176,14 +180,14 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
       <Dialog open={reviewOpen} onOpenChange={(v) => !v && setReviewOpen(false)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Проверка задания</DialogTitle>
+            <DialogTitle>{t('review.title')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3">
               <p className="text-xs text-muted-foreground font-semibold mb-1">Ответ ученика</p>
               {item.submissionText
                 ? <p className="text-sm text-foreground leading-snug">{item.submissionText}</p>
-                : (!item.fileUrls.length && <p className="text-xs text-muted-foreground italic">Без комментария</p>)
+                : (!item.fileUrls.length && <p className="text-xs text-muted-foreground italic">{t('review.noComment')}</p>)
               }
               {item.fileUrls.length > 0 && (
                 <div className="flex flex-col gap-1 mt-2">
@@ -205,12 +209,12 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-foreground">
-                Обратная связь (необязательно)
+                {t('review.feedbackLabel')}
               </label>
               <textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Напишите комментарий к работе ученика..."
+                placeholder={t('review.feedbackPlaceholder')}
                 rows={3}
                 className="w-full rounded-md border border-[var(--border-subtle)] bg-surface-0 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-colors"
               />
@@ -223,7 +227,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
                 onClick={() => setReviewOpen(false)}
                 disabled={reviewLoading}
               >
-                Отмена
+                {t('cancel')}
               </Button>
               <Button
                 className="flex-1 gap-1.5 bg-success hover:bg-success/90 text-white"
@@ -231,7 +235,7 @@ export function TutorHomeworkCard({ item, onReview, reviewLoading }: TutorHomewo
                 disabled={reviewLoading}
               >
                 <CheckCircle2 size={14} />
-                {reviewLoading ? 'Сохранение...' : 'Отметить проверенным'}
+                {reviewLoading ? t('saving') : t('review.confirm')}
               </Button>
             </div>
           </div>

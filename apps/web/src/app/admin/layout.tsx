@@ -3,26 +3,28 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { LayoutDashboard, Users, ArrowDownToLine, LogOut, Shield, Tag, CreditCard, Send, GraduationCap } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 
-const NAV = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/users', label: 'Пользователи', icon: Users },
-  { href: '/admin/tutors', label: 'Репетиторы', icon: GraduationCap },
-  { href: '/admin/orders', label: 'Платежи', icon: CreditCard },
-  { href: '/admin/withdrawals', label: 'Выводы средств', icon: ArrowDownToLine },
-  { href: '/admin/bot', label: 'Telegram-бот', icon: Send },
-  { href: '/admin/promo', label: 'Промокоды', icon: Tag },
-]
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('admin')
   const user = useAuthStore(s => s.user)
   const router = useRouter()
   const pathname = usePathname()
   const { logout } = useAuth()
+
+  const NAV = [
+    { href: '/admin', label: t('nav.dashboard'), icon: LayoutDashboard, exact: true },
+    { href: '/admin/users', label: t('nav.users'), icon: Users },
+    { href: '/admin/tutors', label: t('nav.tutors'), icon: GraduationCap },
+    { href: '/admin/orders', label: t('nav.orders'), icon: CreditCard },
+    { href: '/admin/withdrawals', label: t('nav.withdrawals'), icon: ArrowDownToLine },
+    { href: '/admin/bot', label: t('nav.bot'), icon: Send },
+    { href: '/admin/promo', label: t('nav.promo'), icon: Tag },
+  ]
 
   useEffect(() => {
     if (user && user.role !== 'ADMIN') {
@@ -87,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/45 hover:text-red-400 hover:bg-red-500/[0.07] transition-all"
           >
             <LogOut size={17} />
-            Выйти
+            {t('logout')}
           </button>
         </div>
       </aside>

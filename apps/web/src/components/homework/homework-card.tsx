@@ -1,26 +1,24 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { format, differenceInDays } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import { getInitials } from '@tutorflow/utils'
 import { Clock, CheckCircle2, MessageSquare, Paperclip, X, Loader2 } from 'lucide-react'
 import type { StudentHomeworkItem } from '@tutorflow/types'
 import { uploadFiles } from '@/hooks/use-homework'
+import { useFormatters } from '@/i18n/use-formatters'
 import { cn } from '@/lib/utils'
 
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; variant: 'secondary' | 'warning' | 'success' | 'default' }
-> = {
-  ASSIGNED: { label: 'Задано', variant: 'warning' },
-  SUBMITTED: { label: 'Сдано', variant: 'default' },
-  REVIEWED: { label: 'Проверено', variant: 'success' },
+const STATUS_VARIANT: Record<string, 'secondary' | 'warning' | 'success' | 'default'> = {
+  ASSIGNED: 'warning',
+  SUBMITTED: 'default',
+  REVIEWED: 'success',
 }
 
 interface HomeworkCardProps {
@@ -30,13 +28,16 @@ interface HomeworkCardProps {
 }
 
 export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProps) {
+  const t = useTranslations('homework')
+  const f = useFormatters()
   const [submitOpen, setSubmitOpen] = useState(false)
   const [comment, setComment] = useState('')
   const [files, setFiles] = useState<File[]>([])
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const config = STATUS_CONFIG[item.status] ?? STATUS_CONFIG['ASSIGNED']!
+  const statusVariant = STATUS_VARIANT[item.status] ?? STATUS_VARIANT['ASSIGNED']!
+  const statusLabel = t(`status.${item.status}`)
   const isAssigned = item.status === 'ASSIGNED'
   const isReviewed = item.status === 'REVIEWED'
   const hasDeadline = !!item.deadline
@@ -47,10 +48,10 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
 
   function deadlineLabel(): string {
     if (!deadlineDate) return ''
-    if (isOverdue) return 'Просрочено'
-    if (daysLeft === 0) return 'Сегодня'
-    if (daysLeft === 1) return 'Завтра'
-    return format(deadlineDate, 'd MMM', { locale: ru })
+    if (isOverdue) return t('deadline.overdue')
+    if (daysLeft === 0) return t('deadline.today')
+    if (daysLeft === 1) return t('deadline.tomorrow')
+    return format(deadlineDate, 'd MMM', { locale: f.dateFnsLocale })
   }
 
   function handleClose() {
@@ -86,7 +87,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
   }
 
   function getFileName(url: string) {
-    return decodeURIComponent(url.split('/').pop() ?? url).replace(/^[a-f0-9]{32}/, '').replace(/^[-_]/, '') || 'Файл'
+    return decodeURIComponent(url.split('/').pop() ?? url).replace(/^[a-f0-9]{32}/, '').replace(/^[-_]/, '') || t('file')
   }
 
   const isBusy = uploading || submitLoading
@@ -111,7 +112,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2 mb-0.5">
               <p className="text-sm font-semibold text-foreground truncate">{item.lesson.subject}</p>
-              <Badge variant={config.variant} className="shrink-0">{config.label}</Badge>
+              <Badge variant={statusVariant} className="shrink-0">{statusLabel}</Badge>
             </div>
 
             <p className="text-xs text-muted-foreground truncate">{item.tutor.user.name}</p>
@@ -146,7 +147,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
           <div className="rounded-md bg-success/[0.07] border border-success/20 p-3 mt-3">
             <div className="flex items-center gap-1.5 mb-1">
               <MessageSquare size={12} className="text-success" />
-              <span className="text-xs font-semibold text-success">Обратная связь</span>
+              <span className="text-xs font-semibold text-success">{t('feedback')}</span>
             </div>
             <p className="text-xs text-foreground leading-snug">{item.feedback}</p>
           </div>
@@ -154,7 +155,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
 
         {item.status !== 'ASSIGNED' && (item.submissionText || item.fileUrls.length > 0) && (
           <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3 mt-3 space-y-1.5">
-            <p className="text-xs text-muted-foreground font-semibold">Ваш ответ</p>
+            <p className="text-xs text-muted-foreground font-semibold">{t('yourAnswer')}</p>
             {item.submissionText && <p className="text-xs text-foreground leading-snug">{item.submissionText}</p>}
             {item.fileUrls.map((url) => (
               <a key={url} href={url} target="_blank" rel="noopener noreferrer"
@@ -174,7 +175,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
             disabled={submitLoading}
           >
             <CheckCircle2 size={14} />
-            {submitLoading ? 'Отправка...' : 'Сдать задание'}
+            {submitLoading ? t('submitting') : t('submitTask')}
           </Button>
         )}
       </CardContent>
@@ -182,20 +183,20 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
       <Dialog open={submitOpen} onOpenChange={(v) => !v && handleClose()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Сдать задание</DialogTitle>
+            <DialogTitle>{t('submitTask')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <div className="rounded-md bg-surface-0 border border-[var(--border-subtle)] p-3">
-              <p className="text-xs text-muted-foreground font-semibold mb-1">Задание</p>
+              <p className="text-xs text-muted-foreground font-semibold mb-1">{t('modal.taskLabel')}</p>
               <p className="text-sm text-foreground line-clamp-3 leading-snug">{item.description}</p>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-foreground">Комментарий (необязательно)</label>
+              <label className="text-sm font-medium text-foreground">{t('submit.commentLabel')}</label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Напишите комментарий к выполненному заданию..."
+                placeholder={t('submit.commentPlaceholder')}
                 rows={3}
                 className="w-full rounded-md border border-[var(--border-subtle)] bg-surface-0 px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none transition-colors"
               />
@@ -203,7 +204,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
 
             {/* Файлы */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-foreground">Файлы (необязательно, до 5)</label>
+              <label className="text-sm font-medium text-foreground">{t('submit.filesLabel')}</label>
 
               {files.length > 0 && (
                 <div className="flex flex-col gap-1">
@@ -235,7 +236,7 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
                     className="flex items-center gap-2 rounded-md border-2 border-dashed border-[var(--border-strong)] px-4 py-2.5 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                   >
                     <Paperclip size={15} />
-                    Прикрепить файл
+                    {t('attachFile')}
                   </button>
                 </>
               )}
@@ -243,12 +244,12 @@ export function HomeworkCard({ item, onSubmit, submitLoading }: HomeworkCardProp
 
             <div className="flex gap-2">
               <Button variant="secondary" className="flex-1" onClick={handleClose} disabled={isBusy}>
-                Отмена
+                {t('cancel')}
               </Button>
               <Button className="flex-1 gap-1.5" onClick={handleSubmit} disabled={isBusy}>
                 {isBusy
-                  ? <><Loader2 size={14} className="animate-spin" /> {uploading ? 'Загрузка...' : 'Отправка...'}</>
-                  : <><CheckCircle2 size={14} /> Сдать</>
+                  ? <><Loader2 size={14} className="animate-spin" /> {uploading ? t('uploading') : t('submitting')}</>
+                  : <><CheckCircle2 size={14} /> {t('submit.confirm')}</>
                 }
               </Button>
             </div>

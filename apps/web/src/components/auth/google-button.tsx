@@ -1,6 +1,7 @@
 'use client'
 
 import { useGoogleLogin } from '@react-oauth/google'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-auth'
 import { toast } from '@/components/ui/use-toast'
@@ -17,6 +18,7 @@ const GoogleIcon = () => (
 
 // Этот компонент рендерится только внутри GoogleOAuthProvider (когда client_id задан)
 function GoogleLoginInner() {
+  const t = useTranslations('auth')
   const { loginWithGoogle } = useAuth()
   const [loading, setLoading] = useState(false)
 
@@ -27,8 +29,8 @@ function GoogleLoginInner() {
       } catch (err) {
         toast({
           variant: 'destructive',
-          title: 'Ошибка входа через Google',
-          description: err instanceof Error ? err.message : 'Попробуйте ещё раз',
+          title: t('google.errorTitle'),
+          description: err instanceof Error ? err.message : t('google.tryAgain'),
         })
       } finally {
         setLoading(false)
@@ -36,7 +38,7 @@ function GoogleLoginInner() {
     },
     onError: () => {
       setLoading(false)
-      toast({ variant: 'destructive', title: 'Ошибка входа через Google' })
+      toast({ variant: 'destructive', title: t('google.errorTitle') })
     },
   })
 
@@ -49,19 +51,20 @@ function GoogleLoginInner() {
       disabled={loading}
     >
       <GoogleIcon />
-      {loading ? 'Загрузка...' : 'Продолжить с Google'}
+      {loading ? t('google.loading') : t('google.continue')}
     </Button>
   )
 }
 
 export function GoogleButton() {
+  const t = useTranslations('auth')
   // Если client_id не задан — GoogleOAuthProvider не в дереве,
   // показываем задизейбленную кнопку чтобы избежать ошибки хука
   if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
     return (
       <Button type="button" variant="secondary" className="w-full gap-3" disabled>
         <GoogleIcon />
-        Продолжить с Google
+        {t('google.continue')}
       </Button>
     )
   }

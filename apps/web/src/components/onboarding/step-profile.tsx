@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, Clock, Pencil, User, UserRound, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -27,10 +28,10 @@ interface StepProfileProps {
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 
-const GENDER_OPTIONS: { value: Gender; label: string; Icon: LucideIcon }[] = [
-  { value: 'MALE', label: 'Мужской', Icon: User },
-  { value: 'FEMALE', label: 'Женский', Icon: UserRound },
-  { value: 'OTHER', label: 'Другой', Icon: Users },
+const GENDER_OPTIONS: { value: Gender; labelKey: string; Icon: LucideIcon }[] = [
+  { value: 'MALE', labelKey: 'gender.male', Icon: User },
+  { value: 'FEMALE', labelKey: 'gender.female', Icon: UserRound },
+  { value: 'OTHER', labelKey: 'gender.other', Icon: Users },
 ]
 
 const container = {
@@ -44,6 +45,7 @@ const item = {
 }
 
 export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps) {
+  const t = useTranslations('onboarding')
   const isValid = data.name.trim().length >= 2 && data.gender !== null
   const [editingTz, setEditingTz] = useState(false)
   const tzOptions = timezoneOptionsWith(data.timezone)
@@ -57,17 +59,17 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
     >
       <motion.div variants={item}>
         <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          Расскажите о себе
+          {t('profile.title')}
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Эта информация поможет персонализировать приложение
+          {t('profile.subtitle')}
         </p>
       </motion.div>
 
       {/* Name */}
       <motion.div variants={item} className="mt-6">
         <label htmlFor="ob-name" className="text-sm font-medium text-foreground mb-1.5 block">
-          Ваше имя
+          {t('profile.nameLabel')}
         </label>
         <Input
           id="ob-name"
@@ -81,7 +83,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
               })
             }
           }}
-          placeholder="Иван Иванов"
+          placeholder={t('profile.namePlaceholder')}
           autoFocus
           className="h-12 text-base"
         />
@@ -89,9 +91,9 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
 
       {/* Gender */}
       <motion.div variants={item} className="mt-5">
-        <p className="text-sm font-medium text-foreground mb-2">Пол</p>
+        <p className="text-sm font-medium text-foreground mb-2">{t('gender.label')}</p>
         <div className="grid grid-cols-3 gap-2">
-          {GENDER_OPTIONS.map(({ value, label, Icon }) => (
+          {GENDER_OPTIONS.map(({ value, labelKey, Icon }) => (
             <motion.button
               key={value}
               type="button"
@@ -117,7 +119,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
                   data.gender === value ? 'text-primary' : 'text-muted-foreground',
                 )}
               >
-                {label}
+                {t(labelKey)}
               </span>
             </motion.button>
           ))}
@@ -135,7 +137,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
 
       {/* Timezone — определён автоматически, подтвердить или изменить */}
       <motion.div variants={item} className="mt-5">
-        <p className="text-sm font-medium text-foreground mb-2">Часовой пояс</p>
+        <p className="text-sm font-medium text-foreground mb-2">{t('profile.timezone')}</p>
         {editingTz ? (
           <Select
             value={data.timezone}
@@ -162,7 +164,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
               <p className="text-sm font-medium text-foreground truncate">
                 {timezoneLabel(data.timezone)}
               </p>
-              <p className="text-xs text-muted-foreground">Определён автоматически</p>
+              <p className="text-xs text-muted-foreground">{t('profile.autoDetected')}</p>
             </div>
             <button
               type="button"
@@ -170,7 +172,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
               className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               <Pencil size={14} />
-              Изменить
+              {t('profile.change')}
             </button>
             <Check size={18} className="shrink-0 text-primary" />
           </div>
@@ -188,7 +190,7 @@ export function StepProfile({ data, onChange, onNext, onBack }: StepProfileProps
           size="lg"
           className="flex-1 group"
         >
-          Далее
+          {t('next')}
           <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
         </Button>
       </motion.div>

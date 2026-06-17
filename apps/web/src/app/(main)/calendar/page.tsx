@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { format, isToday, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, LayoutList, CalendarDays } from 'lucide-react'
+import { useFormatters } from '@/i18n/use-formatters'
 import { DateStrip } from '@/components/calendar/date-strip'
 import { MonthGrid } from '@/components/calendar/month-grid'
 import { DayView } from '@/components/calendar/day-view'
@@ -16,6 +17,8 @@ import { fadeUp } from '@/lib/motion'
 type ViewMode = 'strip' | 'grid'
 
 export default function CalendarPage() {
+  const t = useTranslations('calendar')
+  const f = useFormatters()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [viewMonth, setViewMonth] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -67,8 +70,8 @@ export default function CalendarPage() {
 
   const monthSubtitle =
     monthLessonsCount > 0
-      ? `${monthLessonsCount} ${monthLessonsCount === 1 ? 'урок' : 'урока/уроков'}`
-      : 'Нет уроков'
+      ? f.count(monthLessonsCount, 'lessons')
+      : t('noLessons')
 
   // ── Шапка (общая для мобилы и десктопа) ──────────────────────────────────
   const header = (
@@ -79,14 +82,14 @@ export default function CalendarPage() {
           <button
             onClick={handlePrevMonth}
             className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-            aria-label="Предыдущий месяц"
+            aria-label={t('prevMonth')}
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={handleNextMonth}
             className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-            aria-label="Следующий месяц"
+            aria-label={t('nextMonth')}
           >
             <ChevronRight size={20} />
           </button>
@@ -102,7 +105,7 @@ export default function CalendarPage() {
         >
           <button className="min-w-0 text-left transition-opacity hover:opacity-80">
             <h1 className="truncate text-xl font-bold capitalize tracking-tight text-foreground lg:text-h2">
-              {format(viewMonth, 'LLLL yyyy', { locale: ru })}
+              {format(viewMonth, 'LLLL yyyy', { locale: f.dateFnsLocale })}
             </h1>
             <p className="mt-0.5 text-xs text-muted-foreground lg:text-sm">{monthSubtitle}</p>
           </button>
@@ -115,7 +118,7 @@ export default function CalendarPage() {
             onClick={handleToday}
             className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
           >
-            Сегодня
+            {t('today')}
           </button>
         )}
 
@@ -123,7 +126,7 @@ export default function CalendarPage() {
         <button
           onClick={() => setViewMode(viewMode === 'strip' ? 'grid' : 'strip')}
           className="hidden lg:flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-          aria-label={viewMode === 'strip' ? 'Показать календарь' : 'Показать список'}
+          aria-label={viewMode === 'strip' ? t('showCalendar') : t('showList')}
         >
           {viewMode === 'strip' ? <CalendarDays size={18} /> : <LayoutList size={18} />}
         </button>
@@ -184,13 +187,13 @@ export default function CalendarPage() {
             <div className="mt-1 grid grid-cols-2 gap-3 border-t border-border/60 pt-4">
               <div className="rounded-md bg-surface-0 px-3 py-2.5">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Уроков в месяце
+                  {t('lessonsInMonth')}
                 </p>
                 <p className="tnum mt-1 text-h3 text-foreground">{monthLessonsCount}</p>
               </div>
               <div className="rounded-md bg-surface-0 px-3 py-2.5">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Дней с уроками
+                  {t('daysWithLessons')}
                 </p>
                 <p className="tnum mt-1 text-h3 text-foreground">{activeDaysCount}</p>
               </div>

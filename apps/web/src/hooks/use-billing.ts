@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import api from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useBilling() {
+  const t = useTranslations('toasts')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const setUser = useAuthStore((s) => s.setUser)
@@ -20,7 +22,7 @@ export function useBilling() {
       }
       return true
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Ошибка активации триала')
+      setError(e.response?.data?.error ?? t('trialActivationError'))
       return false
     } finally {
       setLoading(false)
@@ -36,7 +38,7 @@ export function useBilling() {
         window.location.href = data.url
       }
     } catch (e: any) {
-      setError(e.response?.data?.error ?? 'Ошибка создания платежа')
+      setError(e.response?.data?.error ?? t('checkoutError'))
     } finally {
       setLoading(false)
     }

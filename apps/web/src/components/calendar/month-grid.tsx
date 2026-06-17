@@ -2,11 +2,13 @@
 
 import { format, isToday, isSameDay, getDay, isSameMonth } from 'date-fns'
 import { motion } from 'framer-motion'
+import { useFormatters } from '@/i18n/use-formatters'
 import { cn } from '@/lib/utils'
 import type { LessonWithStudent } from '@tutorflow/types'
 
 // Неделя начинается с Пн (российский стандарт)
-const WEEK_DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+// Опорные даты: 2024-01-01 — понедельник, далее 7 дней подряд (Пн..Вс)
+const WEEK_DAY_DATES = Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i))
 
 interface MonthGridProps {
   days: Date[]
@@ -16,6 +18,7 @@ interface MonthGridProps {
 }
 
 export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridProps) {
+  const f = useFormatters()
   const firstDay = days[0]!
   // Смещение: (0=Вс → 6, 1=Пн → 0, 2=Вт → 1, ...)
   const offset = (getDay(firstDay) + 6) % 7
@@ -24,15 +27,15 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
     <div className="px-3 lg:px-0 py-1">
       {/* Заголовки дней недели */}
       <div className="grid grid-cols-7 mb-1.5">
-        {WEEK_DAYS.map((d, i) => (
+        {WEEK_DAY_DATES.map((d, i) => (
           <div
-            key={d}
+            key={i}
             className={cn(
               'text-center text-[10px] font-semibold uppercase tracking-wider py-1',
               i >= 5 ? 'text-muted-foreground/60' : 'text-muted-foreground',
             )}
           >
-            {d}
+            {format(d, 'EEEEEE', { locale: f.dateFnsLocale })}
           </div>
         ))}
       </div>
@@ -60,7 +63,7 @@ export function MonthGrid({ days, selected, lessonCounts, onSelect }: MonthGridP
               onClick={() => onSelect(day)}
               whileTap={{ scale: 0.94 }}
               aria-pressed={isSelected}
-              aria-label={format(day, 'd MMMM yyyy')}
+              aria-label={format(day, 'd MMMM yyyy', { locale: f.dateFnsLocale })}
               className={cn(
                 'group relative flex aspect-square flex-col items-center justify-center gap-1 rounded-md transition-all duration-150 lg:aspect-[1/0.82]',
                 isSelected

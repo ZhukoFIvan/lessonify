@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import { CalendarCheck, Check, X, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,8 +11,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useBookingRequests } from '@/hooks/use-availability'
 import { toast } from '@/components/ui/use-toast'
 import { getInitials } from '@tutorflow/utils'
+import { useFormatters } from '@/i18n/use-formatters'
 
 export function BookingRequestsSection() {
+  const t = useTranslations('settingsSections')
+  const f = useFormatters()
   const { bookings, loading, respond } = useBookingRequests('PENDING')
   const [respondingId, setRespondingId] = useState<string | null>(null)
   const [priceMap, setPriceMap] = useState<Record<string, string>>({})
@@ -27,10 +30,10 @@ export function BookingRequestsSection() {
       await respond(bookingId, status, price)
       toast({
         variant: status === 'CONFIRMED' ? 'success' : 'default',
-        title: status === 'CONFIRMED' ? 'Запись подтверждена' : 'Запись отклонена',
+        title: status === 'CONFIRMED' ? t('bookingConfirmed') : t('bookingRejected'),
       })
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка' })
+      toast({ variant: 'destructive', title: t('error') })
     } finally {
       setRespondingId(null)
     }
@@ -44,12 +47,12 @@ export function BookingRequestsSection() {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-foreground">Запросы на запись</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t('bookingRequestsTitle')}</h3>
             {!loading && bookings.length > 0 && (
               <Badge variant="warning" className="text-[10px]">{bookings.length}</Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">Ученики хотят записаться на урок</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('bookingRequestsSubtitle')}</p>
         </div>
       </div>
 
@@ -71,8 +74,8 @@ export function BookingRequestsSection() {
                   <p className="text-sm font-semibold text-foreground truncate">{booking.student?.name}</p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Clock size={10} />
-                    {format(new Date(booking.requestedAt), "d MMM, EEEE 'в' HH:mm", { locale: ru })}
-                    {booking.slot && ` · ${booking.slot.durationMinutes} мин`}
+                    {format(new Date(booking.requestedAt), t('bookingDateFormat'), { locale: f.dateFnsLocale })}
+                    {booking.slot && ` · ${t('minutesShort', { m: booking.slot.durationMinutes })}`}
                   </p>
                 </div>
               </div>
@@ -86,7 +89,7 @@ export function BookingRequestsSection() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  placeholder="Цена (₽)"
+                  placeholder={t('pricePlaceholder')}
                   value={priceMap[booking.id] ?? ''}
                   onChange={(e) => setPriceMap((p) => ({ ...p, [booking.id]: e.target.value }))}
                   className="tnum flex-1 text-xs border border-subtle rounded-md px-2.5 py-1.5 bg-surface-1 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/60"
@@ -99,7 +102,7 @@ export function BookingRequestsSection() {
                   disabled={respondingId === booking.id}
                 >
                   <X size={13} />
-                  Отклонить
+                  {t('reject')}
                 </Button>
                 <Button
                   size="sm"
@@ -108,7 +111,7 @@ export function BookingRequestsSection() {
                   disabled={respondingId === booking.id}
                 >
                   <Check size={13} />
-                  Подтвердить
+                  {t('confirm')}
                 </Button>
               </div>
             </div>

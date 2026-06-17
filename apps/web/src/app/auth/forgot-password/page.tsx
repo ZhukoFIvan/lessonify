@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Eye, EyeOff, KeyRound } from 'lucide-react'
@@ -15,35 +16,36 @@ import { cn } from '@/lib/utils'
 
 // ── Схемы ──────────────────────────────────────────────────────────────────────
 
-const emailSchema = z.object({
-  email: z.string().email('Некорректный email'),
-})
-
-const codeSchema = z.object({
-  code: z.string().length(6, 'Код должен быть 6 цифр').regex(/^\d+$/, 'Только цифры'),
-})
-
-const passwordSchema = z.object({
-  newPassword: z.string().min(8, 'Минимум 8 символов'),
-  confirmPassword: z.string().min(1, 'Подтвердите пароль'),
-}).refine((d) => d.newPassword === d.confirmPassword, {
-  message: 'Пароли не совпадают',
-  path: ['confirmPassword'],
-})
-
-type EmailData = z.infer<typeof emailSchema>
-type CodeData = z.infer<typeof codeSchema>
-type PasswordData = z.infer<typeof passwordSchema>
+type EmailData = { email: string }
+type CodeData = { code: string }
+type PasswordData = { newPassword: string; confirmPassword: string }
 
 // ── Компонент ──────────────────────────────────────────────────────────────────
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [email, setEmail] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [code, setCode] = useState('')
+
+  const emailSchema = z.object({
+    email: z.string().email(t('forgotPassword.emailInvalid')),
+  })
+
+  const codeSchema = z.object({
+    code: z.string().length(6, t('forgotPassword.codeLength')).regex(/^\d+$/, t('forgotPassword.codeDigits')),
+  })
+
+  const passwordSchema = z.object({
+    newPassword: z.string().min(8, t('forgotPassword.passwordMin')),
+    confirmPassword: z.string().min(1, t('forgotPassword.confirmRequired')),
+  }).refine((d) => d.newPassword === d.confirmPassword, {
+    message: t('forgotPassword.passwordMismatch'),
+    path: ['confirmPassword'],
+  })
 
   // ── Шаг 1: ввод email ──────────────────────────────────────────────────────
 
@@ -57,7 +59,7 @@ export default function ForgotPasswordPage() {
     })
     if (!res.ok) {
       const err = await res.json()
-      toast({ variant: 'destructive', title: err.error ?? 'Ошибка' })
+      toast({ variant: 'destructive', title: err.error ?? t('forgotPassword.error') })
       return
     }
     setEmail(data.email)
@@ -85,12 +87,12 @@ export default function ForgotPasswordPage() {
     })
     if (!res.ok) {
       const err = await res.json()
-      toast({ variant: 'destructive', title: err.error ?? 'Ошибка' })
+      toast({ variant: 'destructive', title: err.error ?? t('forgotPassword.error') })
       // Если код неверный — возвращаем на шаг 2
       if (res.status === 400) setStep(2)
       return
     }
-    toast({ variant: 'success', title: 'Пароль изменён', description: 'Войдите с новым паролем' })
+    toast({ variant: 'success', title: t('forgotPassword.successTitle'), description: t('forgotPassword.successDesc') })
     router.push('/auth/login')
   }
 
@@ -102,14 +104,14 @@ export default function ForgotPasswordPage() {
           <KeyRound size={24} />
         </div>
         <h1 className="text-h1 text-foreground">
-          {step === 1 && 'Сброс пароля'}
-          {step === 2 && 'Введите код'}
-          {step === 3 && 'Новый пароль'}
+          {step === 1 && t('forgotPassword.step1Title')}
+          {step === 2 && t('forgotPassword.step2Title')}
+          {step === 3 && t('forgotPassword.step3Title')}
         </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
-          {step === 1 && 'Введите email — отправим код на почту'}
-          {step === 2 && `Код отправлен на ${email}`}
-          {step === 3 && 'Придумайте новый пароль'}
+          {step === 1 && t('forgotPassword.step1Subtitle')}
+          {step === 2 && t('forgotPassword.step2Subtitle', { email })}
+          {step === 3 && t('forgotPassword.step3Subtitle')}
         </p>
       </div>
 
@@ -143,7 +145,7 @@ export default function ForgotPasswordPage() {
             )}
           </div>
           <Button type="submit" className="w-full mt-2" disabled={emailForm.formState.isSubmitting}>
-            {emailForm.formState.isSubmitting ? 'Отправка...' : 'Отправить код'}
+            {emailForm.formState.isSubmitting ? t('forgotPassword.sending') : t('forgotPassword.sendCode')}
           </Button>
         </form>
       )}
@@ -152,7 +154,7 @@ export default function ForgotPasswordPage() {
       {step === 2 && (
         <form onSubmit={codeForm.handleSubmit(onCodeSubmit)} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="code">6-значный код</Label>
+            <Label htmlFor="code">{t('forgotPassword.codeLabel')}</Label>
             <Input
               id="code"
               type="text"
@@ -167,14 +169,14 @@ export default function ForgotPasswordPage() {
             )}
           </div>
           <Button type="submit" className="w-full mt-2">
-            Подтвердить
+            {t('forgotPassword.confirm')}
           </Button>
           <button
             type="button"
             onClick={() => emailForm.handleSubmit(onEmailSubmit)()}
             className="text-center text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            Отправить код повторно
+            {t('forgotPassword.resendCode')}
           </button>
         </form>
       )}
@@ -183,7 +185,7 @@ export default function ForgotPasswordPage() {
       {step === 3 && (
         <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="newPassword">Новый пароль</Label>
+            <Label htmlFor="newPassword">{t('forgotPassword.newPasswordLabel')}</Label>
             <div className="relative">
               <Input
                 id="newPassword"
@@ -207,7 +209,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="confirmPassword">Повторите пароль</Label>
+            <Label htmlFor="confirmPassword">{t('forgotPassword.confirmLabel')}</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
@@ -231,7 +233,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={passwordForm.formState.isSubmitting}>
-            {passwordForm.formState.isSubmitting ? 'Сохранение...' : 'Сохранить пароль'}
+            {passwordForm.formState.isSubmitting ? t('forgotPassword.saving') : t('forgotPassword.savePassword')}
           </Button>
         </form>
       )}
@@ -242,7 +244,7 @@ export default function ForgotPasswordPage() {
         className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft size={14} />
-        Вернуться к входу
+        {t('forgotPassword.backToLogin')}
       </Link>
     </div>
   )

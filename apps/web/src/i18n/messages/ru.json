@@ -1,0 +1,1042 @@
+{
+  "nav": {
+    "dashboard": "Главная",
+    "calendar": "Расписание",
+    "students": "Ученики",
+    "finances": "Финансы",
+    "homework": "ДЗ",
+    "settings": "Настройки",
+    "teachers": "Преподаватели"
+  },
+  "common": {
+    "logout": "Выйти",
+    "expandMenu": "Развернуть меню",
+    "collapseMenu": "Свернуть меню",
+    "roleTutor": "Репетитор",
+    "roleStudent": "Ученик"
+  },
+  "theme": {
+    "light": "Светлая",
+    "system": "Системная",
+    "dark": "Тёмная"
+  },
+  "format": {
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "yesterday": "Вчера",
+    "duration": {
+      "min": "{m} мин",
+      "hour": "{h} ч",
+      "hourMin": "{h} ч {m} мин"
+    },
+    "count": {
+      "lessons": "{count, plural, one {# урок} few {# урока} many {# уроков} other {# уроков}}",
+      "students": "{count, plural, one {# ученик} few {# ученика} many {# учеников} other {# учеников}}",
+      "teachers": "{count, plural, one {# преподаватель} few {# преподавателя} many {# преподавателей} other {# преподавателей}}"
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Профиль, оформление, тариф и интеграции",
+    "themeTitle": "Тема оформления",
+    "themeSubtitle": "Системная, светлая или тёмная",
+    "languageTitle": "Язык интерфейса",
+    "languageSubtitle": "Русский, английский или украинский",
+    "logout": "Выйти из аккаунта",
+    "loggingOut": "Выход...",
+    "offer": "Оферта",
+    "privacy": "Конфиденциальность"
+  },
+  "auth": {
+    "login": {
+      "welcome": "Добро пожаловать",
+      "subtitle": "Войдите в свой аккаунт Lessonify",
+      "email": "Email",
+      "password": "Пароль",
+      "forgotPassword": "Забыли пароль?",
+      "submit": "Войти",
+      "submitting": "Вход...",
+      "or": "или",
+      "noAccount": "Нет аккаунта?",
+      "register": "Зарегистрироваться",
+      "errorTitle": "Ошибка входа",
+      "errorRetry": "Попробуйте ещё раз",
+      "invalidEmail": "Некорректный email",
+      "passwordRequired": "Введите пароль"
+    },
+    "register": {
+      "title": "Создать аккаунт",
+      "subtitle": "Присоединяйтесь к Lessonify",
+      "roleTutor": "Репетитор",
+      "roleTutorDesc": "Веду уроки",
+      "roleStudent": "Ученик",
+      "roleStudentDesc": "Учусь",
+      "nameLabel": "Имя",
+      "namePlaceholder": "Иван Иванов",
+      "passwordLabel": "Пароль",
+      "confirmLabel": "Повторите пароль",
+      "nameMin": "Минимум 2 символа",
+      "emailInvalid": "Некорректный email",
+      "passwordMin": "Минимум 8 символов",
+      "confirmRequired": "Подтвердите пароль",
+      "passwordMismatch": "Пароли не совпадают",
+      "errorTitle": "Ошибка регистрации",
+      "tryAgain": "Попробуйте ещё раз",
+      "inviteNeededTitle": "Нужна ссылка-приглашение",
+      "inviteNeededDesc": "Попросите репетитора отправить вам персональную ссылку для регистрации.",
+      "submitting": "Создание...",
+      "submit": "Создать аккаунт",
+      "or": "или",
+      "termsPrefix": "Регистрируясь, вы соглашаетесь с",
+      "termsLink": "публичной офертой",
+      "haveAccount": "Уже есть аккаунт?",
+      "signIn": "Войти"
+    },
+    "google": {
+      "errorTitle": "Ошибка входа через Google",
+      "tryAgain": "Попробуйте ещё раз",
+      "loading": "Загрузка...",
+      "continue": "Продолжить с Google"
+    },
+    "forgotPassword": {
+      "emailInvalid": "Некорректный email",
+      "codeLength": "Код должен быть 6 цифр",
+      "codeDigits": "Только цифры",
+      "passwordMin": "Минимум 8 символов",
+      "confirmRequired": "Подтвердите пароль",
+      "passwordMismatch": "Пароли не совпадают",
+      "error": "Ошибка",
+      "successTitle": "Пароль изменён",
+      "successDesc": "Войдите с новым паролем",
+      "step1Title": "Сброс пароля",
+      "step2Title": "Введите код",
+      "step3Title": "Новый пароль",
+      "step1Subtitle": "Введите email — отправим код на почту",
+      "step2Subtitle": "Код отправлен на {email}",
+      "step3Subtitle": "Придумайте новый пароль",
+      "sending": "Отправка...",
+      "sendCode": "Отправить код",
+      "codeLabel": "6-значный код",
+      "confirm": "Подтвердить",
+      "resendCode": "Отправить код повторно",
+      "newPasswordLabel": "Новый пароль",
+      "confirmLabel": "Повторите пароль",
+      "saving": "Сохранение...",
+      "savePassword": "Сохранить пароль",
+      "backToLogin": "Вернуться к входу"
+    },
+    "marketing": {
+      "scheduleTitle": "Расписание без хаоса",
+      "scheduleDesc": "Все уроки, переносы и напоминания в одном календаре.",
+      "moneyTitle": "Деньги под контролем",
+      "moneyDesc": "Оплаты, долги и доход за месяц — наглядно и точно.",
+      "homeworkTitle": "Домашка и прогресс",
+      "homeworkDesc": "Задания, проверка и история занятий у каждого ученика.",
+      "studentsTitle": "Ученики рядом",
+      "studentsDesc": "Профили, контакты и заметки — ничего не потеряется.",
+      "heroTitle": "CRM для репетиторов, в которой приятно работать",
+      "heroDesc": "Расписание, оплаты, домашние задания и ученики — собрано в одном месте. Меньше рутины, больше уроков.",
+      "offer": "Публичная оферта",
+      "privacy": "Политика конфиденциальности"
+    }
+  },
+  "admin": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "blockedShort": "Блок",
+    "searchPlaceholder": "Поиск по имени или email",
+    "pagination": "Страница {page} из {pages}",
+    "roles": {
+      "tutor": "Репетитор",
+      "student": "Ученик",
+      "admin": "Админ",
+      "adminFull": "Администратор"
+    },
+    "withdrawalStatus": {
+      "pending": "Ожидает",
+      "paid": "Оплачен",
+      "rejected": "Отклонён"
+    },
+    "orderStatus": {
+      "paid": "Оплачен",
+      "pending": "Ожидает",
+      "failed": "Ошибка"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Пользователи",
+      "tutors": "Репетиторы",
+      "orders": "Платежи",
+      "withdrawals": "Выводы средств",
+      "bot": "Telegram-бот",
+      "promo": "Промокоды"
+    },
+    "logout": "Выйти",
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Обзор активности платформы",
+      "registrations": "Регистрации",
+      "registrationsLast14": "За последние 14 дней",
+      "registrationsCount": "{count} регистраций",
+      "newUsers": "Новые пользователи",
+      "withdrawalRequests": "Заявки на вывод",
+      "viewAll": "Все →",
+      "noUsers": "Нет пользователей",
+      "noWithdrawals": "Нет заявок",
+      "cards": {
+        "users": "Пользователи",
+        "usersSub": "+{d7} за 7 дн · +{d30} за 30 дн",
+        "tutors": "Репетиторы",
+        "students": "Ученики",
+        "activePro": "Активный PRO",
+        "activeProSub": "всего PRO: {count}",
+        "revenue": "Доход (оплачено)",
+        "revenueSub": "{amount} ₽ в этом месяце",
+        "payments": "Платежей",
+        "paymentsSub": "успешных заказов",
+        "lessons": "Уроки",
+        "lessonsSub": "{count} в этом месяце",
+        "botLinked": "Бот подключён",
+        "botLinkedSub": "из {count} привязок",
+        "pendingWithdrawals": "Ожидают вывода",
+        "referralIncome": "Реферальный доход",
+        "blocked": "Заблокированы",
+        "conversion": "Конверсия FREE→PRO"
+      }
+    },
+    "bot": {
+      "title": "Telegram-бот",
+      "subtitle": "Подключения и активность",
+      "recentConnections": "Недавние подключения",
+      "noConnections": "Подключений пока нет",
+      "noName": "Без имени",
+      "cards": {
+        "started": "Нажали /start",
+        "startedSub": "{count} нажатий всего",
+        "startToLinked": "Старт → привязка",
+        "outOf": "{a} из {b}",
+        "connected": "Подключено",
+        "connectedSub": "из {count} привязок",
+        "tutorConversion": "Конверсия репетиторов",
+        "tutors": "Репетиторы",
+        "students": "Ученики",
+        "activeLinks": "Активных привязок",
+        "pending": "Незавершённых",
+        "pendingSub": "код выдан, бот не привязан"
+      }
+    },
+    "orders": {
+      "title": "Платежи",
+      "subtitle": "{count} заказов · Robokassa",
+      "empty": "Платежей не найдено",
+      "tabs": {
+        "all": "Все",
+        "paid": "Оплаченные",
+        "pending": "Ожидают",
+        "failed": "Ошибки"
+      },
+      "plan": {
+        "monthly": "Месяц",
+        "yearly": "Год"
+      },
+      "summary": {
+        "revenue": "Доход",
+        "paid": "Оплачено",
+        "pending": "Ожидают",
+        "failed": "Ошибки"
+      },
+      "table": {
+        "user": "Пользователь",
+        "plan": "Тариф",
+        "amount": "Сумма",
+        "status": "Статус",
+        "date": "Дата"
+      }
+    },
+    "promo": {
+      "title": "Промокоды",
+      "subtitle": "Коды для получения Pro-плана",
+      "newTitle": "Новый промокод",
+      "create": "Создать",
+      "creating": "Создание...",
+      "created": "Промокод создан",
+      "error": "Ошибка",
+      "copied": "Скопировано!",
+      "empty": "Промокодов пока нет",
+      "inactive": "неактивен",
+      "until": "до {date}",
+      "daysProPlus": "+{count} дней Pro",
+      "usesLabel": "{count, plural, one {использование} few {использования} many {использований} other {использований}}",
+      "fields": {
+        "code": "Код *",
+        "description": "Описание",
+        "descriptionPlaceholder": "Для блогера @ivan",
+        "daysToAdd": "Дней Pro *",
+        "maxUses": "Макс. использований",
+        "maxUsesPlaceholder": "Пусто = безлимит",
+        "expiresAt": "Действует до"
+      }
+    },
+    "tutors": {
+      "title": "Репетиторы",
+      "count": "{count} репетиторов",
+      "empty": "Репетиторы не найдены",
+      "table": {
+        "tutor": "Репетитор",
+        "plan": "Тариф",
+        "students": "Ученики",
+        "lessons": "Уроки"
+      }
+    },
+    "tutorDetail": {
+      "back": "К списку репетиторов",
+      "notFound": "Репетитор не найден",
+      "registered": "Регистрация: {date}",
+      "proUntil": "PRO до {date}",
+      "studentsHeading": "Ученики ({count})",
+      "noStudents": "У репетитора пока нет учеников",
+      "noEmail": "без email",
+      "lessonsCount": "{count, plural, one {# урок} few {# урока} many {# уроков} other {# уроков}}",
+      "stats": {
+        "students": "Ученики",
+        "lessons": "Уроки",
+        "completed": "Проведено",
+        "revenue": "Выручка (оплачено)"
+      }
+    },
+    "users": {
+      "title": "Пользователи",
+      "count": "{count} пользователей",
+      "empty": "Пользователи не найдены",
+      "blocked": "заблокирован",
+      "block": "Заблокировать",
+      "unblock": "Разблокировать",
+      "tabs": {
+        "all": "Все",
+        "tutors": "Репетиторы",
+        "students": "Ученики",
+        "admins": "Админы"
+      },
+      "table": {
+        "user": "Пользователь",
+        "email": "Email",
+        "role": "Роль",
+        "plan": "Тариф",
+        "actions": "Действия"
+      }
+    },
+    "planModal": {
+      "title": "Изменить тариф",
+      "termMonths": "Срок (месяцев)",
+      "months": "{count} мес.",
+      "exactDays": "…или точное число дней",
+      "daysPlaceholder": "Напр. 45"
+    },
+    "roleModal": {
+      "title": "Изменить роль",
+      "adminWarning": "Внимание: пользователь получит полный доступ к админ-панели."
+    },
+    "withdrawals": {
+      "title": "Выводы средств",
+      "count": "{count} заявок",
+      "empty": "Заявок не найдено",
+      "emptyPending": "Нет ожидающих заявок",
+      "confirmPayment": "Подтвердить оплату",
+      "tabs": {
+        "all": "Все",
+        "pending": "Ожидают",
+        "paid": "Оплачены",
+        "rejected": "Отклонены"
+      },
+      "table": {
+        "user": "Пользователь",
+        "amount": "Сумма",
+        "details": "Реквизиты",
+        "status": "Статус",
+        "actions": "Действия"
+      }
+    },
+    "rejectModal": {
+      "title": "Отклонить заявку",
+      "reasonLabel": "Причина (необязательно)",
+      "reasonPlaceholder": "Укажите причину отклонения...",
+      "reject": "Отклонить",
+      "rejecting": "Отклонение..."
+    }
+  },
+  "calendar": {
+    "prevMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "today": "Сегодня",
+    "showCalendar": "Показать календарь",
+    "showList": "Показать список",
+    "noLessons": "Нет уроков",
+    "noLessonsToday": "Уроков нет",
+    "lessonsInMonth": "Уроков в месяце",
+    "daysWithLessons": "Дней с уроками",
+    "lesson": "Урок",
+    "tapToAdd": "Нажмите, чтобы добавить",
+    "selectDate": "Выбор даты",
+    "pickMonthYear": "Выбор месяца и года",
+    "reminderSent": "Напоминание отправлено ученику",
+    "reminderFailed": "Не удалось отправить напоминание",
+    "error": "Ошибка",
+    "noSlots": "Нет доступных слотов",
+    "noSlotsHint": "Репетитор не указал время записи для этого дня",
+    "availableSlots": "Доступные слоты для записи",
+    "notePlaceholder": "Комментарий репетитору (необязательно)...",
+    "sending": "Отправка...",
+    "bookAt": "Записаться на {time}",
+    "requestSent": "Запрос отправлен",
+    "requestSentHint": "Репетитор получит уведомление",
+    "requestFailed": "Не удалось отправить запрос",
+    "minShort": "{count, plural, one {# мин} few {# мин} many {# мин} other {# мин}}",
+    "minFull": "{count, plural, one {# минута} few {# минуты} many {# минут} other {# минут}}"
+  },
+  "dashboard": {
+    "all": "Все",
+    "total": "Итого",
+    "more": "{count, plural, one {ещё #} few {ещё #} many {ещё #} other {ещё #}}",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "quickActionsTitle": "Быстрые действия",
+    "homeworkTitle": "Домашние задания",
+    "greeting": {
+      "night": "Доброй ночи",
+      "morning": "Доброе утро",
+      "day": "Добрый день",
+      "evening": "Добрый вечер"
+    },
+    "actionCards": {
+      "student": {
+        "title": "Добавить ученика",
+        "desc": "Новый ученик в вашу базу"
+      },
+      "lesson": {
+        "title": "Запланировать урок",
+        "desc": "Занятие в расписание"
+      },
+      "homework": {
+        "title": "Создать ДЗ",
+        "desc": "Задать домашнее задание"
+      }
+    },
+    "quickActions": {
+      "lesson": {
+        "label": "Урок",
+        "title": "Добавить урок"
+      },
+      "student": {
+        "label": "Ученик",
+        "title": "Добавить ученика"
+      },
+      "homework": {
+        "label": "ДЗ",
+        "title": "Создать ДЗ"
+      }
+    },
+    "stats": {
+      "income": "Доход за месяц",
+      "students": "Учеников",
+      "weekLessons": "Уроков за неделю",
+      "pendingHomework": "ДЗ на проверке"
+    },
+    "debtors": {
+      "title": "Должны заплатить",
+      "morePeople": "{count, plural, one {ещё # чел.} few {ещё # чел.} many {ещё # чел.} other {ещё # чел.}}"
+    },
+    "homeworkOverview": {
+      "assigned": "Задано",
+      "submitted": "Сдано",
+      "overdue": "Просрочено",
+      "empty": "Заданий пока нет"
+    },
+    "nextLesson": {
+      "label": "Ближайший урок",
+      "now": "Идёт сейчас",
+      "emptyTitle": "Ближайших уроков нет",
+      "emptySub": "Свободное окно — можно выдохнуть"
+    },
+    "countdown": {
+      "hm": "{h}ч {m}м",
+      "ms": "{m}м {s}с",
+      "s": "{s}с"
+    },
+    "todayLessons": {
+      "title": "Уроки сегодня",
+      "schedule": "Запланировать урок"
+    },
+    "payment": {
+      "paid": "Оплачено",
+      "pending": "Ожидает",
+      "overdue": "Просрочено"
+    },
+    "studentRest": {
+      "morning": {
+        "title": "Сегодня свободен",
+        "sub": "Хорошее начало дня без занятий"
+      },
+      "day": {
+        "title": "Сегодня свободен",
+        "sub": "Можно отдохнуть или заняться чем-то своим"
+      },
+      "evening": {
+        "title": "На сегодня всё",
+        "sub": "Уроков и заданий нет — заслуженный отдых"
+      },
+      "lessonsLabel": "уроков",
+      "tasksLabel": "заданий"
+    },
+    "studentNext": {
+      "label": "Следующий урок",
+      "now": "Сейчас",
+      "inHm": "через {h}ч {m}м",
+      "inM": "через {m} мин"
+    },
+    "trial": {
+      "activated": "PRO на 30 дней активирован!",
+      "cta": "Попробуйте PRO бесплатно — 30 дней без ограничений",
+      "activate": "Активировать",
+      "expired": "PRO-план истёк. Продлите чтобы не потерять функции.",
+      "expiresIn": "{count, plural, one {PRO-план заканчивается через # дн.} few {PRO-план заканчивается через # дн.} many {PRO-план заканчивается через # дн.} other {PRO-план заканчивается через # дн.}}",
+      "renew": "Продлить"
+    }
+  },
+  "finances": {
+    "title": "Финансы",
+    "subtitle": "Доходы и задолженности",
+    "invoicePdf": "Счёт PDF",
+    "error": "Ошибка",
+    "received": "Получено",
+    "pending": "Ожидает",
+    "mustPay": "Должны заплатить",
+    "loading": "Загружаем…",
+    "allPaid": "Все уроки оплачены",
+    "studentsWithDebt": "{students} с задолженностью",
+    "totalDue": "всего к оплате",
+    "noDebts": "Долгов нет",
+    "noDebtsHint": "Все уроки оплачены — отличная работа",
+    "processingPayment": "Проводим оплату…",
+    "acceptPayment": "Принять оплату",
+    "debtCleared": "{name} — долг погашен",
+    "payFailed": "Не удалось провести оплату",
+    "incomeSixMonths": "Доходы за 6 месяцев",
+    "noDataYet": "Пока нет данных",
+    "noDataHint": "Данные появятся после первых проведённых и оплаченных уроков",
+    "generateInvoice": "Сформировать счёт",
+    "student": "Ученик",
+    "selectStudent": "Выберите ученика",
+    "selectStudentPlaceholder": "Выберите ученика...",
+    "allStudentsOption": "Все ученики (общий счёт)",
+    "allStudentsFilename": "все-ученики",
+    "studentFilename": "ученик",
+    "invoiceDownloaded": "Счёт скачан",
+    "pdfFailed": "Не удалось сформировать PDF",
+    "dateFrom": "С",
+    "dateTo": "По",
+    "cancel": "Отмена",
+    "generating": "Формируем...",
+    "downloadPdf": "Скачать PDF",
+    "monthlyIncome": "Доход за месяц",
+    "receivedOf": "получено из <total></total>",
+    "pendingAmount": "<amount></amount> ожидает"
+  },
+  "homework": {
+    "title": "Домашние задания",
+    "noTasks": "Нет заданий",
+    "taskCount": "{count, plural, one {# задание} few {# задания} many {# заданий} other {# заданий}}",
+    "file": "Файл",
+    "feedback": "Обратная связь",
+    "yourAnswer": "Ваш ответ",
+    "studentAnswer": "Ответ ученика",
+    "yourReview": "Ваш отзыв",
+    "submitTask": "Сдать задание",
+    "submitting": "Отправка...",
+    "reviewTask": "Проверить задание",
+    "attachFile": "Прикрепить файл",
+    "uploading": "Загрузка...",
+    "saving": "Сохранение...",
+    "cancel": "Отмена",
+    "filters": {
+      "all": "Все",
+      "assigned": "Задано",
+      "submitted": "Сдано",
+      "reviewed": "Проверено"
+    },
+    "status": {
+      "ASSIGNED": "Задано",
+      "SUBMITTED": "Сдано",
+      "REVIEWED": "Проверено"
+    },
+    "deadline": {
+      "overdue": "Просрочено",
+      "today": "Сегодня",
+      "tomorrow": "Завтра"
+    },
+    "emptyState": {
+      "title": "Заданий нет",
+      "hint": "Задания появятся здесь после создания",
+      "filteredTitle": "Нет заданий с таким статусом",
+      "filteredHint": "Попробуйте другой фильтр"
+    },
+    "toast": {
+      "error": "Ошибка",
+      "submitted": "Задание сдано",
+      "submitFailed": "Не удалось отправить задание",
+      "reviewed": "Задание проверено",
+      "reviewFailed": "Не удалось сохранить проверку",
+      "uploadFailed": "Ошибка загрузки файлов",
+      "created": "Домашнее задание добавлено",
+      "createFailed": "Не удалось создать задание"
+    },
+    "validation": {
+      "descriptionRequired": "Описание обязательно"
+    },
+    "modal": {
+      "title": "Домашнее задание",
+      "taskLabel": "Задание",
+      "descriptionPlaceholder": "Опишите задание для ученика...",
+      "deadlineLabel": "Дедлайн (необязательно)",
+      "materialsLabel": "Материалы (необязательно, до 5)",
+      "submit": "Добавить задание"
+    },
+    "submit": {
+      "commentLabel": "Комментарий (необязательно)",
+      "commentPlaceholder": "Напишите комментарий к выполненному заданию...",
+      "filesLabel": "Файлы (необязательно, до 5)",
+      "confirm": "Сдать"
+    },
+    "review": {
+      "title": "Проверка задания",
+      "noComment": "Без комментария",
+      "feedbackLabel": "Обратная связь (необязательно)",
+      "feedbackPlaceholder": "Напишите комментарий к работе ученика...",
+      "confirm": "Отметить проверенным"
+    }
+  },
+  "invite": {
+    "acceptFailed": "Не удалось принять приглашение",
+    "loading": {
+      "title": "Обработка приглашения...",
+      "subtitle": "Пожалуйста, подождите"
+    },
+    "success": {
+      "title": "Готово!",
+      "subtitle": "Вы добавлены как ученик. Переход в кабинет..."
+    },
+    "error": {
+      "title": "Ошибка",
+      "backToDashboard": "Вернуться в кабинет"
+    }
+  },
+  "lesson": {
+    "title": "Новый урок",
+    "submit": "Добавить урок",
+    "creating": "Создание...",
+    "durationMin": "{m}м",
+    "durationHour": "{h}ч",
+    "fields": {
+      "student": "Ученик",
+      "subject": "Предмет",
+      "date": "Дата",
+      "time": "Время",
+      "duration": "Длительность",
+      "price": "Стоимость, ₽"
+    },
+    "placeholders": {
+      "student": "Выберите ученика...",
+      "subject": "Математика",
+      "priceFromProfile": "{price} (из профиля)"
+    },
+    "errors": {
+      "studentRequired": "Выберите ученика",
+      "subjectRequired": "Укажите предмет",
+      "dateRequired": "Укажите дату",
+      "timeRequired": "Укажите время",
+      "pastLesson": "Нельзя создать урок в прошлом"
+    },
+    "toast": {
+      "created": "Урок добавлен",
+      "createFailed": "Не удалось создать урок",
+      "error": "Ошибка"
+    },
+    "paymentStatus": {
+      "PAID": "Оплачено",
+      "PENDING": "Ожидает",
+      "OVERDUE": "Просрочено"
+    },
+    "card": {
+      "saving": "Сохранение...",
+      "markPaid": "Отметить оплаченным",
+      "sending": "Отправка...",
+      "remind": "Напомнить ученику",
+      "addHomework": "Добавить ДЗ"
+    },
+    "notes": {
+      "journal": "Журнал урока",
+      "cancel": "Отмена",
+      "save": "Сохранить",
+      "add": "Добавить заметку",
+      "placeholder": "Что прошли на уроке...",
+      "emptyStudent": "Репетитор ещё не добавил заметки",
+      "addFailed": "Не удалось добавить заметку",
+      "updateFailed": "Не удалось обновить заметку",
+      "deleteFailed": "Не удалось удалить заметку"
+    }
+  },
+  "onboarding": {
+    "next": "Далее",
+    "skip": "Пропустить",
+    "gender": {
+      "label": "Пол",
+      "male": "Мужской",
+      "female": "Женский",
+      "other": "Другой"
+    },
+    "avatar": {
+      "choose": "Выберите аватарку",
+      "alt": "Аватарка",
+      "variant": "Вариант {index}",
+      "upload": "Загрузить свою фото",
+      "uploading": "Загрузка..."
+    },
+    "welcome": {
+      "greeting": "Добро пожаловать!",
+      "greetingNamed": "{name}, добро пожаловать!",
+      "subtitle": "Настроим приложение под вас за пару минут. Расскажите немного о себе — и вперёд!",
+      "pillSchedule": "Расписание",
+      "pillPayments": "Оплаты",
+      "pillHomework": "ДЗ",
+      "cta": "Поехали"
+    },
+    "profile": {
+      "title": "Расскажите о себе",
+      "subtitle": "Эта информация поможет персонализировать приложение",
+      "nameLabel": "Ваше имя",
+      "namePlaceholder": "Иван Иванов",
+      "timezone": "Часовой пояс",
+      "autoDetected": "Определён автоматически",
+      "change": "Изменить"
+    },
+    "subjects": {
+      "title": "Что вы преподаёте?",
+      "subtitle": "Выберите предметы — можно несколько",
+      "customPlaceholder": "Свой предмет...",
+      "rateLabel": "Ставка за час (₽)",
+      "rateHint": "Можно указать позже в настройках",
+      "list": {
+        "math": "Математика",
+        "english": "Английский",
+        "russian": "Русский язык",
+        "physics": "Физика",
+        "chemistry": "Химия",
+        "biology": "Биология",
+        "computerScience": "Информатика",
+        "history": "История",
+        "socialStudies": "Обществознание",
+        "literature": "Литература",
+        "german": "Немецкий",
+        "french": "Французский",
+        "music": "Музыка",
+        "drawing": "Рисование",
+        "geography": "География"
+      }
+    },
+    "firstStudent": {
+      "title": "Добавьте первого ученика",
+      "subtitle": "Можно пропустить и добавить позже",
+      "nameLabel": "Имя ученика",
+      "namePlaceholder": "Анна Петрова",
+      "subjectLabel": "Предмет",
+      "subjectPlaceholder": "Математика",
+      "colorLabel": "Цвет",
+      "addButton": "Добавить ученика",
+      "adding": "Добавление...",
+      "addedToast": "Ученик добавлен!",
+      "errorTitle": "Ошибка",
+      "errorDescription": "Попробуйте ещё раз",
+      "successTitle": "Отлично!",
+      "successMessage": "{name} добавлен(а) в список учеников"
+    },
+    "telegram": {
+      "title": "Подключите Telegram",
+      "subtitle": "Получайте напоминания об уроках и оплатах прямо в мессенджер",
+      "connected": "Telegram подключён!",
+      "connectedHint": "Уведомления будут приходить в бот",
+      "openBot": "Открыть бот",
+      "pressStart": "Нажмите «Start» в боте — мы автоматически определим подключение",
+      "linkError": "Не удалось получить ссылку. Можно подключить позже в настройках.",
+      "benefit1": "Напоминание за 1 час до урока",
+      "benefit2": "Уведомление о новом домашнем задании",
+      "benefit3": "Сводка по оплатам за неделю",
+      "setupLater": "Настрою позже"
+    },
+    "plan": {
+      "title": "Выберите план",
+      "subtitle": "Начните бесплатно или попробуйте все возможности PRO",
+      "forever": "навсегда",
+      "daysFree": "30 дней бесплатно",
+      "perMonthAfterTrial": "в месяц, после триала",
+      "activating": "Активация...",
+      "tryProFree": "Попробовать PRO бесплатно",
+      "continueFree": "Продолжить на FREE",
+      "trialActivatedToast": "PRO на 30 дней активирован!",
+      "free": {
+        "upTo5": "До 5 учеников",
+        "schedule": "Расписание и календарь",
+        "payments": "Учёт оплат",
+        "homework": "Домашние задания",
+        "telegram": "Telegram-уведомления",
+        "unlimited": "Безлимит учеников",
+        "googleCalendar": "Google Calendar",
+        "pdfInvoices": "PDF-счета"
+      },
+      "pro": {
+        "unlimited": "Неограниченное число учеников",
+        "schedule": "Расписание и календарь",
+        "payments": "Учёт оплат",
+        "homework": "Домашние задания",
+        "telegram": "Telegram-уведомления",
+        "googleCalendar": "Google Calendar синхронизация",
+        "pdfInvoices": "Генерация PDF-счетов",
+        "prioritySupport": "Приоритетная поддержка"
+      }
+    },
+    "done": {
+      "welcomeToast": "Добро пожаловать в Lessonify!",
+      "errorTitle": "Ошибка",
+      "errorDescription": "Попробуйте ещё раз",
+      "statProfile": "Профиль",
+      "statSubjects": "Предметы",
+      "statStudent": "Ученик",
+      "title": "Всё готово!",
+      "subtitleTutor": "Ваш аккаунт настроен. Переходите к дашборду — там уже ждут ваши инструменты.",
+      "subtitleStudent": "Аккаунт настроен. Переходите к расписанию — ваш репетитор уже ждёт!",
+      "ready": "Готово",
+      "saving": "Сохранение...",
+      "goToDashboard": "Перейти к дашборду"
+    }
+  },
+  "settingsSections": {
+    "error": "Ошибка",
+    "cancel": "Отмена",
+    "add": "Добавить",
+    "save": "Сохранить",
+    "saving": "Сохранение...",
+    "saveFailed": "Не удалось сохранить",
+    "loading": "Загрузка...",
+    "connected": "Подключён",
+    "connect": "Подключить",
+    "disconnect": "Отключить",
+    "apply": "Применить",
+    "minutesShort": "{m} мин",
+    "hoursPlural": "{count, plural, one {# час} few {# часа} many {# часов} other {# часов}}",
+    "daysPlural": "{count, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
+    "days": {
+      "sun": "Воскресенье",
+      "mon": "Понедельник",
+      "tue": "Вторник",
+      "wed": "Среда",
+      "thu": "Четверг",
+      "fri": "Пятница",
+      "sat": "Суббота"
+    },
+    "availabilityTitle": "Расписание записи",
+    "availabilitySubtitle": "Укажите, когда ученики могут записаться",
+    "slotAdded": "Слот добавлен",
+    "slotAddFailed": "Не удалось добавить слот",
+    "slotDeleted": "Слот удалён",
+    "noSlots": "Нет слотов",
+    "bookingConfirmed": "Запись подтверждена",
+    "bookingRejected": "Запись отклонена",
+    "bookingRequestsTitle": "Запросы на запись",
+    "bookingRequestsSubtitle": "Ученики хотят записаться на урок",
+    "bookingDateFormat": "d MMM, EEEE 'в' HH:mm",
+    "pricePlaceholder": "Цена (₽)",
+    "reject": "Отклонить",
+    "confirm": "Подтвердить",
+    "googleCalendar": "Google Календарь",
+    "calendarConnected": "Google Календарь подключён",
+    "calendarConnectFailed": "Не удалось подключить Google Календарь",
+    "calendarDisconnected": "Google Календарь отключён",
+    "calendarSyncInfo": "Уроки автоматически синхронизируются в Google Календарь",
+    "calendarSyncPrompt": "Синхронизируйте уроки с Google Календарём автоматически",
+    "lastSync": "Последняя синхр.",
+    "syncEnabled": "Синхронизация включена",
+    "syncDisabled": "Синхронизация выключена",
+    "syncOn": "Синхр. вкл.",
+    "syncOff": "Синхр. выкл.",
+    "syncAll": "Синхронизировать все",
+    "syncError": "Ошибка синхронизации",
+    "syncedLessons": "{count, plural, one {Синхронизирован # урок} few {Синхронизировано # урока} many {Синхронизировано # уроков} other {Синхронизировано # уроков}}",
+    "profile": "Профиль",
+    "name": "Имя",
+    "nameMin": "Минимум 2 символа",
+    "profileUpdated": "Профиль обновлён",
+    "referralTitle": "Реферальная программа",
+    "referralSubtitle": "Приглашайте коллег и зарабатывайте",
+    "yourReferralCode": "Ваш реферальный код",
+    "copy": "Копировать",
+    "copiedShort": "Скопировано",
+    "copied": "Скопировано!",
+    "invited": "Приглашённых",
+    "earnedRub": "Заработано ₽",
+    "balanceRub": "Баланс ₽",
+    "referralDescription": "<b>20% с каждой покупки Pro</b> от приглашённого репетитора. Минимальная сумма вывода — 500 ₽.",
+    "withdrawProcessing": "Заявка на вывод обрабатывается",
+    "withdrawMin": "Вывод от 500 ₽ (сейчас {amount} ₽)",
+    "withdrawNow": "Вывести {amount} ₽",
+    "withdrawTitle": "Вывод средств",
+    "withdrawAmount": "Сумма к выводу",
+    "withdrawDetailsLabel": "Реквизиты для перевода",
+    "withdrawDetailsPlaceholder": "Номер карты или телефон СБП",
+    "withdrawSubmitted": "Заявка отправлена",
+    "withdrawSubmittedDesc": "Мы переведём средства в течение 3 рабочих дней",
+    "tryLater": "Попробуйте позже",
+    "sending": "Отправка...",
+    "submitRequest": "Отправить заявку",
+    "remindersTitle": "Напоминания",
+    "remindersSubtitle": "Когда напоминать об уроках",
+    "remindersSaved": "Напоминания сохранены",
+    "beforeLesson": "За сколько до урока",
+    "afterLessonPayment": "Напомнить об оплате через",
+    "timezone": "Ваш часовой пояс",
+    "freePlan": "Бесплатный план",
+    "proPlan": "PRO план",
+    "active": "Активен",
+    "activeUntil": "Активен до {date}",
+    "basicFeatures": "Базовые возможности",
+    "proExpiresToday": "PRO-план истекает сегодня!",
+    "proExpiresIn": "{count, plural, one {PRO-план заканчивается через # дн.} few {PRO-план заканчивается через # дн.} many {PRO-план заканчивается через # дн.} other {PRO-план заканчивается через # дн.}}",
+    "freeFeatures": {
+      "students": "До 5 учеников",
+      "schedule": "Расписание и календарь",
+      "payments": "Учёт оплат",
+      "homework": "Домашние задания",
+      "telegram": "Telegram-уведомления"
+    },
+    "proFeatures": {
+      "unlimitedStudents": "Неограниченное число учеников",
+      "allFree": "Все функции бесплатного плана",
+      "bookingPage": "Страница записи для учеников",
+      "googleCalendar": "Google Calendar синхронизация",
+      "referral": "Реферальная программа",
+      "pdfInvoices": "Генерация PDF-счетов",
+      "prioritySupport": "Приоритетная поддержка"
+    },
+    "promoPlaceholder": "Введите промокод",
+    "promoApplied": "{count, plural, one {Промокод применён! +# день PRO} few {Промокод применён! +# дня PRO} many {Промокод применён! +# дней PRO} other {Промокод применён! +# дней PRO}}",
+    "havePromo": "Есть промокод?",
+    "trialActivated": "Пробный период на 30 дней активирован!",
+    "tryProFree": "Попробовать PRO бесплатно — 30 дней",
+    "activating": "Активация...",
+    "paymentSuccess": "Оплата прошла успешно! PRO-план активирован.",
+    "paymentCancelled": "Оплата отменена",
+    "proPlans": "Тарифы PRO",
+    "perMonth": "в месяц",
+    "perYear": "в год",
+    "extendPro": "Продлить PRO",
+    "plusMonth": "+1 месяц",
+    "plusYear": "+1 год",
+    "offerAgreement": "Оплачивая, вы соглашаетесь с <a>публичной офертой</a>",
+    "openingTelegram": "Открываем Telegram",
+    "openingTelegramDesc": "Нажмите «Start» в боте — привязка определится автоматически.",
+    "telegramDisconnected": "Telegram отключён",
+    "telegramDisconnectFailed": "Не удалось отключить Telegram",
+    "telegramPrompt": "Получайте напоминания об уроках в Telegram",
+    "disconnecting": "Отключение...",
+    "openBotConnect": "Открыть бота и подключить"
+  },
+  "students": {
+    "title": "Ученики",
+    "add": "Добавить",
+    "noStudents": "Нет учеников",
+    "addFirstHint": "Нажмите, чтобы добавить первого",
+    "searchPlaceholder": "Поиск по имени или предмету...",
+    "clearSearch": "Очистить поиск",
+    "notFound": "Ничего не найдено",
+    "tryAnotherQuery": "Попробуйте другой запрос",
+    "perHour": "/ч",
+    "summary": {
+      "total": "Всего",
+      "debts": "Долги",
+      "debtors": "Должников"
+    },
+    "card": {
+      "telegramConnected": "Telegram подключён",
+      "noSubject": "Без предмета",
+      "noLessons": "Нет уроков",
+      "debt": "Долг {amount}"
+    },
+    "form": {
+      "title": "Новый ученик",
+      "name": "Имя *",
+      "namePlaceholder": "Иван Иванов",
+      "nameRequired": "Введите имя",
+      "subject": "Предмет",
+      "subjectPlaceholder": "Математика",
+      "hourlyRate": "Стоимость урока, ₽",
+      "emailInvalid": "Некорректный email",
+      "phone": "Телефон",
+      "color": "Цвет",
+      "notes": "Заметки",
+      "notesPlaceholder": "Любая дополнительная информация",
+      "saving": "Сохранение...",
+      "submit": "Добавить ученика"
+    },
+    "toast": {
+      "error": "Ошибка",
+      "created": "Ученик добавлен",
+      "createError": "Не удалось добавить ученика",
+      "linkCopied": "Ссылка скопирована",
+      "copyError": "Не удалось скопировать ссылку",
+      "deleted": "Ученик удалён",
+      "deleteError": "Не удалось удалить ученика"
+    },
+    "payment": {
+      "paid": "Оплачено",
+      "pending": "Ожидает",
+      "overdue": "Просрочено"
+    },
+    "detail": {
+      "title": "Карточка ученика",
+      "debt": "Долг",
+      "added": "Добавлен",
+      "notes": "Заметки",
+      "generating": "Генерация...",
+      "copyInvite": "Скопировать ссылку-приглашение",
+      "recentLessons": "Последние уроки",
+      "deleteStudent": "Удалить ученика",
+      "deleteConfirm": "Удалить <b>{name}</b>? Все уроки и домашние задания будут удалены.",
+      "cancel": "Отмена",
+      "deleting": "Удаление...",
+      "delete": "Удалить"
+    }
+  },
+  "teachers": {
+    "title": "Преподаватели",
+    "noneConnected": "Нет подключённых преподавателей",
+    "add": "Добавить",
+    "addByLink": "Добавить преподавателя по ссылке",
+    "addByLinkHint": "Если преподаватель отправил вам ссылку-приглашение — вставьте её сюда. Преподаватель добавится и все назначенные им уроки станут видны в расписании.",
+    "cancel": "Отмена",
+    "emptyTitle": "Нет преподавателей",
+    "emptyHint": "Попросите преподавателя отправить вам ссылку-приглашение",
+    "pasteLink": "Вставить ссылку",
+    "toastAdded": "Преподаватель добавлен!",
+    "addError": "Не удалось добавить преподавателя",
+    "error": "Ошибка"
+  },
+  "toasts": {
+    "invalidCredentials": "Неверный email или пароль",
+    "googleLoginError": "Ошибка входа через Google",
+    "registerError": "Ошибка регистрации",
+    "welcomeToLessonify": "Добро пожаловать в Lessonify!",
+    "trialActivationError": "Ошибка активации триала",
+    "checkoutError": "Ошибка создания платежа",
+    "loadLessonsError": "Не удалось загрузить уроки",
+    "promoApplyError": "Ошибка применения промокода",
+    "invoiceFilePrefix": "счёт"
+  }
+}

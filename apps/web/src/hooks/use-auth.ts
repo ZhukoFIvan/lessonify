@@ -1,11 +1,21 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth.store'
 import { toast } from '@/components/ui/use-toast'
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from '@/i18n/config'
+
+// Засеваем куку языка из сохранённого в БД предпочтения, чтобы сервер сразу
+// отрендерил интерфейс на нужном языке (кросс-девайс перенос выбора).
+function seedLocaleCookie(locale?: string | null): void {
+  if (!locale) return
+  document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`
+}
 
 export function useAuth() {
+  const t = useTranslations('toasts')
   const router = useRouter()
   const { setUser, setAccessToken, logout: clearStore } = useAuthStore()
 
@@ -21,7 +31,7 @@ export function useAuth() {
     })
 
     if (!res.ok) {
-      throw new Error('Неверный email или пароль')
+      throw new Error(t('invalidCredentials'))
     }
 
     const { data } = await res.json()
@@ -29,6 +39,7 @@ export function useAuth() {
     // Сохраняем в Zustand
     setUser(data.user)
     setAccessToken(data.accessToken)
+    seedLocaleCookie(data.user?.locale)
 
     router.push(data.user.role === 'ADMIN' ? '/admin' : '/dashboard')
     router.refresh()
@@ -46,12 +57,13 @@ export function useAuth() {
 
     if (!res.ok) {
       const err = await res.json()
-      throw new Error(err.error ?? 'Ошибка входа через Google')
+      throw new Error(err.error ?? t('googleLoginError'))
     }
 
     const { data } = await res.json()
     setUser(data.user)
     setAccessToken(data.accessToken)
+    seedLocaleCookie(data.user?.locale)
     router.push('/dashboard')
     router.refresh()
   }
@@ -75,7 +87,7 @@ export function useAuth() {
 
     if (!res.ok) {
       const err = await res.json()
-      throw new Error(err.error ?? 'Ошибка регистрации')
+      throw new Error(err.error ?? t('registerError'))
     }
 
     const { data: resData } = await res.json()
@@ -109,6 +121,7 @@ export function useAuth() {
     name?: string
     gender?: 'MALE' | 'FEMALE' | 'OTHER' | null
     avatarUrl?: string | null
+    locale?: 'ru' | 'en' | 'uk'
   }) {
     // Используем Axios с Bearer токеном из Zustand
     const { default: api } = await import('@/lib/api')
@@ -125,7 +138,7 @@ export function useAuth() {
     avatarUrl: string
   }) {
     await updateProfile(data)
-    toast({ variant: 'success', title: 'Добро пожаловать в Lessonify!' })
+    toast({ variant: 'success', title: t('welcomeToLessonify') })
     router.push('/dashboard')
   }
 

@@ -6,12 +6,15 @@ export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 
 // ── Base user ─────────────────────────────────────────────────────────────────
 
+export type Locale = 'ru' | 'en' | 'uk'
+
 export interface User {
   id: string
   email: string
   name: string
   avatarUrl: string | null
   gender: Gender | null
+  locale: Locale | null
   role: UserRole
   isBlocked: boolean
   plan: 'FREE' | 'PRO'

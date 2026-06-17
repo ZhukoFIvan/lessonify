@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Send, Link2, GraduationCap, BookOpen, Hourglass, TrendingUp, MousePointerClick } from 'lucide-react'
 import { useAdminBotStats } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
@@ -16,6 +17,7 @@ function StatCard({ label, value, icon, color, sub }: { label: string; value: st
 }
 
 export default function AdminBotPage() {
+  const t = useTranslations('admin')
   const { stats, loading } = useAdminBotStats()
 
   if (loading) {
@@ -34,22 +36,22 @@ export default function AdminBotPage() {
   if (!stats) return null
 
   const cards = [
-    { label: 'Нажали /start', value: stats.botStarted, icon: <MousePointerClick size={18} className="text-pink-400" />, color: 'bg-pink-500/15', sub: `${stats.botStartsTotal} нажатий всего` },
-    { label: 'Старт → привязка', value: `${stats.startToLinkedConversion}%`, icon: <TrendingUp size={18} className="text-emerald-400" />, color: 'bg-emerald-500/15', sub: `${stats.linked} из ${stats.botStarted}` },
-    { label: 'Подключено', value: stats.linked, icon: <Send size={18} className="text-blue-400" />, color: 'bg-blue-500/15', sub: `из ${stats.total} привязок` },
-    { label: 'Конверсия репетиторов', value: `${stats.tutorConversion}%`, icon: <TrendingUp size={18} className="text-primary" />, color: 'bg-primary/15', sub: `${stats.tutorConnections} из ${stats.totalTutors}` },
-    { label: 'Репетиторы', value: stats.tutorConnections, icon: <GraduationCap size={18} className="text-violet-400" />, color: 'bg-violet-500/15' },
-    { label: 'Ученики', value: stats.studentConnections, icon: <BookOpen size={18} className="text-cyan-400" />, color: 'bg-cyan-500/15' },
-    { label: 'Активных привязок', value: stats.linked, icon: <Link2 size={18} className="text-green-400" />, color: 'bg-green-500/15' },
-    { label: 'Незавершённых', value: stats.pendingCodes, icon: <Hourglass size={18} className="text-amber-400" />, color: 'bg-amber-500/15', sub: 'код выдан, бот не привязан' },
+    { label: t('bot.cards.started'), value: stats.botStarted, icon: <MousePointerClick size={18} className="text-pink-400" />, color: 'bg-pink-500/15', sub: t('bot.cards.startedSub', { count: stats.botStartsTotal }) },
+    { label: t('bot.cards.startToLinked'), value: `${stats.startToLinkedConversion}%`, icon: <TrendingUp size={18} className="text-emerald-400" />, color: 'bg-emerald-500/15', sub: t('bot.cards.outOf', { a: stats.linked, b: stats.botStarted }) },
+    { label: t('bot.cards.connected'), value: stats.linked, icon: <Send size={18} className="text-blue-400" />, color: 'bg-blue-500/15', sub: t('bot.cards.connectedSub', { count: stats.total }) },
+    { label: t('bot.cards.tutorConversion'), value: `${stats.tutorConversion}%`, icon: <TrendingUp size={18} className="text-primary" />, color: 'bg-primary/15', sub: t('bot.cards.outOf', { a: stats.tutorConnections, b: stats.totalTutors }) },
+    { label: t('bot.cards.tutors'), value: stats.tutorConnections, icon: <GraduationCap size={18} className="text-violet-400" />, color: 'bg-violet-500/15' },
+    { label: t('bot.cards.students'), value: stats.studentConnections, icon: <BookOpen size={18} className="text-cyan-400" />, color: 'bg-cyan-500/15' },
+    { label: t('bot.cards.activeLinks'), value: stats.linked, icon: <Link2 size={18} className="text-green-400" />, color: 'bg-green-500/15' },
+    { label: t('bot.cards.pending'), value: stats.pendingCodes, icon: <Hourglass size={18} className="text-amber-400" />, color: 'bg-amber-500/15', sub: t('bot.cards.pendingSub') },
   ]
 
   return (
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-black text-white">Telegram-бот</h1>
-        <p className="text-white/40 text-sm mt-1">Подключения и активность</p>
+        <h1 className="text-2xl font-black text-white">{t('bot.title')}</h1>
+        <p className="text-white/40 text-sm mt-1">{t('bot.subtitle')}</p>
       </div>
 
       {/* Stats grid */}
@@ -60,7 +62,7 @@ export default function AdminBotPage() {
       {/* Recent connections */}
       <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-white/[0.06]">
-          <h2 className="text-white font-bold text-sm">Недавние подключения</h2>
+          <h2 className="text-white font-bold text-sm">{t('bot.recentConnections')}</h2>
         </div>
         <div className="divide-y divide-white/[0.04]">
           {stats.recent.map(c => (
@@ -73,11 +75,11 @@ export default function AdminBotPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-medium truncate">
-                  {c.target.name ?? c.firstName ?? 'Без имени'}
+                  {c.target.name ?? c.firstName ?? t('bot.noName')}
                   {c.username && <span className="text-white/35 font-normal ml-1.5">@{c.username}</span>}
                 </p>
                 <p className="text-white/35 text-xs truncate">
-                  {c.target.type === 'tutor' ? 'Репетитор' : 'Ученик'}
+                  {c.target.type === 'tutor' ? t('roles.tutor') : t('roles.student')}
                   {c.target.email ? ` · ${c.target.email}` : ''}
                 </p>
               </div>
@@ -87,7 +89,7 @@ export default function AdminBotPage() {
             </div>
           ))}
           {stats.recent.length === 0 && (
-            <p className="px-5 py-6 text-white/30 text-sm text-center">Подключений пока нет</p>
+            <p className="px-5 py-6 text-white/30 text-sm text-center">{t('bot.noConnections')}</p>
           )}
         </div>
       </div>

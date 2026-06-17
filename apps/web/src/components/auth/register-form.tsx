@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Eye, EyeOff, GraduationCap, BookOpen } from 'lucide-react'
 import { useState } from 'react'
@@ -14,29 +15,37 @@ import { useAuth } from '@/hooks/use-auth'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 
-const registerSchema = z
-  .object({
-    name: z.string().min(2, 'Минимум 2 символа').max(100),
-    email: z.string().email('Некорректный email'),
-    password: z.string().min(8, 'Минимум 8 символов'),
-    confirmPassword: z.string().min(1, 'Подтвердите пароль'),
-    role: z.enum(['TUTOR', 'STUDENT']),
-    inviteToken: z.string().optional(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Пароли не совпадают',
-    path: ['confirmPassword'],
-  })
-
-type RegisterFormData = z.infer<typeof registerSchema>
+type RegisterFormData = {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+  role: 'TUTOR' | 'STUDENT'
+  inviteToken?: string
+}
 
 interface RegisterFormProps {
   inviteToken?: string
 }
 
 export function RegisterForm({ inviteToken }: RegisterFormProps) {
+  const t = useTranslations('auth')
   const { register: registerUser } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
+
+  const registerSchema = z
+    .object({
+      name: z.string().min(2, t('register.nameMin')).max(100),
+      email: z.string().email(t('register.emailInvalid')),
+      password: z.string().min(8, t('register.passwordMin')),
+      confirmPassword: z.string().min(1, t('register.confirmRequired')),
+      role: z.enum(['TUTOR', 'STUDENT']),
+      inviteToken: z.string().optional(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('register.passwordMismatch'),
+      path: ['confirmPassword'],
+    })
 
   const {
     register,
@@ -66,8 +75,8 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
     } catch (err) {
       toast({
         variant: 'destructive',
-        title: 'Ошибка регистрации',
-        description: err instanceof Error ? err.message : 'Попробуйте ещё раз',
+        title: t('register.errorTitle'),
+        description: err instanceof Error ? err.message : t('register.tryAgain'),
       })
     }
   }
@@ -79,16 +88,16 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
         <div className="brand-gradient mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-white shadow-elevation-2 lg:hidden">
           <GraduationCap size={24} />
         </div>
-        <h1 className="text-h1 text-foreground">Создать аккаунт</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Присоединяйтесь к Lessonify</p>
+        <h1 className="text-h1 text-foreground">{t('register.title')}</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">{t('register.subtitle')}</p>
       </div>
 
       {/* Выбор роли */}
       {!inviteToken && (
         <div className="grid grid-cols-2 gap-3">
           {([
-            { value: 'TUTOR', label: 'Репетитор', icon: GraduationCap, desc: 'Веду уроки' },
-            { value: 'STUDENT', label: 'Ученик', icon: BookOpen, desc: 'Учусь' },
+            { value: 'TUTOR', label: t('register.roleTutor'), icon: GraduationCap, desc: t('register.roleTutorDesc') },
+            { value: 'STUDENT', label: t('register.roleStudent'), icon: BookOpen, desc: t('register.roleStudentDesc') },
           ] as const).map(({ value, label, icon: Icon, desc }) => {
             const selected = role === value
             return (
@@ -124,8 +133,8 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
       {/* Форма */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Имя</Label>
-          <Input id="name" placeholder="Иван Иванов" autoComplete="name" {...register('name')} />
+          <Label htmlFor="name">{t('register.nameLabel')}</Label>
+          <Input id="name" placeholder={t('register.namePlaceholder')} autoComplete="name" {...register('name')} />
           {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
         </div>
 
@@ -136,12 +145,12 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">Пароль</Label>
+          <Label htmlFor="password">{t('register.passwordLabel')}</Label>
           <div className="relative">
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Минимум 8 символов"
+              placeholder={t('register.passwordMin')}
               autoComplete="new-password"
               className="pr-12"
               {...register('password')}
@@ -158,11 +167,11 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="confirmPassword">Повторите пароль</Label>
+          <Label htmlFor="confirmPassword">{t('register.confirmLabel')}</Label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder="Повторите пароль"
+            placeholder={t('register.confirmLabel')}
             autoComplete="new-password"
             {...register('confirmPassword')}
           />
@@ -172,9 +181,9 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
         {/* Поле для токена приглашения (только для ученика) */}
         {role === 'STUDENT' && !inviteToken && (
           <div className="rounded-lg border border-[hsl(var(--warning)/0.3)] bg-[hsl(var(--warning)/0.12)] p-4">
-            <p className="mb-1 text-sm font-semibold text-[hsl(var(--warning))]">Нужна ссылка-приглашение</p>
+            <p className="mb-1 text-sm font-semibold text-[hsl(var(--warning))]">{t('register.inviteNeededTitle')}</p>
             <p className="text-xs text-muted-foreground">
-              Попросите репетитора отправить вам персональную ссылку для регистрации.
+              {t('register.inviteNeededDesc')}
             </p>
           </div>
         )}
@@ -184,7 +193,7 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
           className="w-full mt-2"
           disabled={isSubmitting || (role === 'STUDENT' && !inviteToken)}
         >
-          {isSubmitting ? 'Создание...' : 'Создать аккаунт'}
+          {isSubmitting ? t('register.submitting') : t('register.submit')}
         </Button>
       </form>
 
@@ -193,7 +202,7 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
         <>
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-[var(--border-subtle)]" />
-            <span className="text-xs text-muted-foreground">или</span>
+            <span className="text-xs text-muted-foreground">{t('register.or')}</span>
             <div className="h-px flex-1 bg-[var(--border-subtle)]" />
           </div>
           <GoogleButton />
@@ -201,16 +210,16 @@ export function RegisterForm({ inviteToken }: RegisterFormProps) {
       )}
 
       <p className="text-center text-xs text-muted-foreground">
-        Регистрируясь, вы соглашаетесь с{' '}
+        {t('register.termsPrefix')}{' '}
         <a href="/offer" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-          публичной офертой
+          {t('register.termsLink')}
         </a>
       </p>
 
       <p className="text-center text-sm text-muted-foreground">
-        Уже есть аккаунт?{' '}
+        {t('register.haveAccount')}{' '}
         <Link href="/auth/login" className="font-semibold text-primary hover:underline">
-          Войти
+          {t('register.signIn')}
         </Link>
       </p>
     </div>

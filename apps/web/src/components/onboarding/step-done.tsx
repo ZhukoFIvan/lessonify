@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,7 @@ interface StepDoneProps {
 }
 
 export function StepDone({ data, isTutor }: StepDoneProps) {
+  const t = useTranslations('onboarding')
   const router = useRouter()
   const { setUser } = useAuthStore()
   const { update: updateTutor } = useUpdateTutorSettings()
@@ -80,20 +82,20 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
         avatarUrl: data.avatarUrl,
       })
       setUser(res.data)
-      toast({ variant: 'success', title: 'Добро пожаловать в Lessonify!' })
+      toast({ variant: 'success', title: t('done.welcomeToast') })
       router.push('/dashboard')
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Попробуйте ещё раз' })
+      toast({ variant: 'destructive', title: t('done.errorTitle'), description: t('done.errorDescription') })
       setSaving(false)
     }
   }
 
   const stats = [
-    { label: 'Профиль', done: true },
+    { label: t('done.statProfile'), done: true },
     ...(isTutor
       ? [
-          { label: 'Предметы', done: data.subjects.length > 0 },
-          { label: 'Ученик', done: data.studentAdded },
+          { label: t('done.statSubjects'), done: data.subjects.length > 0 },
+          { label: t('done.statStudent'), done: data.studentAdded },
         ]
       : []),
   ]
@@ -130,7 +132,7 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
         transition={{ delay: 0.3 }}
         className="text-2xl font-bold text-foreground tracking-tight"
       >
-        Всё готово!
+        {t('done.title')}
       </motion.h2>
 
       <motion.p
@@ -140,8 +142,8 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
         className="text-muted-foreground mt-2 max-w-xs"
       >
         {isTutor
-          ? 'Ваш аккаунт настроен. Переходите к дашборду — там уже ждут ваши инструменты.'
-          : 'Аккаунт настроен. Переходите к расписанию — ваш репетитор уже ждёт!'}
+          ? t('done.subtitleTutor')
+          : t('done.subtitleStudent')}
       </motion.p>
 
       {/* Summary cards */}
@@ -163,7 +165,7 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
               {done && <CheckCircle2 size={14} className="text-white" />}
             </div>
             <span className="text-sm text-foreground">{label}</span>
-            {done && <span className="text-xs text-green-600 dark:text-green-400 ml-auto">Готово</span>}
+            {done && <span className="text-xs text-green-600 dark:text-green-400 ml-auto">{t('done.ready')}</span>}
           </motion.div>
         ))}
       </motion.div>
@@ -184,11 +186,11 @@ export function StepDone({ data, isTutor }: StepDoneProps) {
           {saving ? (
             <>
               <Loader2 size={18} className="mr-2 animate-spin" />
-              Сохранение...
+              {t('done.saving')}
             </>
           ) : (
             <>
-              Перейти к дашборду
+              {t('done.goToDashboard')}
               <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
             </>
           )}

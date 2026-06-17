@@ -127,6 +127,7 @@ const profileSchema = z.object({
   name: z.string().min(2).max(100).trim().optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).nullable().optional(),
   avatarUrl: z.string().url().nullable().optional(),
+  locale: z.enum(['ru', 'en', 'uk']).optional(),
 })
 
 authRouter.patch('/profile', requireAuth, async (req: Request, res: Response) => {
@@ -138,10 +139,11 @@ authRouter.patch('/profile', requireAuth, async (req: Request, res: Response) =>
         ...(data.name !== undefined && { name: data.name }),
         ...(data.gender !== undefined && { gender: data.gender }),
         ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+        ...(data.locale !== undefined && { locale: data.locale }),
       },
       select: {
         id: true, email: true, name: true,
-        avatarUrl: true, gender: true, role: true,
+        avatarUrl: true, gender: true, locale: true, role: true,
         createdAt: true, updatedAt: true,
       },
     })
@@ -272,6 +274,7 @@ authRouter.get('/me', async (req: Request, res: Response) => {
           name: true,
           avatarUrl: true,
           gender: true,
+          locale: true,
           role: true,
           createdAt: true,
           updatedAt: true,

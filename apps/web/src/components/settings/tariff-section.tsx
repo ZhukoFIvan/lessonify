@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Zap, Crown, Check, Tag, Clock, Sparkles, ArrowRight } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { usePromo } from '@/hooks/use-promo'
@@ -8,24 +9,7 @@ import { useBilling } from '@/hooks/use-billing'
 import { toast } from '@/components/ui/use-toast'
 import { useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
-
-const FREE_FEATURES = [
-  'До 5 учеников',
-  'Расписание и календарь',
-  'Учёт оплат',
-  'Домашние задания',
-  'Telegram-уведомления',
-]
-
-const PRO_FEATURES = [
-  'Неограниченное число учеников',
-  'Все функции бесплатного плана',
-  'Страница записи для учеников',
-  'Google Calendar синхронизация',
-  'Реферальная программа',
-  'Генерация PDF-счетов',
-  'Приоритетная поддержка',
-]
+import { useFormatters } from '@/i18n/use-formatters'
 
 // Карточка тарифа для оплаты/продления
 function PlanOption({
@@ -71,9 +55,28 @@ function PlanOption({
 }
 
 export function TariffSection() {
+  const t = useTranslations('settingsSections')
   const user = useAuthStore((s) => s.user)
   const isPro = user?.plan === 'PRO'
   const canTrial = !user?.trialUsed && user?.plan === 'FREE'
+
+  const FREE_FEATURES = [
+    t('freeFeatures.students'),
+    t('freeFeatures.schedule'),
+    t('freeFeatures.payments'),
+    t('freeFeatures.homework'),
+    t('freeFeatures.telegram'),
+  ]
+
+  const PRO_FEATURES = [
+    t('proFeatures.unlimitedStudents'),
+    t('proFeatures.allFree'),
+    t('proFeatures.bookingPage'),
+    t('proFeatures.googleCalendar'),
+    t('proFeatures.referral'),
+    t('proFeatures.pdfInvoices'),
+    t('proFeatures.prioritySupport'),
+  ]
 
   const [promoInput, setPromoInput] = useState('')
   const [showPromo, setShowPromo] = useState(false)
@@ -81,6 +84,7 @@ export function TariffSection() {
   const { activateTrial, checkout, refreshStatus, loading: billingLoading, error: billingError } = useBilling()
 
   const searchParams = useSearchParams()
+  const f = useFormatters()
 
   useEffect(() => {
     refreshStatus()
@@ -95,9 +99,9 @@ export function TariffSection() {
 
     if (payment === 'success' || robokassaSuccess) {
       refreshStatus()
-      toast({ variant: 'success', title: 'Оплата прошла успешно! PRO-план активирован.' })
+      toast({ variant: 'success', title: t('paymentSuccess') })
     } else if (payment === 'cancelled') {
-      toast({ variant: 'destructive', title: 'Оплата отменена' })
+      toast({ variant: 'destructive', title: t('paymentCancelled') })
     } else if (robokassaReturn) {
       // Вернулись с оплаты без явного успеха — просто обновим статус плана.
       refreshStatus()
@@ -105,7 +109,7 @@ export function TariffSection() {
   }, [searchParams])
 
   const expiresAt = user?.planExpiresAt
-    ? new Date(user.planExpiresAt).toLocaleDateString('ru', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? f.dateFull(new Date(user.planExpiresAt).toISOString())
     : null
 
   const daysLeft = user?.planExpiresAt
@@ -118,7 +122,7 @@ export function TariffSection() {
     if (!promoInput.trim()) return
     const result = await apply(promoInput.trim())
     if (result) {
-      toast({ variant: 'success', title: `Промокод применён! +${result.daysAdded} дней PRO` })
+      toast({ variant: 'success', title: t('promoApplied', { count: result.daysAdded }) })
       setPromoInput('')
       setShowPromo(false)
     }
@@ -127,7 +131,7 @@ export function TariffSection() {
   const handleTrial = async () => {
     const ok = await activateTrial()
     if (ok) {
-      toast({ variant: 'success', title: 'Пробный период на 30 дней активирован!' })
+      toast({ variant: 'success', title: t('trialActivated') })
     } else if (billingError) {
       toast({ variant: 'destructive', title: billingError })
     }
@@ -156,10 +160,10 @@ export function TariffSection() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">
-            {isPro ? 'PRO план' : 'Бесплатный план'}
+            {isPro ? t('proPlan') : t('freePlan')}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">
-            {isPro && expiresAt ? `Активен до ${expiresAt}` : isPro ? 'Активен' : 'Базовые возможности'}
+            {isPro && expiresAt ? t('activeUntil', { date: expiresAt }) : isPro ? t('active') : t('basicFeatures')}
           </p>
         </div>
         <span
@@ -179,7 +183,7 @@ export function TariffSection() {
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-md bg-amber-500/10 border border-amber-500/20">
           <Clock size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
           <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-            {daysLeft === 0 ? 'PRO-план истекает сегодня!' : `PRO-план заканчивается через ${daysLeft} дн.`}
+            {daysLeft === 0 ? t('proExpiresToday') : t('proExpiresIn', { count: daysLeft })}
           </p>
         </div>
       )}
@@ -207,7 +211,7 @@ export function TariffSection() {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Введите промокод"
+              placeholder={t('promoPlaceholder')}
               value={promoInput}
               onChange={e => setPromoInput(e.target.value.toUpperCase())}
               onKeyDown={e => e.key === 'Enter' && handleApplyPromo()}
@@ -218,12 +222,12 @@ export function TariffSection() {
               disabled={promoLoading || !promoInput.trim()}
               className="rounded-md brand-gradient px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50"
             >
-              {promoLoading ? '...' : 'Применить'}
+              {promoLoading ? '...' : t('apply')}
             </button>
           </div>
           {promoError && <p className="text-xs text-destructive">{promoError}</p>}
           <button onClick={() => setShowPromo(false)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Отмена
+            {t('cancel')}
           </button>
         </div>
       ) : (
@@ -232,7 +236,7 @@ export function TariffSection() {
           className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <Tag size={12} />
-          Есть промокод?
+          {t('havePromo')}
         </button>
       )}
 
@@ -244,7 +248,7 @@ export function TariffSection() {
           className="group flex w-full items-center justify-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 py-2.5 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-500/20 disabled:opacity-50 dark:text-amber-400"
         >
           <Sparkles size={15} />
-          {billingLoading ? 'Активация...' : 'Попробовать PRO бесплатно — 30 дней'}
+          {billingLoading ? t('activating') : t('tryProFree')}
           {!billingLoading && <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />}
         </button>
       )}
@@ -252,19 +256,19 @@ export function TariffSection() {
       {/* Payment plans */}
       {!isPro && (
         <div className="space-y-2.5 border-t border-subtle pt-4">
-          <p className="text-xs font-semibold text-foreground">Тарифы PRO</p>
+          <p className="text-xs font-semibold text-foreground">{t('proPlans')}</p>
           <div className="grid grid-cols-2 gap-2.5">
             <PlanOption
               price="499"
               unit="₽"
-              caption="в месяц"
+              caption={t('perMonth')}
               onClick={() => checkout('monthly')}
               disabled={billingLoading}
             />
             <PlanOption
               price="3 990"
               unit="₽"
-              caption="в год"
+              caption={t('perYear')}
               badge="−33%"
               highlighted
               onClick={() => checkout('yearly')}
@@ -273,10 +277,13 @@ export function TariffSection() {
           </div>
           {billingError && <p className="text-xs text-destructive mt-1">{billingError}</p>}
           <p className="text-[11px] text-muted-foreground">
-            Оплачивая, вы соглашаетесь с{' '}
-            <a href="/offer" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
-              публичной офертой
-            </a>
+            {t.rich('offerAgreement', {
+              a: (chunks) => (
+                <a href="/offer" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
         </div>
       )}
@@ -284,7 +291,7 @@ export function TariffSection() {
       {/* Extend PRO */}
       {isPro && (
         <div className="space-y-2.5 border-t border-amber-500/15 pt-4">
-          <p className="text-xs font-semibold text-foreground">Продлить PRO</p>
+          <p className="text-xs font-semibold text-foreground">{t('extendPro')}</p>
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={() => checkout('monthly')}
@@ -295,7 +302,7 @@ export function TariffSection() {
                 <span className="tnum text-xl font-extrabold tracking-tight text-foreground">499</span>
                 <span className="text-sm font-semibold text-muted-foreground">₽</span>
               </div>
-              <span className="text-[11px] text-muted-foreground">+1 месяц</span>
+              <span className="text-[11px] text-muted-foreground">{t('plusMonth')}</span>
             </button>
             <button
               onClick={() => checkout('yearly')}
@@ -309,15 +316,18 @@ export function TariffSection() {
                 <span className="tnum text-xl font-extrabold tracking-tight text-foreground">3 990</span>
                 <span className="text-sm font-semibold text-muted-foreground">₽</span>
               </div>
-              <span className="text-[11px] text-muted-foreground">+1 год</span>
+              <span className="text-[11px] text-muted-foreground">{t('plusYear')}</span>
             </button>
           </div>
           {billingError && <p className="text-xs text-destructive mt-1">{billingError}</p>}
           <p className="text-[11px] text-muted-foreground">
-            Оплачивая, вы соглашаетесь с{' '}
-            <a href="/offer" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
-              публичной офертой
-            </a>
+            {t.rich('offerAgreement', {
+              a: (chunks) => (
+                <a href="/offer" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
         </div>
       )}

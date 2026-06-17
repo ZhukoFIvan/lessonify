@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
 import { STUDENT_TABS, TUTOR_TABS } from './constants'
@@ -9,6 +10,7 @@ import { STUDENT_TABS, TUTOR_TABS } from './constants'
 export function BottomNav() {
   const pathname = usePathname()
   const role = useAuthStore((s) => s.user?.role)
+  const tNav = useTranslations('nav')
 
   const tabs = role === 'STUDENT' ? STUDENT_TABS : TUTOR_TABS
 
@@ -20,7 +22,8 @@ export function BottomNav() {
         className="flex items-stretch border-t border-[var(--border-subtle)] bg-surface-1/95 px-1 backdrop-blur-xl"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        {tabs.map(({ href, icon: Icon, label }) => {
+        {tabs.map(({ href, icon: Icon, labelKey }) => {
+          const label = tNav(labelKey)
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link

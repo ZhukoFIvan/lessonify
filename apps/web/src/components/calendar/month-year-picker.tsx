@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format, setMonth, setYear } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import {
   Dialog,
@@ -11,22 +11,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { useFormatters } from '@/i18n/use-formatters'
 import { cn } from '@/lib/utils'
 
-const MONTHS = [
-  'Январь',
-  'Февраль',
-  'Март',
-  'Апрель',
-  'Май',
-  'Июнь',
-  'Июль',
-  'Август',
-  'Сентябрь',
-  'Октябрь',
-  'Ноябрь',
-  'Декабрь',
-]
+// Опорные даты первого числа каждого месяца — для локализованных названий
+const MONTH_DATES = Array.from({ length: 12 }, (_, i) => new Date(2024, i, 1))
 
 interface MonthYearPickerProps {
   value: Date
@@ -35,6 +24,8 @@ interface MonthYearPickerProps {
 }
 
 export function MonthYearPicker({ value, onChange, children }: MonthYearPickerProps) {
+  const t = useTranslations('calendar')
+  const f = useFormatters()
   const [open, setOpen] = useState(false)
   const [pickerYear, setPickerYear] = useState(value.getFullYear())
 
@@ -60,7 +51,7 @@ export function MonthYearPicker({ value, onChange, children }: MonthYearPickerPr
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar size={18} />
-            Выбор месяца и года
+            {t('pickMonthYear')}
           </DialogTitle>
         </DialogHeader>
 
@@ -83,21 +74,21 @@ export function MonthYearPicker({ value, onChange, children }: MonthYearPickerPr
 
         {/* Months grid */}
         <div className="grid grid-cols-3 gap-2">
-          {MONTHS.map((month, index) => {
+          {MONTH_DATES.map((monthDate, index) => {
             const isSelected =
               value.getMonth() === index && value.getFullYear() === pickerYear
             return (
               <button
-                key={month}
+                key={index}
                 onClick={() => handleMonthSelect(index)}
                 className={cn(
-                  'py-3 px-4 rounded-xl text-sm font-medium transition-colors',
+                  'py-3 px-4 rounded-xl text-sm font-medium capitalize transition-colors',
                   isSelected
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-secondary text-foreground',
                 )}
               >
-                {month}
+                {format(monthDate, 'LLLL', { locale: f.dateFnsLocale })}
               </button>
             )
           })}

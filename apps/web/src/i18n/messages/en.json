@@ -1,0 +1,1042 @@
+{
+  "nav": {
+    "dashboard": "Home",
+    "calendar": "Schedule",
+    "students": "Students",
+    "finances": "Finances",
+    "homework": "Homework",
+    "settings": "Settings",
+    "teachers": "Teachers"
+  },
+  "common": {
+    "logout": "Log out",
+    "expandMenu": "Expand menu",
+    "collapseMenu": "Collapse menu",
+    "roleTutor": "Tutor",
+    "roleStudent": "Student"
+  },
+  "theme": {
+    "light": "Light",
+    "system": "System",
+    "dark": "Dark"
+  },
+  "format": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "duration": {
+      "min": "{m} min",
+      "hour": "{h} h",
+      "hourMin": "{h} h {m} min"
+    },
+    "count": {
+      "lessons": "{count, plural, one {# lesson} other {# lessons}}",
+      "students": "{count, plural, one {# student} other {# students}}",
+      "teachers": "{count, plural, one {# teacher} other {# teachers}}"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Profile, appearance, plan and integrations",
+    "themeTitle": "Appearance",
+    "themeSubtitle": "System, light or dark",
+    "languageTitle": "Interface language",
+    "languageSubtitle": "Russian, English or Ukrainian",
+    "logout": "Log out of account",
+    "loggingOut": "Logging out...",
+    "offer": "Terms",
+    "privacy": "Privacy"
+  },
+  "auth": {
+    "login": {
+      "welcome": "Welcome back",
+      "subtitle": "Sign in to your Lessonify account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "or": "or",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "errorTitle": "Sign-in error",
+      "errorRetry": "Please try again",
+      "invalidEmail": "Invalid email",
+      "passwordRequired": "Enter your password"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join Lessonify",
+      "roleTutor": "Tutor",
+      "roleTutorDesc": "I teach lessons",
+      "roleStudent": "Student",
+      "roleStudentDesc": "I'm learning",
+      "nameLabel": "Name",
+      "namePlaceholder": "John Smith",
+      "passwordLabel": "Password",
+      "confirmLabel": "Repeat password",
+      "nameMin": "At least 2 characters",
+      "emailInvalid": "Invalid email",
+      "passwordMin": "At least 8 characters",
+      "confirmRequired": "Confirm the password",
+      "passwordMismatch": "Passwords don't match",
+      "errorTitle": "Registration error",
+      "tryAgain": "Please try again",
+      "inviteNeededTitle": "Invite link required",
+      "inviteNeededDesc": "Ask your tutor to send you a personal registration link.",
+      "submitting": "Creating...",
+      "submit": "Create account",
+      "or": "or",
+      "termsPrefix": "By signing up, you agree to the",
+      "termsLink": "terms of service",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "google": {
+      "errorTitle": "Google sign-in error",
+      "tryAgain": "Please try again",
+      "loading": "Loading...",
+      "continue": "Continue with Google"
+    },
+    "forgotPassword": {
+      "emailInvalid": "Invalid email",
+      "codeLength": "Code must be 6 digits",
+      "codeDigits": "Digits only",
+      "passwordMin": "At least 8 characters",
+      "confirmRequired": "Confirm the password",
+      "passwordMismatch": "Passwords don't match",
+      "error": "Error",
+      "successTitle": "Password changed",
+      "successDesc": "Sign in with your new password",
+      "step1Title": "Reset password",
+      "step2Title": "Enter code",
+      "step3Title": "New password",
+      "step1Subtitle": "Enter your email — we'll send a code",
+      "step2Subtitle": "Code sent to {email}",
+      "step3Subtitle": "Create a new password",
+      "sending": "Sending...",
+      "sendCode": "Send code",
+      "codeLabel": "6-digit code",
+      "confirm": "Confirm",
+      "resendCode": "Resend code",
+      "newPasswordLabel": "New password",
+      "confirmLabel": "Repeat password",
+      "saving": "Saving...",
+      "savePassword": "Save password",
+      "backToLogin": "Back to login"
+    },
+    "marketing": {
+      "scheduleTitle": "Schedule without chaos",
+      "scheduleDesc": "All lessons, reschedules and reminders in one calendar.",
+      "moneyTitle": "Money under control",
+      "moneyDesc": "Payments, debts and monthly income — clear and precise.",
+      "homeworkTitle": "Homework and progress",
+      "homeworkDesc": "Assignments, reviews and lesson history for every student.",
+      "studentsTitle": "Students close by",
+      "studentsDesc": "Profiles, contacts and notes — nothing gets lost.",
+      "heroTitle": "A CRM for tutors that's a pleasure to use",
+      "heroDesc": "Schedule, payments, homework and students — all in one place. Less routine, more lessons.",
+      "offer": "Terms of service",
+      "privacy": "Privacy policy"
+    }
+  },
+  "admin": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "blockedShort": "Blocked",
+    "searchPlaceholder": "Search by name or email",
+    "pagination": "Page {page} of {pages}",
+    "roles": {
+      "tutor": "Tutor",
+      "student": "Student",
+      "admin": "Admin",
+      "adminFull": "Administrator"
+    },
+    "withdrawalStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "rejected": "Rejected"
+    },
+    "orderStatus": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "failed": "Failed"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "tutors": "Tutors",
+      "orders": "Payments",
+      "withdrawals": "Withdrawals",
+      "bot": "Telegram bot",
+      "promo": "Promo codes"
+    },
+    "logout": "Log out",
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Platform activity overview",
+      "registrations": "Registrations",
+      "registrationsLast14": "Last 14 days",
+      "registrationsCount": "{count} registrations",
+      "newUsers": "New users",
+      "withdrawalRequests": "Withdrawal requests",
+      "viewAll": "All →",
+      "noUsers": "No users",
+      "noWithdrawals": "No requests",
+      "cards": {
+        "users": "Users",
+        "usersSub": "+{d7} in 7d · +{d30} in 30d",
+        "tutors": "Tutors",
+        "students": "Students",
+        "activePro": "Active PRO",
+        "activeProSub": "total PRO: {count}",
+        "revenue": "Revenue (paid)",
+        "revenueSub": "{amount} ₽ this month",
+        "payments": "Payments",
+        "paymentsSub": "successful orders",
+        "lessons": "Lessons",
+        "lessonsSub": "{count} this month",
+        "botLinked": "Bot linked",
+        "botLinkedSub": "of {count} links",
+        "pendingWithdrawals": "Pending withdrawals",
+        "referralIncome": "Referral income",
+        "blocked": "Blocked",
+        "conversion": "FREE→PRO conversion"
+      }
+    },
+    "bot": {
+      "title": "Telegram bot",
+      "subtitle": "Connections and activity",
+      "recentConnections": "Recent connections",
+      "noConnections": "No connections yet",
+      "noName": "No name",
+      "cards": {
+        "started": "Pressed /start",
+        "startedSub": "{count} presses total",
+        "startToLinked": "Start → linked",
+        "outOf": "{a} of {b}",
+        "connected": "Connected",
+        "connectedSub": "of {count} links",
+        "tutorConversion": "Tutor conversion",
+        "tutors": "Tutors",
+        "students": "Students",
+        "activeLinks": "Active links",
+        "pending": "Incomplete",
+        "pendingSub": "code issued, bot not linked"
+      }
+    },
+    "orders": {
+      "title": "Payments",
+      "subtitle": "{count} orders · Robokassa",
+      "empty": "No payments found",
+      "tabs": {
+        "all": "All",
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Failed"
+      },
+      "plan": {
+        "monthly": "Month",
+        "yearly": "Year"
+      },
+      "summary": {
+        "revenue": "Revenue",
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Failed"
+      },
+      "table": {
+        "user": "User",
+        "plan": "Plan",
+        "amount": "Amount",
+        "status": "Status",
+        "date": "Date"
+      }
+    },
+    "promo": {
+      "title": "Promo codes",
+      "subtitle": "Codes to grant the Pro plan",
+      "newTitle": "New promo code",
+      "create": "Create",
+      "creating": "Creating...",
+      "created": "Promo code created",
+      "error": "Error",
+      "copied": "Copied!",
+      "empty": "No promo codes yet",
+      "inactive": "inactive",
+      "until": "until {date}",
+      "daysProPlus": "+{count} days of Pro",
+      "usesLabel": "{count, plural, one {use} other {uses}}",
+      "fields": {
+        "code": "Code *",
+        "description": "Description",
+        "descriptionPlaceholder": "For blogger @ivan",
+        "daysToAdd": "Pro days *",
+        "maxUses": "Max uses",
+        "maxUsesPlaceholder": "Empty = unlimited",
+        "expiresAt": "Valid until"
+      }
+    },
+    "tutors": {
+      "title": "Tutors",
+      "count": "{count} tutors",
+      "empty": "No tutors found",
+      "table": {
+        "tutor": "Tutor",
+        "plan": "Plan",
+        "students": "Students",
+        "lessons": "Lessons"
+      }
+    },
+    "tutorDetail": {
+      "back": "Back to tutors",
+      "notFound": "Tutor not found",
+      "registered": "Registered: {date}",
+      "proUntil": "PRO until {date}",
+      "studentsHeading": "Students ({count})",
+      "noStudents": "This tutor has no students yet",
+      "noEmail": "no email",
+      "lessonsCount": "{count, plural, one {# lesson} other {# lessons}}",
+      "stats": {
+        "students": "Students",
+        "lessons": "Lessons",
+        "completed": "Completed",
+        "revenue": "Revenue (paid)"
+      }
+    },
+    "users": {
+      "title": "Users",
+      "count": "{count} users",
+      "empty": "No users found",
+      "blocked": "blocked",
+      "block": "Block",
+      "unblock": "Unblock",
+      "tabs": {
+        "all": "All",
+        "tutors": "Tutors",
+        "students": "Students",
+        "admins": "Admins"
+      },
+      "table": {
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "plan": "Plan",
+        "actions": "Actions"
+      }
+    },
+    "planModal": {
+      "title": "Change plan",
+      "termMonths": "Term (months)",
+      "months": "{count} mo.",
+      "exactDays": "…or an exact number of days",
+      "daysPlaceholder": "E.g. 45"
+    },
+    "roleModal": {
+      "title": "Change role",
+      "adminWarning": "Warning: the user will get full access to the admin panel."
+    },
+    "withdrawals": {
+      "title": "Withdrawals",
+      "count": "{count} requests",
+      "empty": "No requests found",
+      "emptyPending": "No pending requests",
+      "confirmPayment": "Confirm payment",
+      "tabs": {
+        "all": "All",
+        "pending": "Pending",
+        "paid": "Paid",
+        "rejected": "Rejected"
+      },
+      "table": {
+        "user": "User",
+        "amount": "Amount",
+        "details": "Details",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "rejectModal": {
+      "title": "Reject request",
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "Specify the reason for rejection...",
+      "reject": "Reject",
+      "rejecting": "Rejecting..."
+    }
+  },
+  "calendar": {
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "today": "Today",
+    "showCalendar": "Show calendar",
+    "showList": "Show list",
+    "noLessons": "No lessons",
+    "noLessonsToday": "No lessons",
+    "lessonsInMonth": "Lessons this month",
+    "daysWithLessons": "Days with lessons",
+    "lesson": "Lesson",
+    "tapToAdd": "Tap to add",
+    "selectDate": "Select date",
+    "pickMonthYear": "Pick month and year",
+    "reminderSent": "Reminder sent to student",
+    "reminderFailed": "Failed to send reminder",
+    "error": "Error",
+    "noSlots": "No available slots",
+    "noSlotsHint": "The tutor hasn't set booking times for this day",
+    "availableSlots": "Available booking slots",
+    "notePlaceholder": "Note to the tutor (optional)...",
+    "sending": "Sending...",
+    "bookAt": "Book at {time}",
+    "requestSent": "Request sent",
+    "requestSentHint": "The tutor will be notified",
+    "requestFailed": "Failed to send request",
+    "minShort": "{count, plural, one {# min} other {# min}}",
+    "minFull": "{count, plural, one {# minute} other {# minutes}}"
+  },
+  "dashboard": {
+    "all": "All",
+    "total": "Total",
+    "more": "{count, plural, one {# more} other {# more}}",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "quickActionsTitle": "Quick actions",
+    "homeworkTitle": "Homework",
+    "greeting": {
+      "night": "Good night",
+      "morning": "Good morning",
+      "day": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "actionCards": {
+      "student": {
+        "title": "Add student",
+        "desc": "A new student in your roster"
+      },
+      "lesson": {
+        "title": "Schedule lesson",
+        "desc": "Add a class to the timetable"
+      },
+      "homework": {
+        "title": "Create homework",
+        "desc": "Assign a homework task"
+      }
+    },
+    "quickActions": {
+      "lesson": {
+        "label": "Lesson",
+        "title": "Add lesson"
+      },
+      "student": {
+        "label": "Student",
+        "title": "Add student"
+      },
+      "homework": {
+        "label": "HW",
+        "title": "Create homework"
+      }
+    },
+    "stats": {
+      "income": "Income this month",
+      "students": "Students",
+      "weekLessons": "Lessons this week",
+      "pendingHomework": "Homework to review"
+    },
+    "debtors": {
+      "title": "Owe payment",
+      "morePeople": "{count, plural, one {# more person} other {# more people}}"
+    },
+    "homeworkOverview": {
+      "assigned": "Assigned",
+      "submitted": "Submitted",
+      "overdue": "Overdue",
+      "empty": "No homework yet"
+    },
+    "nextLesson": {
+      "label": "Next lesson",
+      "now": "In progress",
+      "emptyTitle": "No upcoming lessons",
+      "emptySub": "Free slot — take a breather"
+    },
+    "countdown": {
+      "hm": "{h}h {m}m",
+      "ms": "{m}m {s}s",
+      "s": "{s}s"
+    },
+    "todayLessons": {
+      "title": "Lessons today",
+      "schedule": "Schedule lesson"
+    },
+    "payment": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "studentRest": {
+      "morning": {
+        "title": "Free today",
+        "sub": "A nice start to a day with no classes"
+      },
+      "day": {
+        "title": "Free today",
+        "sub": "Take a break or do your own thing"
+      },
+      "evening": {
+        "title": "All done for today",
+        "sub": "No lessons or tasks — well-earned rest"
+      },
+      "lessonsLabel": "lessons",
+      "tasksLabel": "tasks"
+    },
+    "studentNext": {
+      "label": "Next lesson",
+      "now": "Now",
+      "inHm": "in {h}h {m}m",
+      "inM": "in {m} min"
+    },
+    "trial": {
+      "activated": "PRO activated for 30 days!",
+      "cta": "Try PRO for free — 30 days with no limits",
+      "activate": "Activate",
+      "expired": "Your PRO plan has expired. Renew to keep your features.",
+      "expiresIn": "{count, plural, one {PRO plan ends in # day} other {PRO plan ends in # days}}",
+      "renew": "Renew"
+    }
+  },
+  "finances": {
+    "title": "Finances",
+    "subtitle": "Income and debts",
+    "invoicePdf": "Invoice PDF",
+    "error": "Error",
+    "received": "Received",
+    "pending": "Pending",
+    "mustPay": "Outstanding payments",
+    "loading": "Loading…",
+    "allPaid": "All lessons paid",
+    "studentsWithDebt": "{students} with debt",
+    "totalDue": "total due",
+    "noDebts": "No debts",
+    "noDebtsHint": "All lessons paid — great job",
+    "processingPayment": "Processing payment…",
+    "acceptPayment": "Accept payment",
+    "debtCleared": "{name} — debt cleared",
+    "payFailed": "Could not process the payment",
+    "incomeSixMonths": "Income over 6 months",
+    "noDataYet": "No data yet",
+    "noDataHint": "Data will appear after your first completed and paid lessons",
+    "generateInvoice": "Generate invoice",
+    "student": "Student",
+    "selectStudent": "Select a student",
+    "selectStudentPlaceholder": "Select a student...",
+    "allStudentsOption": "All students (combined invoice)",
+    "allStudentsFilename": "all-students",
+    "studentFilename": "student",
+    "invoiceDownloaded": "Invoice downloaded",
+    "pdfFailed": "Could not generate the PDF",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "cancel": "Cancel",
+    "generating": "Generating...",
+    "downloadPdf": "Download PDF",
+    "monthlyIncome": "Income this month",
+    "receivedOf": "received of <total></total>",
+    "pendingAmount": "<amount></amount> pending"
+  },
+  "homework": {
+    "title": "Homework",
+    "noTasks": "No tasks",
+    "taskCount": "{count, plural, one {# task} other {# tasks}}",
+    "file": "File",
+    "feedback": "Feedback",
+    "yourAnswer": "Your answer",
+    "studentAnswer": "Student's answer",
+    "yourReview": "Your review",
+    "submitTask": "Submit task",
+    "submitting": "Submitting...",
+    "reviewTask": "Review task",
+    "attachFile": "Attach file",
+    "uploading": "Uploading...",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "filters": {
+      "all": "All",
+      "assigned": "Assigned",
+      "submitted": "Submitted",
+      "reviewed": "Reviewed"
+    },
+    "status": {
+      "ASSIGNED": "Assigned",
+      "SUBMITTED": "Submitted",
+      "REVIEWED": "Reviewed"
+    },
+    "deadline": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "tomorrow": "Tomorrow"
+    },
+    "emptyState": {
+      "title": "No tasks yet",
+      "hint": "Tasks will appear here once created",
+      "filteredTitle": "No tasks with this status",
+      "filteredHint": "Try another filter"
+    },
+    "toast": {
+      "error": "Error",
+      "submitted": "Task submitted",
+      "submitFailed": "Failed to submit the task",
+      "reviewed": "Task reviewed",
+      "reviewFailed": "Failed to save the review",
+      "uploadFailed": "File upload error",
+      "created": "Homework added",
+      "createFailed": "Failed to create the task"
+    },
+    "validation": {
+      "descriptionRequired": "Description is required"
+    },
+    "modal": {
+      "title": "Homework",
+      "taskLabel": "Task",
+      "descriptionPlaceholder": "Describe the task for the student...",
+      "deadlineLabel": "Deadline (optional)",
+      "materialsLabel": "Materials (optional, up to 5)",
+      "submit": "Add task"
+    },
+    "submit": {
+      "commentLabel": "Comment (optional)",
+      "commentPlaceholder": "Write a comment about the completed task...",
+      "filesLabel": "Files (optional, up to 5)",
+      "confirm": "Submit"
+    },
+    "review": {
+      "title": "Review task",
+      "noComment": "No comment",
+      "feedbackLabel": "Feedback (optional)",
+      "feedbackPlaceholder": "Write a comment about the student's work...",
+      "confirm": "Mark as reviewed"
+    }
+  },
+  "invite": {
+    "acceptFailed": "Failed to accept the invitation",
+    "loading": {
+      "title": "Processing invitation...",
+      "subtitle": "Please wait"
+    },
+    "success": {
+      "title": "Done!",
+      "subtitle": "You have been added as a student. Redirecting to your dashboard..."
+    },
+    "error": {
+      "title": "Error",
+      "backToDashboard": "Back to dashboard"
+    }
+  },
+  "lesson": {
+    "title": "New lesson",
+    "submit": "Add lesson",
+    "creating": "Creating...",
+    "durationMin": "{m}m",
+    "durationHour": "{h}h",
+    "fields": {
+      "student": "Student",
+      "subject": "Subject",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "price": "Price, ₽"
+    },
+    "placeholders": {
+      "student": "Select a student...",
+      "subject": "Math",
+      "priceFromProfile": "{price} (from profile)"
+    },
+    "errors": {
+      "studentRequired": "Select a student",
+      "subjectRequired": "Enter a subject",
+      "dateRequired": "Enter a date",
+      "timeRequired": "Enter a time",
+      "pastLesson": "You can't create a lesson in the past"
+    },
+    "toast": {
+      "created": "Lesson added",
+      "createFailed": "Failed to create lesson",
+      "error": "Error"
+    },
+    "paymentStatus": {
+      "PAID": "Paid",
+      "PENDING": "Pending",
+      "OVERDUE": "Overdue"
+    },
+    "card": {
+      "saving": "Saving...",
+      "markPaid": "Mark as paid",
+      "sending": "Sending...",
+      "remind": "Remind the student",
+      "addHomework": "Add homework"
+    },
+    "notes": {
+      "journal": "Lesson journal",
+      "cancel": "Cancel",
+      "save": "Save",
+      "add": "Add note",
+      "placeholder": "What you covered in the lesson...",
+      "emptyStudent": "The tutor hasn't added any notes yet",
+      "addFailed": "Failed to add note",
+      "updateFailed": "Failed to update note",
+      "deleteFailed": "Failed to delete note"
+    }
+  },
+  "onboarding": {
+    "next": "Next",
+    "skip": "Skip",
+    "gender": {
+      "label": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "avatar": {
+      "choose": "Choose an avatar",
+      "alt": "Avatar",
+      "variant": "Variant {index}",
+      "upload": "Upload your own photo",
+      "uploading": "Uploading..."
+    },
+    "welcome": {
+      "greeting": "Welcome!",
+      "greetingNamed": "{name}, welcome!",
+      "subtitle": "Let's set up the app for you in a couple of minutes. Tell us a bit about yourself — and off we go!",
+      "pillSchedule": "Schedule",
+      "pillPayments": "Payments",
+      "pillHomework": "Homework",
+      "cta": "Let's go"
+    },
+    "profile": {
+      "title": "Tell us about yourself",
+      "subtitle": "This information helps personalize the app",
+      "nameLabel": "Your name",
+      "namePlaceholder": "John Doe",
+      "timezone": "Time zone",
+      "autoDetected": "Detected automatically",
+      "change": "Change"
+    },
+    "subjects": {
+      "title": "What do you teach?",
+      "subtitle": "Pick subjects — you can choose several",
+      "customPlaceholder": "Your own subject...",
+      "rateLabel": "Hourly rate (₽)",
+      "rateHint": "You can set this later in settings",
+      "list": {
+        "math": "Mathematics",
+        "english": "English",
+        "russian": "Russian",
+        "physics": "Physics",
+        "chemistry": "Chemistry",
+        "biology": "Biology",
+        "computerScience": "Computer Science",
+        "history": "History",
+        "socialStudies": "Social Studies",
+        "literature": "Literature",
+        "german": "German",
+        "french": "French",
+        "music": "Music",
+        "drawing": "Drawing",
+        "geography": "Geography"
+      }
+    },
+    "firstStudent": {
+      "title": "Add your first student",
+      "subtitle": "You can skip and add later",
+      "nameLabel": "Student name",
+      "namePlaceholder": "Anna Petrova",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "Mathematics",
+      "colorLabel": "Color",
+      "addButton": "Add student",
+      "adding": "Adding...",
+      "addedToast": "Student added!",
+      "errorTitle": "Error",
+      "errorDescription": "Please try again",
+      "successTitle": "Great!",
+      "successMessage": "{name} has been added to your students"
+    },
+    "telegram": {
+      "title": "Connect Telegram",
+      "subtitle": "Get reminders about lessons and payments right in the messenger",
+      "connected": "Telegram connected!",
+      "connectedHint": "Notifications will arrive in the bot",
+      "openBot": "Open the bot",
+      "pressStart": "Press «Start» in the bot — we'll detect the connection automatically",
+      "linkError": "Couldn't get the link. You can connect later in settings.",
+      "benefit1": "Reminder 1 hour before the lesson",
+      "benefit2": "Notification about new homework",
+      "benefit3": "Weekly payments summary",
+      "setupLater": "Set up later"
+    },
+    "plan": {
+      "title": "Choose a plan",
+      "subtitle": "Start for free or try all PRO features",
+      "forever": "forever",
+      "daysFree": "30 days free",
+      "perMonthAfterTrial": "per month, after the trial",
+      "activating": "Activating...",
+      "tryProFree": "Try PRO for free",
+      "continueFree": "Continue on FREE",
+      "trialActivatedToast": "PRO activated for 30 days!",
+      "free": {
+        "upTo5": "Up to 5 students",
+        "schedule": "Schedule and calendar",
+        "payments": "Payment tracking",
+        "homework": "Homework",
+        "telegram": "Telegram notifications",
+        "unlimited": "Unlimited students",
+        "googleCalendar": "Google Calendar",
+        "pdfInvoices": "PDF invoices"
+      },
+      "pro": {
+        "unlimited": "Unlimited number of students",
+        "schedule": "Schedule and calendar",
+        "payments": "Payment tracking",
+        "homework": "Homework",
+        "telegram": "Telegram notifications",
+        "googleCalendar": "Google Calendar sync",
+        "pdfInvoices": "PDF invoice generation",
+        "prioritySupport": "Priority support"
+      }
+    },
+    "done": {
+      "welcomeToast": "Welcome to Lessonify!",
+      "errorTitle": "Error",
+      "errorDescription": "Please try again",
+      "statProfile": "Profile",
+      "statSubjects": "Subjects",
+      "statStudent": "Student",
+      "title": "All set!",
+      "subtitleTutor": "Your account is ready. Head to the dashboard — your tools are waiting there.",
+      "subtitleStudent": "Your account is ready. Head to the schedule — your tutor is already waiting!",
+      "ready": "Done",
+      "saving": "Saving...",
+      "goToDashboard": "Go to dashboard"
+    }
+  },
+  "settingsSections": {
+    "error": "Error",
+    "cancel": "Cancel",
+    "add": "Add",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveFailed": "Failed to save",
+    "loading": "Loading...",
+    "connected": "Connected",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "apply": "Apply",
+    "minutesShort": "{m} min",
+    "hoursPlural": "{count, plural, one {# hour} other {# hours}}",
+    "daysPlural": "{count, plural, one {# day} other {# days}}",
+    "days": {
+      "sun": "Sunday",
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday"
+    },
+    "availabilityTitle": "Booking schedule",
+    "availabilitySubtitle": "Set when students can book a slot",
+    "slotAdded": "Slot added",
+    "slotAddFailed": "Failed to add slot",
+    "slotDeleted": "Slot deleted",
+    "noSlots": "No slots",
+    "bookingConfirmed": "Booking confirmed",
+    "bookingRejected": "Booking rejected",
+    "bookingRequestsTitle": "Booking requests",
+    "bookingRequestsSubtitle": "Students want to book a lesson",
+    "bookingDateFormat": "d MMM, EEEE 'at' HH:mm",
+    "pricePlaceholder": "Price (₽)",
+    "reject": "Reject",
+    "confirm": "Confirm",
+    "googleCalendar": "Google Calendar",
+    "calendarConnected": "Google Calendar connected",
+    "calendarConnectFailed": "Failed to connect Google Calendar",
+    "calendarDisconnected": "Google Calendar disconnected",
+    "calendarSyncInfo": "Lessons are automatically synced to Google Calendar",
+    "calendarSyncPrompt": "Sync your lessons with Google Calendar automatically",
+    "lastSync": "Last sync",
+    "syncEnabled": "Sync enabled",
+    "syncDisabled": "Sync disabled",
+    "syncOn": "Sync on",
+    "syncOff": "Sync off",
+    "syncAll": "Sync all",
+    "syncError": "Sync error",
+    "syncedLessons": "{count, plural, one {Synced # lesson} other {Synced # lessons}}",
+    "profile": "Profile",
+    "name": "Name",
+    "nameMin": "At least 2 characters",
+    "profileUpdated": "Profile updated",
+    "referralTitle": "Referral program",
+    "referralSubtitle": "Invite colleagues and earn",
+    "yourReferralCode": "Your referral code",
+    "copy": "Copy",
+    "copiedShort": "Copied",
+    "copied": "Copied!",
+    "invited": "Invited",
+    "earnedRub": "Earned ₽",
+    "balanceRub": "Balance ₽",
+    "referralDescription": "<b>20% of every Pro purchase</b> made by an invited tutor. Minimum withdrawal amount — 500 ₽.",
+    "withdrawProcessing": "Withdrawal request is being processed",
+    "withdrawMin": "Withdraw from 500 ₽ (now {amount} ₽)",
+    "withdrawNow": "Withdraw {amount} ₽",
+    "withdrawTitle": "Withdraw funds",
+    "withdrawAmount": "Amount to withdraw",
+    "withdrawDetailsLabel": "Transfer details",
+    "withdrawDetailsPlaceholder": "Card number or SBP phone",
+    "withdrawSubmitted": "Request submitted",
+    "withdrawSubmittedDesc": "We'll transfer the funds within 3 business days",
+    "tryLater": "Try again later",
+    "sending": "Sending...",
+    "submitRequest": "Submit request",
+    "remindersTitle": "Reminders",
+    "remindersSubtitle": "When to remind about lessons",
+    "remindersSaved": "Reminders saved",
+    "beforeLesson": "How long before the lesson",
+    "afterLessonPayment": "Remind about payment after",
+    "timezone": "Your timezone",
+    "freePlan": "Free plan",
+    "proPlan": "PRO plan",
+    "active": "Active",
+    "activeUntil": "Active until {date}",
+    "basicFeatures": "Basic features",
+    "proExpiresToday": "PRO plan expires today!",
+    "proExpiresIn": "{count, plural, one {PRO plan ends in # day} other {PRO plan ends in # days}}",
+    "freeFeatures": {
+      "students": "Up to 5 students",
+      "schedule": "Schedule and calendar",
+      "payments": "Payment tracking",
+      "homework": "Homework",
+      "telegram": "Telegram notifications"
+    },
+    "proFeatures": {
+      "unlimitedStudents": "Unlimited students",
+      "allFree": "All free plan features",
+      "bookingPage": "Booking page for students",
+      "googleCalendar": "Google Calendar sync",
+      "referral": "Referral program",
+      "pdfInvoices": "PDF invoice generation",
+      "prioritySupport": "Priority support"
+    },
+    "promoPlaceholder": "Enter promo code",
+    "promoApplied": "{count, plural, one {Promo code applied! +# day of PRO} other {Promo code applied! +# days of PRO}}",
+    "havePromo": "Have a promo code?",
+    "trialActivated": "30-day trial activated!",
+    "tryProFree": "Try PRO for free — 30 days",
+    "activating": "Activating...",
+    "paymentSuccess": "Payment successful! PRO plan activated.",
+    "paymentCancelled": "Payment cancelled",
+    "proPlans": "PRO plans",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "extendPro": "Extend PRO",
+    "plusMonth": "+1 month",
+    "plusYear": "+1 year",
+    "offerAgreement": "By paying, you agree to the <a>public offer</a>",
+    "openingTelegram": "Opening Telegram",
+    "openingTelegramDesc": "Tap \"Start\" in the bot — the link will be detected automatically.",
+    "telegramDisconnected": "Telegram disconnected",
+    "telegramDisconnectFailed": "Failed to disconnect Telegram",
+    "telegramPrompt": "Get lesson reminders in Telegram",
+    "disconnecting": "Disconnecting...",
+    "openBotConnect": "Open bot and connect"
+  },
+  "students": {
+    "title": "Students",
+    "add": "Add",
+    "noStudents": "No students",
+    "addFirstHint": "Tap to add your first one",
+    "searchPlaceholder": "Search by name or subject...",
+    "clearSearch": "Clear search",
+    "notFound": "Nothing found",
+    "tryAnotherQuery": "Try another query",
+    "perHour": "/hr",
+    "summary": {
+      "total": "Total",
+      "debts": "Debts",
+      "debtors": "Debtors"
+    },
+    "card": {
+      "telegramConnected": "Telegram connected",
+      "noSubject": "No subject",
+      "noLessons": "No lessons",
+      "debt": "Debt {amount}"
+    },
+    "form": {
+      "title": "New student",
+      "name": "Name *",
+      "namePlaceholder": "John Smith",
+      "nameRequired": "Enter a name",
+      "subject": "Subject",
+      "subjectPlaceholder": "Mathematics",
+      "hourlyRate": "Lesson price, ₽",
+      "emailInvalid": "Invalid email",
+      "phone": "Phone",
+      "color": "Color",
+      "notes": "Notes",
+      "notesPlaceholder": "Any additional information",
+      "saving": "Saving...",
+      "submit": "Add student"
+    },
+    "toast": {
+      "error": "Error",
+      "created": "Student added",
+      "createError": "Failed to add student",
+      "linkCopied": "Link copied",
+      "copyError": "Failed to copy link",
+      "deleted": "Student deleted",
+      "deleteError": "Failed to delete student"
+    },
+    "payment": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "detail": {
+      "title": "Student profile",
+      "debt": "Debt",
+      "added": "Added",
+      "notes": "Notes",
+      "generating": "Generating...",
+      "copyInvite": "Copy invite link",
+      "recentLessons": "Recent lessons",
+      "deleteStudent": "Delete student",
+      "deleteConfirm": "Delete <b>{name}</b>? All lessons and homework will be removed.",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "delete": "Delete"
+    }
+  },
+  "teachers": {
+    "title": "Teachers",
+    "noneConnected": "No connected teachers",
+    "add": "Add",
+    "addByLink": "Add a teacher by link",
+    "addByLinkHint": "If a teacher sent you an invite link, paste it here. The teacher will be added and all lessons they schedule will appear in your timetable.",
+    "cancel": "Cancel",
+    "emptyTitle": "No teachers",
+    "emptyHint": "Ask your teacher to send you an invite link",
+    "pasteLink": "Paste link",
+    "toastAdded": "Teacher added!",
+    "addError": "Failed to add teacher",
+    "error": "Error"
+  },
+  "toasts": {
+    "invalidCredentials": "Invalid email or password",
+    "googleLoginError": "Google sign-in error",
+    "registerError": "Registration error",
+    "welcomeToLessonify": "Welcome to Lessonify!",
+    "trialActivationError": "Failed to activate trial",
+    "checkoutError": "Failed to create payment",
+    "loadLessonsError": "Failed to load lessons",
+    "promoApplyError": "Failed to apply promo code",
+    "invoiceFilePrefix": "invoice"
+  }
+}

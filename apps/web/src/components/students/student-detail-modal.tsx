@@ -9,32 +9,20 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useStudentDetail, useGenerateInvite, useDeleteStudent } from '@/hooks/use-students'
-import { getInitials, formatRub, formatDuration, pluralize } from '@tutorflow/utils'
+import { getInitials, formatRub } from '@tutorflow/utils'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import {
   Link2, MessageCircle, Phone, Mail, Trash2, ChevronRight,
 } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
-
-const PAYMENT_LABELS: Record<string, string> = {
-  PAID: 'Оплачено',
-  PENDING: 'Ожидает',
-  OVERDUE: 'Просрочено',
-}
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 
 const PAYMENT_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'secondary'> = {
   PAID: 'success',
   PENDING: 'warning',
   OVERDUE: 'danger',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  SCHEDULED: 'Запланирован',
-  COMPLETED: 'Завершён',
-  CANCELLED: 'Отменён',
-  RESCHEDULED: 'Перенесён',
 }
 
 interface StudentDetailModalProps {
@@ -45,6 +33,15 @@ interface StudentDetailModalProps {
 }
 
 export function StudentDetailModal({ studentId, open, onClose, onDeleted }: StudentDetailModalProps) {
+  const t = useTranslations('students')
+  const f = useFormatters()
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    PAID: t('payment.paid'),
+    PENDING: t('payment.pending'),
+    OVERDUE: t('payment.overdue'),
+  }
+
   const { student, loading } = useStudentDetail(open ? studentId : null)
   const { generateInvite, loadingId: inviteLoadingId } = useGenerateInvite()
   const { deleteStudent, loadingId: deleteLoadingId } = useDeleteStudent()
@@ -55,9 +52,9 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
     try {
       const url = await generateInvite(studentId)
       await navigator.clipboard.writeText(url)
-      toast({ variant: 'success', title: 'Ссылка скопирована' })
+      toast({ variant: 'success', title: t('toast.linkCopied') })
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось скопировать ссылку' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('toast.copyError') })
     }
   }
 
@@ -65,12 +62,12 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
     if (!studentId) return
     try {
       await deleteStudent(studentId)
-      toast({ variant: 'success', title: 'Ученик удалён' })
+      toast({ variant: 'success', title: t('toast.deleted') })
       setConfirmDelete(false)
       onClose()
       onDeleted?.()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось удалить ученика' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('toast.deleteError') })
     }
   }
 
@@ -78,7 +75,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
     <Dialog open={open} onOpenChange={(v) => { if (!v) { setConfirmDelete(false); onClose() } }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Карточка ученика</DialogTitle>
+          <DialogTitle>{t('detail.title')}</DialogTitle>
         </DialogHeader>
 
         {loading || !student ? (
@@ -107,7 +104,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                 )}
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   {student.hourlyRate && (
-                    <Badge variant="secondary">{formatRub(student.hourlyRate)}/ч</Badge>
+                    <Badge variant="secondary">{formatRub(student.hourlyRate)}{t('perHour')}</Badge>
                   )}
                   {student.telegramConnected && (
                     <Badge variant="secondary" className="gap-1">
@@ -148,7 +145,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
               <div className="rounded-2xl bg-secondary/60 p-3 text-center">
                 <p className="text-xl font-bold text-foreground">{student.lessonsCount}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {pluralize(student.lessonsCount, ['урок', 'урока', 'уроков'])}
+                  {f.count(student.lessonsCount, 'lessons')}
                 </p>
               </div>
               <div className={cn(
@@ -161,13 +158,13 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                 )}>
                   {formatRub(student.debtAmount)}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">Долг</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t('detail.debt')}</p>
               </div>
               <div className="rounded-2xl bg-secondary/60 p-3 text-center">
                 <p className="text-xl font-bold text-foreground">
-                  {format(new Date(student.createdAt), 'MMM yy', { locale: ru })}
+                  {format(new Date(student.createdAt), 'MMM yy', { locale: f.dateFnsLocale })}
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">Добавлен</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t('detail.added')}</p>
               </div>
             </div>
 
@@ -175,7 +172,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
             {student.notes && (
               <div className="rounded-2xl bg-secondary/40 p-4">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                  Заметки
+                  {t('detail.notes')}
                 </p>
                 <p className="text-sm text-foreground">{student.notes}</p>
               </div>
@@ -190,7 +187,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                 disabled={inviteLoadingId === studentId}
               >
                 <Link2 size={16} />
-                {inviteLoadingId === studentId ? 'Генерация...' : 'Скопировать ссылку-приглашение'}
+                {inviteLoadingId === studentId ? t('detail.generating') : t('detail.copyInvite')}
               </Button>
             )}
 
@@ -198,7 +195,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
             {student.lessons && student.lessons.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Последние уроки
+                  {t('detail.recentLessons')}
                 </p>
                 <div className="flex flex-col gap-2">
                   {student.lessons.map((lesson) => (
@@ -209,9 +206,9 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                       <div>
                         <p className="text-sm font-medium text-foreground">{lesson.subject}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {format(new Date(lesson.startTime), 'd MMM, HH:mm', { locale: ru })}
+                          {format(new Date(lesson.startTime), 'd MMM, HH:mm', { locale: f.dateFnsLocale })}
                           {' · '}
-                          {formatDuration(lesson.durationMinutes)}
+                          {f.duration(lesson.durationMinutes)}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -233,12 +230,15 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                 className="flex items-center gap-2 text-xs text-muted-foreground hover:text-danger transition-colors self-center mt-1"
               >
                 <Trash2 size={13} />
-                Удалить ученика
+                {t('detail.deleteStudent')}
               </button>
             ) : (
               <div className="rounded-2xl border border-danger/40 bg-danger/5 p-4 flex flex-col gap-3">
                 <p className="text-sm text-foreground font-medium">
-                  Удалить <span className="font-bold">{student.name}</span>? Все уроки и домашние задания будут удалены.
+                  {t.rich('detail.deleteConfirm', {
+                    name: student.name,
+                    b: (chunks) => <span className="font-bold">{chunks}</span>,
+                  })}
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -247,7 +247,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                     className="flex-1"
                     onClick={() => setConfirmDelete(false)}
                   >
-                    Отмена
+                    {t('detail.cancel')}
                   </Button>
                   <Button
                     variant="destructive"
@@ -256,7 +256,7 @@ export function StudentDetailModal({ studentId, open, onClose, onDeleted }: Stud
                     onClick={handleDelete}
                     disabled={deleteLoadingId === studentId}
                   >
-                    {deleteLoadingId === studentId ? 'Удаление...' : 'Удалить'}
+                    {deleteLoadingId === studentId ? t('detail.deleting') : t('detail.delete')}
                   </Button>
                 </div>
               </div>

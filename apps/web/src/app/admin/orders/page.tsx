@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle, Clock, XCircle, DollarSign } from 'lucide-react'
 import { useAdminOrders, type AdminOrder } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
@@ -8,12 +9,13 @@ import { cn } from '@/lib/utils'
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations('admin')
   const map: Record<string, string> = {
     PAID: 'bg-green-500/15 text-green-400',
     PENDING: 'bg-amber-500/15 text-amber-400',
     FAILED: 'bg-red-500/15 text-red-400',
   }
-  const label: Record<string, string> = { PAID: 'Оплачен', PENDING: 'Ожидает', FAILED: 'Ошибка' }
+  const label: Record<string, string> = { PAID: t('orderStatus.paid'), PENDING: t('orderStatus.pending'), FAILED: t('orderStatus.failed') }
   return (
     <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-full', map[status] ?? 'bg-gray-500/15 text-gray-400')}>
       {label[status] ?? status}
@@ -35,28 +37,29 @@ function SummaryCard({ label, value, icon, color }: { label: string; value: stri
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-const STATUS_TABS = [
-  { value: 'ALL', label: 'Все' },
-  { value: 'PAID', label: 'Оплаченные' },
-  { value: 'PENDING', label: 'Ожидают' },
-  { value: 'FAILED', label: 'Ошибки' },
-]
-
-const PLAN_LABEL: Record<string, string> = { monthly: 'Месяц', yearly: 'Год' }
-
 export default function AdminOrdersPage() {
+  const t = useTranslations('admin')
   const [status, setStatus] = useState('ALL')
   const [page, setPage] = useState(1)
 
   const { data, loading } = useAdminOrders(status, page)
 
+  const STATUS_TABS = [
+    { value: 'ALL', label: t('orders.tabs.all') },
+    { value: 'PAID', label: t('orders.tabs.paid') },
+    { value: 'PENDING', label: t('orders.tabs.pending') },
+    { value: 'FAILED', label: t('orders.tabs.failed') },
+  ]
+
+  const PLAN_LABEL: Record<string, string> = { monthly: t('orders.plan.monthly'), yearly: t('orders.plan.yearly') }
+
   return (
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-white">Платежи</h1>
+        <h1 className="text-2xl font-black text-white">{t('orders.title')}</h1>
         <p className="text-white/40 text-sm mt-1">
-          {data ? `${data.total} заказов · Robokassa` : '—'}
+          {data ? t('orders.subtitle', { count: data.total }) : '—'}
         </p>
       </div>
 
@@ -64,14 +67,14 @@ export default function AdminOrdersPage() {
       {data && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <SummaryCard
-            label="Доход"
+            label={t('orders.summary.revenue')}
             value={`${Number(data.summary.revenueTotal).toLocaleString('ru')} ₽`}
             icon={<DollarSign size={18} className="text-green-400" />}
             color="bg-green-500/15"
           />
-          <SummaryCard label="Оплачено" value={data.summary.paidCount} icon={<CheckCircle size={18} className="text-emerald-400" />} color="bg-emerald-500/15" />
-          <SummaryCard label="Ожидают" value={data.summary.pendingCount} icon={<Clock size={18} className="text-amber-400" />} color="bg-amber-500/15" />
-          <SummaryCard label="Ошибки" value={data.summary.failedCount} icon={<XCircle size={18} className="text-red-400" />} color="bg-red-500/15" />
+          <SummaryCard label={t('orders.summary.paid')} value={data.summary.paidCount} icon={<CheckCircle size={18} className="text-emerald-400" />} color="bg-emerald-500/15" />
+          <SummaryCard label={t('orders.summary.pending')} value={data.summary.pendingCount} icon={<Clock size={18} className="text-amber-400" />} color="bg-amber-500/15" />
+          <SummaryCard label={t('orders.summary.failed')} value={data.summary.failedCount} icon={<XCircle size={18} className="text-red-400" />} color="bg-red-500/15" />
         </div>
       )}
 
@@ -94,11 +97,11 @@ export default function AdminOrdersPage() {
       {/* Table */}
       <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-5 py-3 border-b border-white/[0.06] text-xs font-semibold text-white/35 uppercase tracking-wider">
-          <span>Пользователь</span>
-          <span>Тариф</span>
-          <span>Сумма</span>
-          <span>Статус</span>
-          <span>Дата</span>
+          <span>{t('orders.table.user')}</span>
+          <span>{t('orders.table.plan')}</span>
+          <span>{t('orders.table.amount')}</span>
+          <span>{t('orders.table.status')}</span>
+          <span>{t('orders.table.date')}</span>
         </div>
 
         {loading ? (
@@ -148,7 +151,7 @@ export default function AdminOrdersPage() {
             ))}
 
             {data?.items.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-10">Платежей не найдено</p>
+              <p className="text-white/30 text-sm text-center py-10">{t('orders.empty')}</p>
             )}
           </div>
         )}
@@ -157,7 +160,7 @@ export default function AdminOrdersPage() {
       {/* Pagination */}
       {data && data.pages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-white/35 text-sm">Страница {data.page} из {data.pages}</p>
+          <p className="text-white/35 text-sm">{t('pagination', { page: data.page, pages: data.pages })}</p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}

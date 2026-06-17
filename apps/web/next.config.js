@@ -1,4 +1,8 @@
 const withPWA = require('next-pwa')
+const createNextIntlPlugin = require('next-intl/plugin')
+
+// Локаль вычисляется на запрос из куки/Accept-Language — i18n-роутинга (/ru, /en) нет.
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const pwaConfig = withPWA({
   dest: 'public',
@@ -54,4 +58,4 @@ const nextConfig = {
   experimental: {},
 }
 
-module.exports = pwaConfig(nextConfig)
+module.exports = withNextIntl(pwaConfig(nextConfig))

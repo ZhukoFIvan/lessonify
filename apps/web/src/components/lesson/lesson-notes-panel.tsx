@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 import { Pencil, Trash2, Plus, Check, X, NotebookPen, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -16,6 +17,8 @@ interface LessonNotesPanelProps {
 }
 
 export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
+  const t = useTranslations('lesson')
+  const f = useFormatters()
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
@@ -38,7 +41,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
       setAddingNew(false)
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось добавить заметку' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('notes.addFailed') })
     }
   }
 
@@ -49,7 +52,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
       setEditingId(null)
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось обновить заметку' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('notes.updateFailed') })
     }
   }
 
@@ -58,7 +61,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
       await deleteNote(noteId)
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось удалить заметку' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('notes.deleteFailed') })
     }
   }
 
@@ -75,7 +78,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
       >
         <span className="flex items-center gap-2">
           <NotebookPen size={16} />
-          <span className="font-medium">Журнал урока</span>
+          <span className="font-medium">{t('notes.journal')}</span>
           {notes.length > 0 && (
             <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-semibold">
               {notes.length}
@@ -108,11 +111,11 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
                       <div className="flex gap-2 justify-end">
                         <Button size="sm" variant="ghost" className="h-8 px-3" onClick={() => setEditingId(null)}>
                           <X size={15} className="mr-1" />
-                          Отмена
+                          {t('notes.cancel')}
                         </Button>
                         <Button size="sm" className="h-8 px-3" onClick={() => handleUpdate(note.id)} disabled={updating}>
                           <Check size={15} className="mr-1" />
-                          Сохранить
+                          {t('notes.save')}
                         </Button>
                       </div>
                     </div>
@@ -121,7 +124,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed">{note.content}</p>
                         <p className="text-xs text-muted-foreground mt-1.5">
-                          {format(new Date(note.createdAt), 'd MMM, HH:mm', { locale: ru })}
+                          {format(new Date(note.createdAt), 'd MMM, HH:mm', { locale: f.dateFnsLocale })}
                         </p>
                       </div>
                       {isTutor && (
@@ -148,7 +151,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
 
               {notes.length === 0 && !isTutor && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Репетитор ещё не добавил заметки
+                  {t('notes.emptyStudent')}
                 </p>
               )}
 
@@ -158,7 +161,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
                     <textarea
                       value={newText}
                       onChange={(e) => setNewText(e.target.value)}
-                      placeholder="Что прошли на уроке..."
+                      placeholder={t('notes.placeholder')}
                       className="w-full text-sm bg-background border border-border rounded-xl p-3 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
                       rows={3}
                       autoFocus
@@ -166,11 +169,11 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
                     <div className="flex gap-2 justify-end">
                       <Button size="sm" variant="ghost" className="h-8 px-3" onClick={() => { setAddingNew(false); setNewText('') }}>
                         <X size={15} className="mr-1" />
-                        Отмена
+                        {t('notes.cancel')}
                       </Button>
                       <Button size="sm" className="h-8 px-3 gap-1.5" onClick={handleCreate} disabled={creating || !newText.trim()}>
                         <Check size={15} />
-                        Сохранить
+                        {t('notes.save')}
                       </Button>
                     </div>
                   </div>
@@ -180,7 +183,7 @@ export function LessonNotesPanel({ lessonId }: LessonNotesPanelProps) {
                     className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-2"
                   >
                     <Plus size={16} />
-                    Добавить заметку
+                    {t('notes.add')}
                   </button>
                 )
               )}

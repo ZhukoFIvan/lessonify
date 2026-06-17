@@ -5,12 +5,15 @@ import { ChevronRight, BookOpen } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslations } from 'next-intl'
 import { useStudentHomework } from '@/hooks/use-homework'
 import { format, differenceInDays } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useFormatters } from '@/i18n/use-formatters'
 import { cn } from '@/lib/utils'
 
 export function StudentHomeworkStrip() {
+  const t = useTranslations('dashboard')
+  const f = useFormatters()
   const { items, loading } = useStudentHomework('ASSIGNED')
 
   if (loading) return <Skeleton className="mx-4 h-24" />
@@ -29,10 +32,10 @@ export function StudentHomeworkStrip() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BookOpen size={15} className="text-primary" />
-          <h2 className="text-base font-bold text-foreground">Домашние задания</h2>
+          <h2 className="text-base font-bold text-foreground">{t('homeworkTitle')}</h2>
         </div>
         <Link href="/homework" className="flex items-center text-xs text-primary font-medium gap-0.5">
-          Все <ChevronRight size={14} />
+          {t('all')} <ChevronRight size={14} />
         </Link>
       </div>
 
@@ -49,10 +52,10 @@ export function StudentHomeworkStrip() {
                 </div>
                 <Badge variant={isUrgent ? 'warning' : 'secondary'} className="shrink-0 text-xs">
                   {daysLeft === 0
-                    ? 'Сегодня'
+                    ? t('today')
                     : daysLeft === 1
-                      ? 'Завтра'
-                      : format(new Date(hw.deadline!), 'd MMM', { locale: ru })}
+                      ? t('tomorrow')
+                      : format(new Date(hw.deadline!), 'd MMM', { locale: f.dateFnsLocale })}
                 </Badge>
               </CardContent>
             </Card>

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 // import { Inter } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { AuthInitializer } from '@/components/auth/auth-initializer'
@@ -11,24 +13,21 @@ import { AuthInitializer } from '@/components/auth/auth-initializer'
 // })
 
 const APP_DESCRIPTION =
-  'Lessonify — CRM для частных репетиторов: расписание, учёт учеников и оплат, домашние задания, Telegram-напоминания. Бесплатно до 5 учеников.'
+  'Lessonify — ИИ-помощник и CRM для частного репетитора: уроки голосом, учёт учеников и оплат, домашние задания, Telegram-напоминания. Бесплатно до 5 учеников.'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://app.lessonify.ru'),
   title: {
-    default: 'Lessonify — CRM для репетиторов',
+    default: 'Lessonify — ИИ-помощник репетитора',
     template: '%s — Lessonify',
   },
   description: APP_DESCRIPTION,
   applicationName: 'Lessonify',
   keywords: [
-    'CRM для репетитора',
-    'программа для репетитора',
+    'ИИ-помощник репетитора',
+    'приложение для репетитора',
     'учёт учеников репетитора',
     'расписание для репетитора',
-    'приложение для репетитора',
-    'журнал репетитора',
-    'учёт оплат репетитор',
     'репетитор онлайн-кабинет',
   ],
   authors: [{ name: 'Жуков Иван Андреевич' }],
@@ -49,18 +48,20 @@ export const metadata: Metadata = {
     siteName: 'Lessonify',
     locale: 'ru_RU',
     url: 'https://app.lessonify.ru/',
-    title: 'Lessonify — CRM для репетиторов',
+    title: 'Lessonify — ИИ-помощник репетитора',
     description: APP_DESCRIPTION,
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lessonify — CRM для репетиторов' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lessonify — ИИ-помощник репетитора' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lessonify — CRM для репетиторов',
+    title: 'Lessonify — ИИ-помощник репетитора',
     description: APP_DESCRIPTION,
     images: ['/og-image.png'],
   },
+  // Приложение закрыто от индексации: SEO-поверхность — лендинг lessonify.ru.
+  // Иначе app.* конкурирует с лендингом по «CRM для репетитора» в выдаче.
   robots: {
-    index: true,
+    index: false,
     follow: true,
   },
 }
@@ -74,15 +75,22 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Локаль определяется на сервере (кука → Accept-Language → ru); messages
+  // отдаются клиенту один раз через провайдер.
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    // <html lang="ru" className={inter.variable}>
-    <html lang="ru">
+    // <html lang={locale} className={inter.variable}>
+    <html lang={locale}>
       <body>
-        <Providers>
-          <AuthInitializer />
-          <div className="min-h-screen">{children}</div>
-        </Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>
+            <AuthInitializer />
+            <div className="min-h-screen">{children}</div>
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

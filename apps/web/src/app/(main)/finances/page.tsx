@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { SummaryCard } from '@/components/finances/summary-card'
 import { IncomeChart } from '@/components/finances/income-chart'
@@ -12,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { fadeUp } from '@/lib/motion'
 
 export default function FinancesPage() {
+  const t = useTranslations('finances')
   const { summary, chart, loading } = usePaymentSummary(6)
   const [invoiceOpen, setInvoiceOpen] = useState(false)
 
@@ -25,14 +27,14 @@ export default function FinancesPage() {
         className="flex items-start justify-between px-4 pb-4 pt-5 lg:px-0 lg:pt-0"
       >
         <div>
-          <h1 className="text-h2 font-bold tracking-tight text-foreground">Финансы</h1>
+          <h1 className="text-h2 font-bold tracking-tight text-foreground">{t('title')}</h1>
           <p className="mt-0.5 text-xs text-muted-foreground lg:text-sm">
-            Доходы и задолженности
+            {t('subtitle')}
           </p>
         </div>
         <Button size="sm" variant="outline" className="mt-1 gap-1.5" onClick={() => setInvoiceOpen(true)}>
           <FileDown size={14} />
-          Счёт PDF
+          {t('invoicePdf')}
         </Button>
       </motion.div>
 

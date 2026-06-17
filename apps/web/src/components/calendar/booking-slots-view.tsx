@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
 import { CalendarPlus, Clock, Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useFormatters } from '@/i18n/use-formatters'
 import { useTutorPublicSlots, useMyBookings } from '@/hooks/use-availability'
 import { toast } from '@/components/ui/use-toast'
 import type { AvailabilitySlot } from '@tutorflow/types'
@@ -17,6 +18,8 @@ interface BookingSlotsViewProps {
 function pad(n: number) { return String(n).padStart(2, '0') }
 
 export function BookingSlotsView({ date, tutorId }: BookingSlotsViewProps) {
+  const t = useTranslations('calendar')
+  const f = useFormatters()
   const { slots, loading } = useTutorPublicSlots(tutorId)
   const { requestBooking } = useMyBookings()
   const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(null)
@@ -36,8 +39,8 @@ export function BookingSlotsView({ date, tutorId }: BookingSlotsViewProps) {
   if (daySlots.length === 0) return (
     <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
       <CalendarPlus size={28} className="opacity-40" />
-      <p className="text-sm font-medium">Нет доступных слотов</p>
-      <p className="text-xs text-center">Репетитор не указал время записи для этого дня</p>
+      <p className="text-sm font-medium">{t('noSlots')}</p>
+      <p className="text-xs text-center">{t('noSlotsHint')}</p>
     </div>
   )
 
@@ -49,12 +52,12 @@ export function BookingSlotsView({ date, tutorId }: BookingSlotsViewProps) {
     setSending(true)
     try {
       await requestBooking({ slotId: selectedSlot.id, requestedAt: requestedAt.toISOString(), note: note || undefined })
-      toast({ variant: 'success', title: 'Запрос отправлен', description: 'Репетитор получит уведомление' })
+      toast({ variant: 'success', title: t('requestSent'), description: t('requestSentHint') })
       setSelectedSlot(null)
       setNote('')
     } catch (err: any) {
-      const msg = err?.response?.data?.error ?? 'Не удалось отправить запрос'
-      toast({ variant: 'destructive', title: 'Ошибка', description: msg })
+      const msg = err?.response?.data?.error ?? t('requestFailed')
+      toast({ variant: 'destructive', title: t('error'), description: msg })
     } finally {
       setSending(false)
     }
@@ -64,7 +67,7 @@ export function BookingSlotsView({ date, tutorId }: BookingSlotsViewProps) {
     <div className="py-2">
       <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1.5">
         <CalendarPlus size={13} />
-        Доступные слоты для записи
+        {t('availableSlots')}
       </p>
 
       <div className="flex flex-col gap-2">
@@ -85,7 +88,7 @@ export function BookingSlotsView({ date, tutorId }: BookingSlotsViewProps) {
                 <span className="text-sm font-medium">
                   {pad(slot.startHour)}:{pad(slot.startMinute)}
                 </span>
-                <span className="text-xs text-muted-foreground">· {slot.durationMinutes} мин</span>
+                <span className="text-xs text-muted-foreground">· {t('minShort', { count: slot.durationMinutes })}</span>
               </div>
             </button>
           )
@@ -97,16 +100,16 @@ export function BookingSlotsView({ date, tutorId }: BookingSlotsViewProps) {
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Комментарий репетитору (необязательно)..."
+            placeholder={t('notePlaceholder')}
             className="w-full text-xs bg-background border border-border rounded-xl p-2.5 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
             rows={2}
           />
           <Button className="w-full gap-2" onClick={handleBook} disabled={sending}>
             <Send size={14} />
-            {sending ? 'Отправка...' : `Записаться на ${pad(selectedSlot.startHour)}:${pad(selectedSlot.startMinute)}`}
+            {sending ? t('sending') : t('bookAt', { time: `${pad(selectedSlot.startHour)}:${pad(selectedSlot.startMinute)}` })}
           </Button>
           <p className="text-[11px] text-muted-foreground text-center">
-            {format(date, 'd MMMM', { locale: ru })} · {selectedSlot.durationMinutes} минут
+            {format(date, 'd MMMM', { locale: f.dateFnsLocale })} · {t('minFull', { count: selectedSlot.durationMinutes })}
           </p>
         </div>
       )}

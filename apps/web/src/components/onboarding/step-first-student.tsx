@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowRight, UserPlus, Check, SkipForward } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,7 @@ const item = {
 }
 
 export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstStudentProps) {
+  const t = useTranslations('onboarding')
   const { createStudent, loading } = useCreateStudent()
 
   const [studentName, setStudentName] = useState('')
@@ -52,9 +54,9 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
       })
       setAdded(true)
       onChange({ studentAdded: true })
-      toast({ variant: 'success', title: 'Ученик добавлен!' })
+      toast({ variant: 'success', title: t('firstStudent.addedToast') })
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Попробуйте ещё раз' })
+      toast({ variant: 'destructive', title: t('firstStudent.errorTitle'), description: t('firstStudent.errorDescription') })
     }
   }
 
@@ -67,10 +69,10 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
     >
       <motion.div variants={item}>
         <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          Добавьте первого ученика
+          {t('firstStudent.title')}
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Можно пропустить и добавить позже
+          {t('firstStudent.subtitle')}
         </p>
       </motion.div>
 
@@ -86,13 +88,13 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
             {/* Student name */}
             <motion.div variants={item}>
               <label htmlFor="ob-student" className="text-sm font-medium text-foreground mb-1.5 block">
-                Имя ученика
+                {t('firstStudent.nameLabel')}
               </label>
               <Input
                 id="ob-student"
                 value={studentName}
                 onChange={(e) => setStudentName(e.target.value)}
-                placeholder="Анна Петрова"
+                placeholder={t('firstStudent.namePlaceholder')}
                 className="h-12 text-base"
                 autoFocus
               />
@@ -101,7 +103,7 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
             {/* Subject (prefilled from step 3) */}
             <motion.div variants={item}>
               <label htmlFor="ob-student-subject" className="text-sm font-medium text-foreground mb-1.5 block">
-                Предмет
+                {t('firstStudent.subjectLabel')}
               </label>
               {data.subjects.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -126,7 +128,7 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
                   id="ob-student-subject"
                   value={studentSubject}
                   onChange={(e) => setStudentSubject(e.target.value)}
-                  placeholder="Математика"
+                  placeholder={t('firstStudent.subjectPlaceholder')}
                   className="h-10"
                 />
               )}
@@ -134,7 +136,7 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
 
             {/* Color */}
             <motion.div variants={item}>
-              <p className="text-sm font-medium text-foreground mb-2">Цвет</p>
+              <p className="text-sm font-medium text-foreground mb-2">{t('firstStudent.colorLabel')}</p>
               <div className="flex gap-2">
                 {COLORS.map(color => (
                   <motion.button
@@ -161,7 +163,7 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
                 className="w-full"
               >
                 <UserPlus size={18} className="mr-2" />
-                {loading ? 'Добавление...' : 'Добавить ученика'}
+                {loading ? t('firstStudent.adding') : t('firstStudent.addButton')}
               </Button>
             </motion.div>
           </motion.div>
@@ -180,9 +182,9 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
             >
               <Check size={32} className="text-green-500" />
             </motion.div>
-            <p className="text-lg font-semibold text-foreground">Отлично!</p>
+            <p className="text-lg font-semibold text-foreground">{t('firstStudent.successTitle')}</p>
             <p className="text-muted-foreground text-sm mt-1">
-              {studentName} добавлен(а) в список учеников
+              {t('firstStudent.successMessage', { name: studentName })}
             </p>
           </motion.div>
         )}
@@ -201,13 +203,13 @@ export function StepFirstStudent({ data, onChange, onNext, onBack }: StepFirstSt
         >
           {added ? (
             <>
-              Далее
+              {t('next')}
               <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
             </>
           ) : (
             <>
               <SkipForward size={18} className="mr-2" />
-              Пропустить
+              {t('skip')}
             </>
           )}
         </Button>

@@ -11,23 +11,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCreateStudent } from '@/hooks/use-students'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslations } from 'next-intl'
 
 const PRESET_COLORS = [
   '#6C63FF', '#10B981', '#F59E0B', '#EF4444',
   '#3B82F6', '#EC4899', '#8B5CF6', '#14B8A6',
 ]
 
-const schema = z.object({
-  name: z.string().min(1, 'Введите имя'),
-  subject: z.string().optional(),
-  hourlyRate: z.coerce.number().int().nonnegative().optional(),
-  email: z.string().email('Некорректный email').optional().or(z.literal('')),
-  phone: z.string().optional(),
-  color: z.string().min(1),
-  notes: z.string().optional(),
-})
-
-type FormData = z.infer<typeof schema>
+type FormData = {
+  name: string
+  subject?: string
+  hourlyRate?: number
+  email?: string
+  phone?: string
+  color: string
+  notes?: string
+}
 
 interface AddStudentModalProps {
   open: boolean
@@ -36,7 +35,18 @@ interface AddStudentModalProps {
 }
 
 export function AddStudentModal({ open, onClose, onCreated }: AddStudentModalProps) {
+  const t = useTranslations('students')
   const { createStudent, loading } = useCreateStudent()
+
+  const schema = z.object({
+    name: z.string().min(1, t('form.nameRequired')),
+    subject: z.string().optional(),
+    hourlyRate: z.coerce.number().int().nonnegative().optional(),
+    email: z.string().email(t('form.emailInvalid')).optional().or(z.literal('')),
+    phone: z.string().optional(),
+    color: z.string().min(1),
+    notes: z.string().optional(),
+  })
 
   const {
     register,
@@ -63,12 +73,12 @@ export function AddStudentModal({ open, onClose, onCreated }: AddStudentModalPro
         color: data.color,
         notes: data.notes || undefined,
       })
-      toast({ variant: 'success', title: 'Ученик добавлен' })
+      toast({ variant: 'success', title: t('toast.created') })
       reset({ color: PRESET_COLORS[0] })
       onClose()
       onCreated?.()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось добавить ученика' })
+      toast({ variant: 'destructive', title: t('toast.error'), description: t('toast.createError') })
     }
   }
 
@@ -76,26 +86,26 @@ export function AddStudentModal({ open, onClose, onCreated }: AddStudentModalPro
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Новый ученик</DialogTitle>
+          <DialogTitle>{t('form.title')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {/* Имя */}
           <div className="flex flex-col gap-1.5">
-            <Label>Имя *</Label>
-            <Input placeholder="Иван Иванов" {...register('name')} />
+            <Label>{t('form.name')}</Label>
+            <Input placeholder={t('form.namePlaceholder')} {...register('name')} />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
 
           {/* Предмет */}
           <div className="flex flex-col gap-1.5">
-            <Label>Предмет</Label>
-            <Input placeholder="Математика" {...register('subject')} />
+            <Label>{t('form.subject')}</Label>
+            <Input placeholder={t('form.subjectPlaceholder')} {...register('subject')} />
           </div>
 
           {/* Стоимость */}
           <div className="flex flex-col gap-1.5">
-            <Label>Стоимость урока, ₽</Label>
+            <Label>{t('form.hourlyRate')}</Label>
             <Input type="number" placeholder="2000" {...register('hourlyRate')} />
           </div>
 
@@ -108,13 +118,13 @@ export function AddStudentModal({ open, onClose, onCreated }: AddStudentModalPro
 
           {/* Телефон */}
           <div className="flex flex-col gap-1.5">
-            <Label>Телефон</Label>
+            <Label>{t('form.phone')}</Label>
             <Input placeholder="+7 999 000-00-00" {...register('phone')} />
           </div>
 
           {/* Цвет */}
           <div className="flex flex-col gap-2">
-            <Label>Цвет</Label>
+            <Label>{t('form.color')}</Label>
             <div className="flex gap-2 flex-wrap">
               {PRESET_COLORS.map((color) => (
                 <button
@@ -135,12 +145,12 @@ export function AddStudentModal({ open, onClose, onCreated }: AddStudentModalPro
 
           {/* Заметки */}
           <div className="flex flex-col gap-1.5">
-            <Label>Заметки</Label>
-            <Input placeholder="Любая дополнительная информация" {...register('notes')} />
+            <Label>{t('form.notes')}</Label>
+            <Input placeholder={t('form.notesPlaceholder')} {...register('notes')} />
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={loading}>
-            {loading ? 'Сохранение...' : 'Добавить ученика'}
+            {loading ? t('form.saving') : t('form.submit')}
           </Button>
         </form>
       </DialogContent>

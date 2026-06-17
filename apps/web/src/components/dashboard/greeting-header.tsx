@@ -2,24 +2,27 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Crown, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuthStore } from '@/store/auth.store'
 import { getInitials } from '@tutorflow/utils'
-import { formatDate } from '@tutorflow/utils'
+import { useFormatters } from '@/i18n/use-formatters'
 
-function getGreeting(): string {
+function getGreetingKey(): string {
   const h = new Date().getHours()
-  if (h < 6) return 'Доброй ночи'
-  if (h < 12) return 'Доброе утро'
-  if (h < 18) return 'Добрый день'
-  return 'Добрый вечер'
+  if (h < 6) return 'greeting.night'
+  if (h < 12) return 'greeting.morning'
+  if (h < 18) return 'greeting.day'
+  return 'greeting.evening'
 }
 
 export function GreetingHeader() {
+  const t = useTranslations('dashboard')
+  const f = useFormatters()
   const { user } = useAuthStore()
-  const greeting = useMemo(getGreeting, [])
-  const today = useMemo(() => formatDate(new Date().toISOString()), [])
+  const greeting = useMemo(() => t(getGreetingKey()), [t])
+  const today = useMemo(() => f.date(new Date().toISOString()), [f])
 
   const firstName = user?.name?.split(' ')[0] ?? ''
   const isPro = user?.plan === 'PRO'

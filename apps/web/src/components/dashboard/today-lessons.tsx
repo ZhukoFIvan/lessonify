@@ -2,13 +2,15 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { CalendarDays, ChevronRight, Plus } from 'lucide-react'
 import { staggerContainer, staggerItem } from '@/lib/motion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { AddLessonModal } from '@/components/lesson/add-lesson-modal'
 import { useDayLessons } from '@/hooks/use-lessons'
-import { getInitials, pluralize } from '@tutorflow/utils'
+import { getInitials } from '@tutorflow/utils'
+import { useFormatters } from '@/i18n/use-formatters'
 import { Badge } from '@/components/ui/badge'
 import { useState } from 'react'
 
@@ -17,15 +19,18 @@ const PAYMENT_VARIANT: Record<string, 'success' | 'warning' | 'danger' | 'second
   PENDING: 'warning',
   OVERDUE: 'danger',
 }
-const PAYMENT_LABELS: Record<string, string> = {
-  PAID: 'Оплачено',
-  PENDING: 'Ожидает',
-  OVERDUE: 'Просрочено',
-}
 
 export function TodayLessons() {
+  const t = useTranslations('dashboard')
+  const f = useFormatters()
   const { lessons, loading, refetch } = useDayLessons(new Date())
   const [addOpen, setAddOpen] = useState(false)
+
+  const PAYMENT_LABELS: Record<string, string> = {
+    PAID: t('payment.paid'),
+    PENDING: t('payment.pending'),
+    OVERDUE: t('payment.overdue'),
+  }
 
   if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-lg" />
 
@@ -34,11 +39,11 @@ export function TodayLessons() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <CalendarDays size={18} className="text-primary" />
-          <h3 className="text-sm font-semibold text-foreground">Уроки сегодня</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t('todayLessons.title')}</h3>
         </div>
         {lessons.length > 0 && (
           <span className="text-xs text-muted-foreground tnum">
-            {pluralize(lessons.length, ['урок', 'урока', 'уроков'])}
+            {f.count(lessons.length, 'lessons')}
           </span>
         )}
       </div>
@@ -49,7 +54,7 @@ export function TodayLessons() {
           className="flex-1 rounded-md border-2 border-dashed border-[var(--border-strong)] py-4 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
         >
           <Plus size={20} />
-          <span className="text-xs font-medium">Запланировать урок</span>
+          <span className="text-xs font-medium">{t('todayLessons.schedule')}</span>
         </button>
       ) : (
         <motion.div
@@ -89,7 +94,7 @@ export function TodayLessons() {
           ))}
           {lessons.length > 4 && (
             <Link href="/calendar" className="flex items-center justify-center gap-1 text-xs text-primary font-medium pt-1">
-              ещё {lessons.length - 4} <ChevronRight size={14} />
+              {t('more', { count: lessons.length - 4 })} <ChevronRight size={14} />
             </Link>
           )}
         </motion.div>

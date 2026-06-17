@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { isToday, isTomorrow, isYesterday, format, formatISO } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -13,7 +13,7 @@ import { AddHomeworkModal } from '@/components/homework/add-homework-modal'
 import { BookingSlotsView } from '@/components/calendar/booking-slots-view'
 import { usePayLesson, useRemindLesson } from '@/hooks/use-lessons'
 import { useMyTutor } from '@/hooks/use-my-tutor'
-import { pluralize } from '@tutorflow/utils'
+import { useFormatters } from '@/i18n/use-formatters'
 import { staggerContainer, staggerItem } from '@/lib/motion'
 import { useAuthStore } from '@/store/auth.store'
 import type { LessonWithStudent, LessonWithTutor } from '@tutorflow/types'
@@ -21,13 +21,6 @@ import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 
 type CalendarLesson = LessonWithStudent | LessonWithTutor
-
-function getDayLabel(date: Date): string {
-  if (isToday(date)) return 'Сегодня'
-  if (isTomorrow(date)) return 'Завтра'
-  if (isYesterday(date)) return 'Вчера'
-  return format(date, 'd MMMM', { locale: ru })
-}
 
 interface DayViewProps {
   date: Date
@@ -39,6 +32,8 @@ interface DayViewProps {
 }
 
 export function DayView({ date, lessons, loading, onRefetch, dense = false }: DayViewProps) {
+  const t = useTranslations('calendar')
+  const f = useFormatters()
   const [addOpen, setAddOpen] = useState(false)
   const [hwLessonId, setHwLessonId] = useState<string | null>(null)
   const { payLesson, loadingId: payLoadingId } = usePayLesson()
@@ -48,7 +43,7 @@ export function DayView({ date, lessons, loading, onRefetch, dense = false }: Da
   // useMyTutor делает запрос только если нужен (студент)
   const { tutor } = useMyTutor()
 
-  const dayLabel = getDayLabel(date)
+  const dayLabel = f.lessonDate(date.toISOString())
 
   async function handlePay(lessonId: string) {
     await payLesson(lessonId)
@@ -58,10 +53,10 @@ export function DayView({ date, lessons, loading, onRefetch, dense = false }: Da
   async function handleRemind(lessonId: string) {
     try {
       await remindLesson(lessonId)
-      toast({ variant: 'success', title: 'Напоминание отправлено ученику' })
+      toast({ variant: 'success', title: t('reminderSent') })
     } catch (err: any) {
-      const message = err?.response?.data?.error || 'Не удалось отправить напоминание'
-      toast({ variant: 'destructive', title: 'Ошибка', description: message })
+      const message = err?.response?.data?.error || t('reminderFailed')
+      toast({ variant: 'destructive', title: t('error'), description: message })
     }
   }
 
@@ -85,15 +80,15 @@ export function DayView({ date, lessons, loading, onRefetch, dense = false }: Da
           {!loading && (
             <p className="text-xs text-muted-foreground mt-0.5">
               {lessons.length === 0
-                ? 'Уроков нет'
-                : pluralize(lessons.length, ['урок', 'урока', 'уроков'])}
+                ? t('noLessonsToday')
+                : f.count(lessons.length, 'lessons')}
             </p>
           )}
         </div>
         {isTutor && (
           <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5 px-4">
             <Plus size={15} />
-            Урок
+            {t('lesson')}
           </Button>
         )}
       </div>
@@ -116,14 +111,14 @@ export function DayView({ date, lessons, loading, onRefetch, dense = false }: Da
               <Plus size={22} />
             </div>
             <div className="text-center">
-              <p className="text-sm font-medium text-foreground group-hover:text-primary">Нет уроков</p>
-              <p className="mt-0.5 text-xs">Нажмите, чтобы добавить</p>
+              <p className="text-sm font-medium text-foreground group-hover:text-primary">{t('noLessons')}</p>
+              <p className="mt-0.5 text-xs">{t('tapToAdd')}</p>
             </div>
           </button>
         ) : (
           <div>
             <div className="py-6 flex flex-col items-center gap-1 text-muted-foreground">
-              <p className="text-sm font-medium">Уроков нет</p>
+              <p className="text-sm font-medium">{t('noLessonsToday')}</p>
             </div>
             <BookingSlotsView date={date} tutorId={tutor?.id ?? null} />
           </div>

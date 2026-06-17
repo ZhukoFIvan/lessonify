@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import api from '@/lib/api'
 
 export function useDownloadInvoice() {
+  const t = useTranslations('toasts')
   const [loading, setLoading] = useState(false)
 
   async function downloadInvoice(studentId: string | undefined, studentName: string, from: string, to: string) {
@@ -16,7 +18,7 @@ export function useDownloadInvoice() {
       const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
       const a = document.createElement('a')
       a.href = url
-      a.download = `счёт-${studentName}-${from}.pdf`
+      a.download = `${t('invoiceFilePrefix')}-${studentName}-${from}.pdf`
       a.click()
       URL.revokeObjectURL(url)
     } finally {

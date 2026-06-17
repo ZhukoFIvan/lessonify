@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { MessageCircle, ExternalLink, Unlink } from 'lucide-react'
 
 export function TelegramSection() {
+  const t = useTranslations('settingsSections')
   const { status, loading, refetch } = useTelegramStatus()
   const { getLink } = useGetTelegramLink()
   const { disconnect, loading: disconnectLoading } = useDisconnectTelegram()
@@ -34,8 +36,8 @@ export function TelegramSection() {
   // После клика по ссылке опрашиваем статус, чтобы автоматически поймать привязку.
   function handleConnectClick() {
     toast({
-      title: 'Открываем Telegram',
-      description: 'Нажмите «Start» в боте — привязка определится автоматически.',
+      title: t('openingTelegram'),
+      description: t('openingTelegramDesc'),
     })
     let tries = 0
     const id = setInterval(async () => {
@@ -50,10 +52,10 @@ export function TelegramSection() {
       await disconnect()
       setDeepLink(null)
       requested.current = false
-      toast({ variant: 'success', title: 'Telegram отключён' })
+      toast({ variant: 'success', title: t('telegramDisconnected') })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось отключить Telegram' })
+      toast({ variant: 'destructive', title: t('error'), description: t('telegramDisconnectFailed') })
     }
   }
 
@@ -68,7 +70,7 @@ export function TelegramSection() {
           <div className="flex items-center gap-2 mb-0.5">
             <p className="text-sm font-semibold text-foreground">Telegram</p>
             {!loading && status?.connected && (
-              <Badge variant="success" className="text-[10px]">Подключён</Badge>
+              <Badge variant="success" className="text-[10px]">{t('connected')}</Badge>
             )}
           </div>
 
@@ -80,7 +82,7 @@ export function TelegramSection() {
             </p>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Получайте напоминания об уроках в Telegram
+              {t('telegramPrompt')}
             </p>
           )}
 
@@ -96,7 +98,7 @@ export function TelegramSection() {
                 disabled={disconnectLoading}
               >
                 <Unlink size={13} />
-                {disconnectLoading ? 'Отключение...' : 'Отключить'}
+                {disconnectLoading ? t('disconnecting') : t('disconnect')}
               </Button>
             ) : (
               <a
@@ -111,7 +113,7 @@ export function TelegramSection() {
                 )}
               >
                 <ExternalLink size={13} />
-                {deepLink ? 'Открыть бота и подключить' : 'Загрузка...'}
+                {deepLink ? t('openBotConnect') : t('loading')}
               </a>
             )}
           </div>

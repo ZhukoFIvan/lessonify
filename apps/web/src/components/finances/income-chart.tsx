@@ -12,7 +12,9 @@ import {
 import { BarChart3 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import type { Locale as DateFnsLocale } from 'date-fns'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 import type { MonthlyIncome } from '@tutorflow/types'
 
 interface IncomeChartProps {
@@ -20,9 +22,9 @@ interface IncomeChartProps {
   loading: boolean
 }
 
-function formatMonth(key: string): string {
+function formatMonth(key: string, dateFnsLocale: DateFnsLocale): string {
   try {
-    return format(new Date(`${key}-01`), 'LLL', { locale: ru })
+    return format(new Date(`${key}-01`), 'LLL', { locale: dateFnsLocale })
   } catch {
     return key
   }
@@ -40,6 +42,7 @@ interface CustomTooltipProps {
 }
 
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  const t = useTranslations('finances')
   if (!active || !payload?.length) return null
 
   const earned = payload.find((p) => p.dataKey === 'earned')?.value ?? 0
@@ -51,14 +54,14 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       {earned > 0 && (
         <p className="flex items-center gap-1.5 text-primary">
           <span className="h-2 w-2 rounded-[3px] bg-primary" />
-          <span className="text-muted-foreground">Получено</span>
+          <span className="text-muted-foreground">{t('received')}</span>
           <span className="tnum ml-auto font-semibold text-foreground">{formatTooltipValue(earned)}</span>
         </p>
       )}
       {pending > 0 && (
         <p className="mt-1 flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-[3px] bg-warning/60" />
-          <span className="text-muted-foreground">Ожидает</span>
+          <span className="text-muted-foreground">{t('pending')}</span>
           <span className="tnum ml-auto font-semibold text-foreground">{formatTooltipValue(pending)}</span>
         </p>
       )}
@@ -67,11 +70,13 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export function IncomeChart({ data, loading }: IncomeChartProps) {
+  const t = useTranslations('finances')
+  const f = useFormatters()
   if (loading) return <Skeleton className="h-full min-h-[220px] rounded-xl" />
 
   const chartData = data.map((d) => ({
     ...d,
-    label: formatMonth(d.month),
+    label: formatMonth(d.month, f.dateFnsLocale),
   }))
 
   const maxValue = Math.max(...data.map((d) => d.earned + d.pending), 1)
@@ -85,16 +90,16 @@ export function IncomeChart({ data, loading }: IncomeChartProps) {
     <div className="surface-1 flex h-full flex-col rounded-xl p-4 shadow-elevation-1 lg:p-5">
       <div className="mb-4 flex items-center justify-between gap-2">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-          Доходы за 6 месяцев
+          {t('incomeSixMonths')}
         </p>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-[3px] bg-primary" />
-            <span className="text-[11px] text-muted-foreground">Получено</span>
+            <span className="text-[11px] text-muted-foreground">{t('received')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-[3px] bg-warning/60" />
-            <span className="text-[11px] text-muted-foreground">Ожидает</span>
+            <span className="text-[11px] text-muted-foreground">{t('pending')}</span>
           </div>
         </div>
       </div>
@@ -104,9 +109,9 @@ export function IncomeChart({ data, loading }: IncomeChartProps) {
           <div className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-2">
             <BarChart3 size={24} strokeWidth={1.5} className="text-muted-foreground/60" />
           </div>
-          <p className="text-sm font-medium text-foreground">Пока нет данных</p>
+          <p className="text-sm font-medium text-foreground">{t('noDataYet')}</p>
           <p className="max-w-[16rem] text-xs text-muted-foreground">
-            Данные появятся после первых проведённых и оплаченных уроков
+            {t('noDataHint')}
           </p>
         </div>
       ) : (

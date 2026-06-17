@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Clock, ChevronRight, PartyPopper, Timer } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -11,7 +12,7 @@ import { useNextLesson } from '@/hooks/use-lessons'
 import { getLessonTimeRange, getMinutesUntil } from '@tutorflow/utils'
 import { getInitials } from '@tutorflow/utils'
 
-function useCountdown(targetIso: string | null) {
+function useCountdown(targetIso: string | null, t: (key: string, values?: Record<string, string | number>) => string) {
   const [display, setDisplay] = useState('')
 
   useEffect(() => {
@@ -20,28 +21,29 @@ function useCountdown(targetIso: string | null) {
     function update() {
       const diff = new Date(targetIso!).getTime() - Date.now()
       if (diff <= 0) {
-        setDisplay('Идёт сейчас')
+        setDisplay(t('nextLesson.now'))
         return
       }
       const h = Math.floor(diff / 3_600_000)
       const m = Math.floor((diff % 3_600_000) / 60_000)
       const s = Math.floor((diff % 60_000) / 1_000)
-      if (h > 0) setDisplay(`${h}ч ${m}м`)
-      else if (m > 0) setDisplay(`${m}м ${s}с`)
-      else setDisplay(`${s}с`)
+      if (h > 0) setDisplay(t('countdown.hm', { h, m }))
+      else if (m > 0) setDisplay(t('countdown.ms', { m, s }))
+      else setDisplay(t('countdown.s', { s }))
     }
 
     update()
     const id = setInterval(update, 1000)
     return () => clearInterval(id)
-  }, [targetIso])
+  }, [targetIso, t])
 
   return display
 }
 
 export function NextLessonCard() {
+  const t = useTranslations('dashboard')
   const { lesson, loading } = useNextLesson()
-  const countdown = useCountdown(lesson?.startTime ?? null)
+  const countdown = useCountdown(lesson?.startTime ?? null, t)
 
   if (loading) return <Skeleton className="h-full min-h-[7rem] rounded-lg" />
 
@@ -54,8 +56,8 @@ export function NextLessonCard() {
           <PartyPopper size={18} className="text-primary" />
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-foreground text-sm">Ближайших уроков нет</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Свободное окно — можно выдохнуть</p>
+          <p className="font-semibold text-foreground text-sm">{t('nextLesson.emptyTitle')}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('nextLesson.emptySub')}</p>
         </div>
       </div>
     )
@@ -72,7 +74,7 @@ export function NextLessonCard() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5 text-white/80 text-xs font-medium">
               <Clock size={13} />
-              <span>Ближайший урок</span>
+              <span>{t('nextLesson.label')}</span>
             </div>
             {/* Живой таймер — hero-treatment для ключевого числа */}
             <div className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full tnum ${isImminent ? 'bg-amber-400 text-amber-900' : 'bg-white/20 text-white'}`}>

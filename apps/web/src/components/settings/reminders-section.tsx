@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,26 +17,27 @@ import { cn } from '@/lib/utils'
 import { detectTimezone, timezoneOptionsWith } from '@/lib/timezones'
 import { Bell } from 'lucide-react'
 
-const BEFORE_OPTIONS = [
-  { value: 5, label: '5 мин' },
-  { value: 10, label: '10 мин' },
-  { value: 15, label: '15 мин' },
-  { value: 30, label: '30 мин' },
-  { value: 60, label: '1 час' },
-  { value: 120, label: '2 часа' },
-]
-
-const AFTER_OPTIONS = [
-  { value: 30, label: '30 мин' },
-  { value: 60, label: '1 час' },
-  { value: 120, label: '2 часа' },
-  { value: 240, label: '4 часа' },
-  { value: 1440, label: '1 день' },
-]
-
 export function RemindersSection() {
+  const t = useTranslations('settingsSections')
   const { settings, loading, refetch } = useTutorSettings()
   const { update, loading: saving } = useUpdateTutorSettings()
+
+  const BEFORE_OPTIONS = [
+    { value: 5, label: t('minutesShort', { m: 5 }) },
+    { value: 10, label: t('minutesShort', { m: 10 }) },
+    { value: 15, label: t('minutesShort', { m: 15 }) },
+    { value: 30, label: t('minutesShort', { m: 30 }) },
+    { value: 60, label: t('hoursPlural', { count: 1 }) },
+    { value: 120, label: t('hoursPlural', { count: 2 }) },
+  ]
+
+  const AFTER_OPTIONS = [
+    { value: 30, label: t('minutesShort', { m: 30 }) },
+    { value: 60, label: t('hoursPlural', { count: 1 }) },
+    { value: 120, label: t('hoursPlural', { count: 2 }) },
+    { value: 240, label: t('hoursPlural', { count: 4 }) },
+    { value: 1440, label: t('daysPlural', { count: 1 }) },
+  ]
 
   const [before, setBefore] = useState<number | null>(null)
   const [after, setAfter] = useState<number | null>(null)
@@ -56,13 +58,13 @@ export function RemindersSection() {
         ...(after !== null && { reminderAfterLesson: after }),
         ...(timezone !== null && { timezone }),
       })
-      toast({ variant: 'success', title: 'Напоминания сохранены' })
+      toast({ variant: 'success', title: t('remindersSaved') })
       setBefore(null)
       setAfter(null)
       setTimezone(null)
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось сохранить' })
+      toast({ variant: 'destructive', title: t('error'), description: t('saveFailed') })
     }
   }
 
@@ -73,8 +75,8 @@ export function RemindersSection() {
           <Bell size={18} />
         </span>
         <div>
-          <p className="text-sm font-semibold text-foreground">Напоминания</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Когда напоминать об уроках</p>
+          <p className="text-sm font-semibold text-foreground">{t('remindersTitle')}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('remindersSubtitle')}</p>
         </div>
       </div>
 
@@ -87,7 +89,7 @@ export function RemindersSection() {
         <div className="flex flex-col gap-5">
           {/* До урока */}
           <div>
-            <p className="text-xs text-muted-foreground mb-2">За сколько до урока</p>
+            <p className="text-xs text-muted-foreground mb-2">{t('beforeLesson')}</p>
             <div className="flex gap-2 flex-wrap">
               {BEFORE_OPTIONS.map(({ value, label }) => (
                 <button
@@ -108,7 +110,7 @@ export function RemindersSection() {
 
           {/* После урока (напоминание об оплате) */}
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Напомнить об оплате через</p>
+            <p className="text-xs text-muted-foreground mb-2">{t('afterLessonPayment')}</p>
             <div className="flex gap-2 flex-wrap">
               {AFTER_OPTIONS.map(({ value, label }) => (
                 <button
@@ -129,7 +131,7 @@ export function RemindersSection() {
 
           {/* Часовой пояс */}
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Ваш часовой пояс</p>
+            <p className="text-xs text-muted-foreground mb-2">{t('timezone')}</p>
             <Select value={currentTimezone} onValueChange={setTimezone}>
               <SelectTrigger className="h-11 text-sm">
                 <SelectValue />
@@ -146,7 +148,7 @@ export function RemindersSection() {
 
           {isDirty && (
             <Button size="sm" onClick={handleSave} disabled={saving} className="self-start px-6">
-              {saving ? 'Сохранение...' : 'Сохранить'}
+              {saving ? t('saving') : t('save')}
             </Button>
           )}
         </div>

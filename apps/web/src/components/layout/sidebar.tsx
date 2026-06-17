@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/use-auth'
@@ -15,6 +16,8 @@ export function Sidebar() {
   const user = useAuthStore((s) => s.user)
   const { logout } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
+  const tNav = useTranslations('nav')
+  const tCommon = useTranslations('common')
 
   const nav = user?.role === 'STUDENT' ? STUDENT_TABS : TUTOR_TABS
 
@@ -36,14 +39,14 @@ export function Sidebar() {
                 Lessonify
               </h1>
               <p className="truncate text-[11px] leading-tight text-muted-foreground">
-                {user?.role === 'TUTOR' ? 'Репетитор' : 'Ученик'}
+                {user?.role === 'TUTOR' ? tCommon('roleTutor') : tCommon('roleStudent')}
               </p>
             </div>
           </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? 'Развернуть меню' : 'Свернуть меню'}
+          aria-label={collapsed ? tCommon('expandMenu') : tCommon('collapseMenu')}
           className={cn(
             'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors',
             'hover:bg-surface-2 hover:text-foreground',
@@ -58,7 +61,8 @@ export function Sidebar() {
 
       {/* Навигация */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {nav.map(({ href, label, icon: Icon }) => {
+        {nav.map(({ href, labelKey, icon: Icon }) => {
+          const label = tNav(labelKey)
           const isActive = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
@@ -103,7 +107,7 @@ export function Sidebar() {
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-[hsl(var(--danger)/0.12)] hover:text-[hsl(var(--danger))]"
             >
               <LogOut size={18} />
-              <span>Выйти</span>
+              <span>{tCommon('logout')}</span>
             </button>
           </>
         ) : (
@@ -116,7 +120,7 @@ export function Sidebar() {
             </div>
             <button
               onClick={() => logout()}
-              title="Выйти"
+              title={tCommon('logout')}
               className="flex w-full items-center justify-center rounded-lg p-2.5 text-muted-foreground transition-colors hover:bg-[hsl(var(--danger)/0.12)] hover:text-[hsl(var(--danger))]"
             >
               <LogOut size={18} />

@@ -10,10 +10,14 @@ import { StudentCard } from '@/components/students/student-card'
 import { StudentDetailModal } from '@/components/students/student-detail-modal'
 import { AddStudentModal } from '@/components/students/add-student-modal'
 import { useStudents } from '@/hooks/use-students'
-import { formatRub, pluralize } from '@tutorflow/utils'
+import { formatRub } from '@tutorflow/utils'
 import { fadeUp } from '@/lib/motion'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 
 export default function StudentsPage() {
+  const t = useTranslations('students')
+  const f = useFormatters()
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [addOpen, setAddOpen] = useState(false)
@@ -49,16 +53,16 @@ export default function StudentsPage() {
         className="flex items-center justify-between gap-3 px-4 pt-5 pb-3 lg:px-0 lg:pt-0"
       >
         <div className="min-w-0">
-          <h1 className="text-xl font-bold tracking-tight text-foreground lg:text-h1">Ученики</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground lg:text-h1">{t('title')}</h1>
           {!loading && (
             <p className="mt-0.5 text-xs text-muted-foreground lg:text-sm">
-              {stats.total === 0 ? 'Нет учеников' : pluralize(stats.total, ['ученик', 'ученика', 'учеников'])}
+              {stats.total === 0 ? t('noStudents') : f.count(stats.total, 'students')}
             </p>
           )}
         </div>
         <Button size="sm" onClick={() => setAddOpen(true)} className="shrink-0 gap-1.5 px-4">
           <Plus size={15} />
-          Добавить
+          {t('add')}
         </Button>
       </motion.div>
 
@@ -67,18 +71,18 @@ export default function StudentsPage() {
         <motion.div variants={fadeUp(0.06)} initial="hidden" animate="show" className="grid grid-cols-2 gap-2.5 px-4 pb-3 lg:grid-cols-3 lg:px-0">
           <SummaryTile
             icon={<Users size={16} />}
-            label="Всего"
+            label={t('summary.total')}
             value={String(stats.total)}
           />
           <SummaryTile
             icon={<Wallet size={16} />}
-            label="Долги"
+            label={t('summary.debts')}
             value={formatRub(stats.totalDebt)}
             tone={stats.totalDebt > 0 ? 'danger' : 'default'}
           />
           <SummaryTile
             icon={<AlertCircle size={16} />}
-            label="Должников"
+            label={t('summary.debtors')}
             value={String(stats.debtorsCount)}
             tone={stats.debtorsCount > 0 ? 'warning' : 'default'}
             className="col-span-2 lg:col-span-1"
@@ -96,7 +100,7 @@ export default function StudentsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск по имени или предмету..."
+            placeholder={t('searchPlaceholder')}
             className="pl-9 pr-9"
           />
           {search && (
@@ -104,7 +108,7 @@ export default function StudentsPage() {
               type="button"
               onClick={() => setSearch('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-              aria-label="Очистить поиск"
+              aria-label={t('clearSearch')}
             >
               <X size={15} />
             </button>
@@ -128,8 +132,8 @@ export default function StudentsPage() {
                   <Search size={24} strokeWidth={1.75} />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">Ничего не найдено</p>
-                  <p className="mt-0.5 text-xs">Попробуйте другой запрос</p>
+                  <p className="text-sm font-medium text-foreground">{t('notFound')}</p>
+                  <p className="mt-0.5 text-xs">{t('tryAnotherQuery')}</p>
                 </div>
               </>
             ) : (
@@ -141,8 +145,8 @@ export default function StudentsPage() {
                   <Users size={22} />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium">Нет учеников</p>
-                  <p className="mt-0.5 text-xs">Нажмите, чтобы добавить первого</p>
+                  <p className="text-sm font-medium">{t('noStudents')}</p>
+                  <p className="mt-0.5 text-xs">{t('addFirstHint')}</p>
                 </div>
               </button>
             )}

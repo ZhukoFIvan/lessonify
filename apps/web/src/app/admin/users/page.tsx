@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Search, ChevronLeft, ChevronRight, ShieldOff, Shield, Crown, UserCog } from 'lucide-react'
 import { useAdminUsers, type AdminUser } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
@@ -8,12 +9,13 @@ import { cn } from '@/lib/utils'
 // ── Role badge ────────────────────────────────────────────────────────────────
 
 function RoleBadge({ role }: { role: string }) {
+  const t = useTranslations('admin')
   const map: Record<string, string> = {
     TUTOR: 'bg-violet-500/15 text-violet-400',
     STUDENT: 'bg-blue-500/15 text-blue-400',
     ADMIN: 'bg-amber-500/15 text-amber-400',
   }
-  const label: Record<string, string> = { TUTOR: 'Репетитор', STUDENT: 'Ученик', ADMIN: 'Админ' }
+  const label: Record<string, string> = { TUTOR: t('roles.tutor'), STUDENT: t('roles.student'), ADMIN: t('roles.admin') }
   return (
     <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', map[role] ?? 'bg-gray-500/15 text-gray-400')}>
       {label[role] ?? role}
@@ -40,6 +42,7 @@ function PlanModal({
   onClose: () => void
   onSave: (plan: 'FREE' | 'PRO', opts?: { months?: number; days?: number }) => Promise<void>
 }) {
+  const t = useTranslations('admin')
   const [plan, setPlan] = useState<'FREE' | 'PRO'>(user.plan)
   const [months, setMonths] = useState<number>(1)
   const [customDays, setCustomDays] = useState('')
@@ -63,7 +66,7 @@ function PlanModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-[#13121f] border border-white/[0.08] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <h3 className="text-white font-bold text-lg mb-1">Изменить тариф</h3>
+        <h3 className="text-white font-bold text-lg mb-1">{t('planModal.title')}</h3>
         <p className="text-white/40 text-sm mb-6">{user.name}</p>
 
         <div className="flex gap-3 mb-5">
@@ -87,7 +90,7 @@ function PlanModal({
 
         {plan === 'PRO' && (
           <div className="mb-5">
-            <label className="text-white/50 text-xs font-medium block mb-2">Срок (месяцев)</label>
+            <label className="text-white/50 text-xs font-medium block mb-2">{t('planModal.termMonths')}</label>
             <div className="flex gap-2 flex-wrap mb-3">
               {[1, 3, 6, 12].map(m => (
                 <button
@@ -100,15 +103,15 @@ function PlanModal({
                       : 'border-white/[0.06] text-white/35 hover:text-white/60',
                   )}
                 >
-                  {m} мес.
+                  {t('planModal.months', { count: m })}
                 </button>
               ))}
             </div>
-            <label className="text-white/50 text-xs font-medium block mb-2">…или точное число дней</label>
+            <label className="text-white/50 text-xs font-medium block mb-2">{t('planModal.exactDays')}</label>
             <input
               type="number"
               min={1}
-              placeholder="Напр. 45"
+              placeholder={t('planModal.daysPlaceholder')}
               value={customDays}
               onChange={e => setCustomDays(e.target.value)}
               className="w-full px-3 py-2.5 bg-[#1a1830] border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-primary/40 transition-colors"
@@ -121,14 +124,14 @@ function PlanModal({
             onClick={onClose}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white/50 border border-white/[0.06] hover:text-white transition-colors"
           >
-            Отмена
+            {t('cancel')}
           </button>
           <button
             onClick={handleSave}
             disabled={loading}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
-            {loading ? 'Сохранение...' : 'Сохранить'}
+            {loading ? t('saving') : t('save')}
           </button>
         </div>
       </div>
@@ -147,6 +150,7 @@ function RoleModal({
   onClose: () => void
   onSave: (role: 'TUTOR' | 'STUDENT' | 'ADMIN') => Promise<void>
 }) {
+  const t = useTranslations('admin')
   const [role, setRole] = useState<'TUTOR' | 'STUDENT' | 'ADMIN'>(user.role)
   const [loading, setLoading] = useState(false)
 
@@ -161,15 +165,15 @@ function RoleModal({
   }
 
   const OPTIONS: { value: 'TUTOR' | 'STUDENT' | 'ADMIN'; label: string }[] = [
-    { value: 'TUTOR', label: 'Репетитор' },
-    { value: 'STUDENT', label: 'Ученик' },
-    { value: 'ADMIN', label: 'Администратор' },
+    { value: 'TUTOR', label: t('roles.tutor') },
+    { value: 'STUDENT', label: t('roles.student') },
+    { value: 'ADMIN', label: t('roles.adminFull') },
   ]
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-[#13121f] border border-white/[0.08] rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <h3 className="text-white font-bold text-lg mb-1">Изменить роль</h3>
+        <h3 className="text-white font-bold text-lg mb-1">{t('roleModal.title')}</h3>
         <p className="text-white/40 text-sm mb-6">{user.name} · {user.email}</p>
 
         <div className="space-y-2 mb-5">
@@ -191,7 +195,7 @@ function RoleModal({
 
         {role === 'ADMIN' && user.role !== 'ADMIN' && (
           <p className="text-amber-400/80 text-xs mb-4">
-            Внимание: пользователь получит полный доступ к админ-панели.
+            {t('roleModal.adminWarning')}
           </p>
         )}
 
@@ -200,14 +204,14 @@ function RoleModal({
             onClick={onClose}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white/50 border border-white/[0.06] hover:text-white transition-colors"
           >
-            Отмена
+            {t('cancel')}
           </button>
           <button
             onClick={handleSave}
             disabled={loading}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
-            {loading ? 'Сохранение...' : 'Сохранить'}
+            {loading ? t('saving') : t('save')}
           </button>
         </div>
       </div>
@@ -217,14 +221,8 @@ function RoleModal({
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-const ROLE_TABS = [
-  { value: 'ALL', label: 'Все' },
-  { value: 'TUTOR', label: 'Репетиторы' },
-  { value: 'STUDENT', label: 'Ученики' },
-  { value: 'ADMIN', label: 'Админы' },
-]
-
 export default function AdminUsersPage() {
+  const t = useTranslations('admin')
   const [search, setSearch] = useState('')
   const [role, setRole] = useState('ALL')
   const [page, setPage] = useState(1)
@@ -233,13 +231,20 @@ export default function AdminUsersPage() {
 
   const { data, loading, blockUser, setPlan, setRole: saveRole } = useAdminUsers(search, role, page)
 
+  const ROLE_TABS = [
+    { value: 'ALL', label: t('users.tabs.all') },
+    { value: 'TUTOR', label: t('users.tabs.tutors') },
+    { value: 'STUDENT', label: t('users.tabs.students') },
+    { value: 'ADMIN', label: t('users.tabs.admins') },
+  ]
+
   return (
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-white">Пользователи</h1>
+        <h1 className="text-2xl font-black text-white">{t('users.title')}</h1>
         <p className="text-white/40 text-sm mt-1">
-          {data ? `${data.total} пользователей` : '—'}
+          {data ? t('users.count', { count: data.total }) : '—'}
         </p>
       </div>
 
@@ -250,7 +255,7 @@ export default function AdminUsersPage() {
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
           <input
             type="text"
-            placeholder="Поиск по имени или email"
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1) }}
             className="w-full pl-9 pr-4 py-2.5 bg-[#0d0c1d] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/40 transition-colors"
@@ -280,11 +285,11 @@ export default function AdminUsersPage() {
       <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
         {/* Table header */}
         <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-5 py-3 border-b border-white/[0.06] text-xs font-semibold text-white/35 uppercase tracking-wider">
-          <span>Пользователь</span>
-          <span>Email</span>
-          <span>Роль</span>
-          <span>Тариф</span>
-          <span>Действия</span>
+          <span>{t('users.table.user')}</span>
+          <span>{t('users.table.email')}</span>
+          <span>{t('users.table.role')}</span>
+          <span>{t('users.table.plan')}</span>
+          <span>{t('users.table.actions')}</span>
         </div>
 
         {loading ? (
@@ -318,7 +323,7 @@ export default function AdminUsersPage() {
                     <p className="text-white text-sm font-medium truncate">{user.name}</p>
                     <p className="text-white/30 text-xs">
                       {new Date(user.createdAt).toLocaleDateString('ru')}
-                      {user.isBlocked && <span className="text-red-400 ml-2">• заблокирован</span>}
+                      {user.isBlocked && <span className="text-red-400 ml-2">• {t('users.blocked')}</span>}
                     </p>
                   </div>
                 </div>
@@ -336,21 +341,21 @@ export default function AdminUsersPage() {
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setPlanModal(user)}
-                    title="Изменить тариф"
+                    title={t('planModal.title')}
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-white/35 hover:text-amber-400 hover:bg-amber-500/10 transition-all"
                   >
                     <Crown size={15} />
                   </button>
                   <button
                     onClick={() => setRoleModal(user)}
-                    title="Изменить роль"
+                    title={t('roleModal.title')}
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-white/35 hover:text-primary hover:bg-primary/10 transition-all"
                   >
                     <UserCog size={15} />
                   </button>
                   <button
                     onClick={() => blockUser(user.id)}
-                    title={user.isBlocked ? 'Разблокировать' : 'Заблокировать'}
+                    title={user.isBlocked ? t('users.unblock') : t('users.block')}
                     className={cn(
                       'w-8 h-8 rounded-lg flex items-center justify-center transition-all',
                       user.isBlocked
@@ -365,7 +370,7 @@ export default function AdminUsersPage() {
             ))}
 
             {data?.users.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-10">Пользователи не найдены</p>
+              <p className="text-white/30 text-sm text-center py-10">{t('users.empty')}</p>
             )}
           </div>
         )}
@@ -375,7 +380,7 @@ export default function AdminUsersPage() {
       {data && data.pages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <p className="text-white/35 text-sm">
-            Страница {data.page} из {data.pages}
+            {t('pagination', { page: data.page, pages: data.pages })}
           </p>
           <div className="flex gap-2">
             <button

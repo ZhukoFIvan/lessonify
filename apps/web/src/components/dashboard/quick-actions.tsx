@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { CalendarPlus, UserPlus, ClipboardPlus, type LucideIcon } from 'lucide-react'
 
 interface QuickAction {
@@ -12,17 +13,19 @@ interface QuickAction {
   primary?: boolean
 }
 
-const actions: QuickAction[] = [
-  { key: 'lesson', icon: CalendarPlus, label: 'Урок', title: 'Добавить урок', primary: true },
-  { key: 'student', icon: UserPlus, label: 'Ученик', title: 'Добавить ученика' },
-  { key: 'homework', icon: ClipboardPlus, label: 'ДЗ', title: 'Создать ДЗ' },
-]
-
 interface QuickActionsProps {
   onAction: (key: string) => void
 }
 
 export function QuickActions({ onAction }: QuickActionsProps) {
+  const t = useTranslations('dashboard')
+
+  const actions: QuickAction[] = [
+    { key: 'lesson', icon: CalendarPlus, label: t('quickActions.lesson.label'), title: t('quickActions.lesson.title'), primary: true },
+    { key: 'student', icon: UserPlus, label: t('quickActions.student.label'), title: t('quickActions.student.title') },
+    { key: 'homework', icon: ClipboardPlus, label: t('quickActions.homework.label'), title: t('quickActions.homework.title') },
+  ]
+
   return (
     <div className="flex gap-2">
       {actions.map((action, i) => {

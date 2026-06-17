@@ -7,6 +7,7 @@ import { useBilling } from '@/hooks/use-billing'
 import { toast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface StepPlanProps {
   onNext: () => void
@@ -14,25 +15,25 @@ interface StepPlanProps {
 }
 
 const FREE_FEATURES = [
-  { text: 'До 5 учеников', included: true },
-  { text: 'Расписание и календарь', included: true },
-  { text: 'Учёт оплат', included: true },
-  { text: 'Домашние задания', included: true },
-  { text: 'Telegram-уведомления', included: true },
-  { text: 'Безлимит учеников', included: false },
-  { text: 'Google Calendar', included: false },
-  { text: 'PDF-счета', included: false },
+  { key: 'plan.free.upTo5', included: true },
+  { key: 'plan.free.schedule', included: true },
+  { key: 'plan.free.payments', included: true },
+  { key: 'plan.free.homework', included: true },
+  { key: 'plan.free.telegram', included: true },
+  { key: 'plan.free.unlimited', included: false },
+  { key: 'plan.free.googleCalendar', included: false },
+  { key: 'plan.free.pdfInvoices', included: false },
 ]
 
 const PRO_FEATURES = [
-  { text: 'Неограниченное число учеников', included: true },
-  { text: 'Расписание и календарь', included: true },
-  { text: 'Учёт оплат', included: true },
-  { text: 'Домашние задания', included: true },
-  { text: 'Telegram-уведомления', included: true },
-  { text: 'Google Calendar синхронизация', included: true },
-  { text: 'Генерация PDF-счетов', included: true },
-  { text: 'Приоритетная поддержка', included: true },
+  { key: 'plan.pro.unlimited', included: true },
+  { key: 'plan.pro.schedule', included: true },
+  { key: 'plan.pro.payments', included: true },
+  { key: 'plan.pro.homework', included: true },
+  { key: 'plan.pro.telegram', included: true },
+  { key: 'plan.pro.googleCalendar', included: true },
+  { key: 'plan.pro.pdfInvoices', included: true },
+  { key: 'plan.pro.prioritySupport', included: true },
 ]
 
 const container = {
@@ -46,13 +47,14 @@ const item = {
 }
 
 export function StepPlan({ onNext, onBack }: StepPlanProps) {
+  const t = useTranslations('onboarding')
   const { activateTrial, loading } = useBilling()
   const [selected, setSelected] = useState<'free' | 'pro'>('pro')
 
   const handleTrial = async () => {
     const ok = await activateTrial()
     if (ok) {
-      toast({ variant: 'success', title: 'PRO на 30 дней активирован!' })
+      toast({ variant: 'success', title: t('plan.trialActivatedToast') })
     }
     onNext()
   }
@@ -73,10 +75,10 @@ export function StepPlan({ onNext, onBack }: StepPlanProps) {
           <Crown size={28} className="text-amber-500" />
         </div>
         <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          Выберите план
+          {t('plan.title')}
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Начните бесплатно или попробуйте все возможности PRO
+          {t('plan.subtitle')}
         </p>
       </motion.div>
 
@@ -100,17 +102,17 @@ export function StepPlan({ onNext, onBack }: StepPlanProps) {
             <span className="text-sm font-bold text-foreground">FREE</span>
           </div>
           <p className="text-xl font-bold text-foreground">0 ₽</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">навсегда</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{t('plan.forever')}</p>
           <div className="mt-3 space-y-1.5">
             {FREE_FEATURES.map((f) => (
-              <div key={f.text} className="flex items-center gap-1.5">
+              <div key={f.key} className="flex items-center gap-1.5">
                 {f.included ? (
                   <Check size={11} className="text-primary shrink-0" />
                 ) : (
                   <X size={11} className="text-muted-foreground/40 shrink-0" />
                 )}
                 <span className={cn('text-[11px]', f.included ? 'text-muted-foreground' : 'text-muted-foreground/40 line-through')}>
-                  {f.text}
+                  {t(f.key)}
                 </span>
               </div>
             ))}
@@ -129,7 +131,7 @@ export function StepPlan({ onNext, onBack }: StepPlanProps) {
           )}
         >
           <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500 text-white">
-            30 дней бесплатно
+            {t('plan.daysFree')}
           </span>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
@@ -138,12 +140,12 @@ export function StepPlan({ onNext, onBack }: StepPlanProps) {
             <span className="text-sm font-bold text-foreground">PRO</span>
           </div>
           <p className="text-xl font-bold text-foreground">499 ₽</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">в месяц, после триала</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{t('plan.perMonthAfterTrial')}</p>
           <div className="mt-3 space-y-1.5">
             {PRO_FEATURES.map((f) => (
-              <div key={f.text} className="flex items-center gap-1.5">
+              <div key={f.key} className="flex items-center gap-1.5">
                 <Check size={11} className="text-amber-500 shrink-0" />
-                <span className="text-[11px] text-muted-foreground">{f.text}</span>
+                <span className="text-[11px] text-muted-foreground">{t(f.key)}</span>
               </div>
             ))}
           </div>
@@ -163,7 +165,7 @@ export function StepPlan({ onNext, onBack }: StepPlanProps) {
             className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white group"
           >
             <Sparkles size={16} className="mr-2" />
-            {loading ? 'Активация...' : 'Попробовать PRO бесплатно'}
+            {loading ? t('plan.activating') : t('plan.tryProFree')}
           </Button>
         ) : (
           <Button
@@ -171,7 +173,7 @@ export function StepPlan({ onNext, onBack }: StepPlanProps) {
             size="lg"
             className="flex-1 group"
           >
-            Продолжить на FREE
+            {t('plan.continueFree')}
             <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
           </Button>
         )}

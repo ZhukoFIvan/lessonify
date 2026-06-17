@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Search, ChevronLeft, ChevronRight, Users, CalendarDays, ChevronRight as ArrowRight } from 'lucide-react'
 import { useAdminTutors, type AdminTutorListItem } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,7 @@ function PlanBadge({ plan }: { plan: string }) {
 }
 
 export default function AdminTutorsPage() {
+  const t = useTranslations('admin')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
 
@@ -22,8 +24,8 @@ export default function AdminTutorsPage() {
     <div className="p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-black text-white">Репетиторы</h1>
-        <p className="text-white/40 text-sm mt-1">{data ? `${data.total} репетиторов` : '—'}</p>
+        <h1 className="text-2xl font-black text-white">{t('tutors.title')}</h1>
+        <p className="text-white/40 text-sm mt-1">{data ? t('tutors.count', { count: data.total }) : '—'}</p>
       </div>
 
       {/* Search */}
@@ -31,7 +33,7 @@ export default function AdminTutorsPage() {
         <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
         <input
           type="text"
-          placeholder="Поиск по имени или email"
+          placeholder={t('searchPlaceholder')}
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1) }}
           className="w-full pl-9 pr-4 py-2.5 bg-[#0d0c1d] border border-white/[0.06] rounded-xl text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/40 transition-colors"
@@ -41,10 +43,10 @@ export default function AdminTutorsPage() {
       {/* Table */}
       <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
         <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-5 py-3 border-b border-white/[0.06] text-xs font-semibold text-white/35 uppercase tracking-wider">
-          <span>Репетитор</span>
-          <span>Тариф</span>
-          <span>Ученики</span>
-          <span>Уроки</span>
+          <span>{t('tutors.table.tutor')}</span>
+          <span>{t('tutors.table.plan')}</span>
+          <span>{t('tutors.table.students')}</span>
+          <span>{t('tutors.table.lessons')}</span>
           <span></span>
         </div>
 
@@ -103,7 +105,7 @@ export default function AdminTutorsPage() {
             ))}
 
             {data?.tutors.length === 0 && (
-              <p className="text-white/30 text-sm text-center py-10">Репетиторы не найдены</p>
+              <p className="text-white/30 text-sm text-center py-10">{t('tutors.empty')}</p>
             )}
           </div>
         )}
@@ -112,7 +114,7 @@ export default function AdminTutorsPage() {
       {/* Pagination */}
       {data && data.pages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-white/35 text-sm">Страница {data.page} из {data.pages}</p>
+          <p className="text-white/35 text-sm">{t('pagination', { page: data.page, pages: data.pages })}</p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}

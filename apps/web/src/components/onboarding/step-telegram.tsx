@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, SkipForward, ExternalLink, CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ const item = {
 }
 
 export function StepTelegram({ onNext, onBack }: StepTelegramProps) {
+  const t = useTranslations('onboarding')
   const [deepLink, setDeepLink] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [connected, setConnected] = useState(false)
@@ -67,10 +69,10 @@ export function StepTelegram({ onNext, onBack }: StepTelegramProps) {
     >
       <motion.div variants={item}>
         <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          Подключите Telegram
+          {t('telegram.title')}
         </h2>
         <p className="text-muted-foreground text-sm mt-1">
-          Получайте напоминания об уроках и оплатах прямо в мессенджер
+          {t('telegram.subtitle')}
         </p>
       </motion.div>
 
@@ -109,10 +111,10 @@ export function StepTelegram({ onNext, onBack }: StepTelegramProps) {
             className="text-center"
           >
             <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-              Telegram подключён!
+              {t('telegram.connected')}
             </p>
             <p className="text-muted-foreground text-sm mt-1">
-              Уведомления будут приходить в бот
+              {t('telegram.connectedHint')}
             </p>
           </motion.div>
         ) : loading ? (
@@ -125,16 +127,16 @@ export function StepTelegram({ onNext, onBack }: StepTelegramProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#0088cc] text-white font-medium hover:bg-[#0077b5] transition-colors shadow-md shadow-[#0088cc]/20"
             >
-              Открыть бот
+              {t('telegram.openBot')}
               <ExternalLink size={16} />
             </a>
             <p className="text-xs text-muted-foreground text-center max-w-xs">
-              Нажмите «Start» в боте — мы автоматически определим подключение
+              {t('telegram.pressStart')}
             </p>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Не удалось получить ссылку. Можно подключить позже в настройках.
+            {t('telegram.linkError')}
           </p>
         )}
       </motion.div>
@@ -142,9 +144,9 @@ export function StepTelegram({ onNext, onBack }: StepTelegramProps) {
       {/* Benefits */}
       <motion.div variants={item} className="mt-8 space-y-2.5">
         {[
-          'Напоминание за 1 час до урока',
-          'Уведомление о новом домашнем задании',
-          'Сводка по оплатам за неделю',
+          t('telegram.benefit1'),
+          t('telegram.benefit2'),
+          t('telegram.benefit3'),
         ].map((text, i) => (
           <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
             <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
@@ -166,13 +168,13 @@ export function StepTelegram({ onNext, onBack }: StepTelegramProps) {
         >
           {connected ? (
             <>
-              Далее
+              {t('next')}
               <ArrowRight size={18} className="ml-2 transition-transform group-hover:translate-x-1" />
             </>
           ) : (
             <>
               <SkipForward size={18} className="mr-2" />
-              Настрою позже
+              {t('telegram.setupLater')}
             </>
           )}
         </Button>

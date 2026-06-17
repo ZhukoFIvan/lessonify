@@ -4,6 +4,7 @@ import { Users, GraduationCap, BookOpen, Crown, Ban, Clock, TrendingUp, DollarSi
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { useTranslations } from 'next-intl'
 import { useAdminStats, type AdminUser, type AdminWithdrawal } from '@/hooks/use-admin'
 import { cn } from '@/lib/utils'
 
@@ -35,12 +36,13 @@ function StatCard({ label, value, icon, color, sub }: StatCardProps) {
 // ── Role badge ────────────────────────────────────────────────────────────────
 
 function RoleBadge({ role }: { role: string }) {
+  const t = useTranslations('admin')
   const map: Record<string, string> = {
     TUTOR: 'bg-violet-500/15 text-violet-400',
     STUDENT: 'bg-blue-500/15 text-blue-400',
     ADMIN: 'bg-amber-500/15 text-amber-400',
   }
-  const label: Record<string, string> = { TUTOR: 'Репетитор', STUDENT: 'Ученик', ADMIN: 'Админ' }
+  const label: Record<string, string> = { TUTOR: t('roles.tutor'), STUDENT: t('roles.student'), ADMIN: t('roles.admin') }
   return (
     <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', map[role] ?? 'bg-gray-500/15 text-gray-400')}>
       {label[role] ?? role}
@@ -51,12 +53,13 @@ function RoleBadge({ role }: { role: string }) {
 // ── Status badge ──────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations('admin')
   const map: Record<string, string> = {
     PENDING: 'bg-amber-500/15 text-amber-400',
     PAID: 'bg-green-500/15 text-green-400',
     REJECTED: 'bg-red-500/15 text-red-400',
   }
-  const label: Record<string, string> = { PENDING: 'Ожидает', PAID: 'Оплачен', REJECTED: 'Отклонён' }
+  const label: Record<string, string> = { PENDING: t('withdrawalStatus.pending'), PAID: t('withdrawalStatus.paid'), REJECTED: t('withdrawalStatus.rejected') }
   return (
     <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', map[status] ?? 'bg-gray-500/15 text-gray-400')}>
       {label[status] ?? status}
@@ -67,11 +70,12 @@ function StatusBadge({ status }: { status: string }) {
 // ── Chart tooltip ─────────────────────────────────────────────────────────────
 
 function CustomTooltip({ active, payload, label }: any) {
+  const t = useTranslations('admin')
   if (!active || !payload?.length) return null
   return (
     <div className="bg-[#1a1830] border border-white/10 rounded-xl px-3 py-2 text-xs">
       <p className="text-white/50 mb-1">{label}</p>
-      <p className="text-primary font-bold">{payload[0].value} регистраций</p>
+      <p className="text-primary font-bold">{t('dashboard.registrationsCount', { count: payload[0].value })}</p>
     </div>
   )
 }
@@ -79,6 +83,7 @@ function CustomTooltip({ active, payload, label }: any) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
+  const t = useTranslations('admin')
   const { stats, loading } = useAdminStats()
 
   if (loading) {
@@ -97,26 +102,26 @@ export default function AdminDashboard() {
   if (!stats) return null
 
   const statCards = [
-    { label: 'Пользователи', value: stats.totalUsers, icon: <Users size={18} className="text-violet-400" />, color: 'bg-violet-500/15', sub: `+${stats.registrations7d} за 7 дн · +${stats.registrations30d} за 30 дн` },
-    { label: 'Репетиторы', value: stats.totalTutors, icon: <GraduationCap size={18} className="text-blue-400" />, color: 'bg-blue-500/15' },
-    { label: 'Ученики', value: stats.totalStudents, icon: <BookOpen size={18} className="text-cyan-400" />, color: 'bg-cyan-500/15' },
-    { label: 'Активный PRO', value: stats.activeProUsers, icon: <Crown size={18} className="text-amber-400" />, color: 'bg-amber-500/15', sub: `всего PRO: ${stats.proUsers}` },
-    { label: 'Доход (оплачено)', value: `${Number(stats.revenueTotal).toLocaleString('ru')} ₽`, icon: <DollarSign size={18} className="text-green-400" />, color: 'bg-green-500/15', sub: `${Number(stats.revenueThisMonth).toLocaleString('ru')} ₽ в этом месяце` },
-    { label: 'Платежей', value: stats.paidOrdersCount, icon: <CreditCard size={18} className="text-emerald-400" />, color: 'bg-emerald-500/15', sub: 'успешных заказов' },
-    { label: 'Уроки', value: stats.totalLessons, icon: <CalendarDays size={18} className="text-sky-400" />, color: 'bg-sky-500/15', sub: `${stats.lessonsThisMonth} в этом месяце` },
-    { label: 'Бот подключён', value: stats.botLinked, icon: <Send size={18} className="text-blue-400" />, color: 'bg-blue-500/15', sub: `из ${stats.botConnections} привязок` },
-    { label: 'Ожидают вывода', value: stats.pendingWithdrawals, icon: <Clock size={18} className="text-orange-400" />, color: 'bg-orange-500/15' },
-    { label: 'Реферальный доход', value: `${Number(stats.totalEarnings).toLocaleString('ru')} ₽`, icon: <TrendingUp size={18} className="text-fuchsia-400" />, color: 'bg-fuchsia-500/15' },
-    { label: 'Заблокированы', value: stats.blockedUsers, icon: <Ban size={18} className="text-red-400" />, color: 'bg-red-500/15' },
-    { label: 'Конверсия FREE→PRO', value: stats.totalUsers > 0 ? `${Math.round((stats.activeProUsers / stats.totalUsers) * 100)}%` : '0%', icon: <UserPlus size={18} className="text-primary" />, color: 'bg-primary/15' },
+    { label: t('dashboard.cards.users'), value: stats.totalUsers, icon: <Users size={18} className="text-violet-400" />, color: 'bg-violet-500/15', sub: t('dashboard.cards.usersSub', { d7: stats.registrations7d, d30: stats.registrations30d }) },
+    { label: t('dashboard.cards.tutors'), value: stats.totalTutors, icon: <GraduationCap size={18} className="text-blue-400" />, color: 'bg-blue-500/15' },
+    { label: t('dashboard.cards.students'), value: stats.totalStudents, icon: <BookOpen size={18} className="text-cyan-400" />, color: 'bg-cyan-500/15' },
+    { label: t('dashboard.cards.activePro'), value: stats.activeProUsers, icon: <Crown size={18} className="text-amber-400" />, color: 'bg-amber-500/15', sub: t('dashboard.cards.activeProSub', { count: stats.proUsers }) },
+    { label: t('dashboard.cards.revenue'), value: `${Number(stats.revenueTotal).toLocaleString('ru')} ₽`, icon: <DollarSign size={18} className="text-green-400" />, color: 'bg-green-500/15', sub: t('dashboard.cards.revenueSub', { amount: Number(stats.revenueThisMonth).toLocaleString('ru') }) },
+    { label: t('dashboard.cards.payments'), value: stats.paidOrdersCount, icon: <CreditCard size={18} className="text-emerald-400" />, color: 'bg-emerald-500/15', sub: t('dashboard.cards.paymentsSub') },
+    { label: t('dashboard.cards.lessons'), value: stats.totalLessons, icon: <CalendarDays size={18} className="text-sky-400" />, color: 'bg-sky-500/15', sub: t('dashboard.cards.lessonsSub', { count: stats.lessonsThisMonth }) },
+    { label: t('dashboard.cards.botLinked'), value: stats.botLinked, icon: <Send size={18} className="text-blue-400" />, color: 'bg-blue-500/15', sub: t('dashboard.cards.botLinkedSub', { count: stats.botConnections }) },
+    { label: t('dashboard.cards.pendingWithdrawals'), value: stats.pendingWithdrawals, icon: <Clock size={18} className="text-orange-400" />, color: 'bg-orange-500/15' },
+    { label: t('dashboard.cards.referralIncome'), value: `${Number(stats.totalEarnings).toLocaleString('ru')} ₽`, icon: <TrendingUp size={18} className="text-fuchsia-400" />, color: 'bg-fuchsia-500/15' },
+    { label: t('dashboard.cards.blocked'), value: stats.blockedUsers, icon: <Ban size={18} className="text-red-400" />, color: 'bg-red-500/15' },
+    { label: t('dashboard.cards.conversion'), value: stats.totalUsers > 0 ? `${Math.round((stats.activeProUsers / stats.totalUsers) * 100)}%` : '0%', icon: <UserPlus size={18} className="text-primary" />, color: 'bg-primary/15' },
   ]
 
   return (
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-black text-white">Dashboard</h1>
-        <p className="text-white/40 text-sm mt-1">Обзор активности платформы</p>
+        <h1 className="text-2xl font-black text-white">{t('dashboard.title')}</h1>
+        <p className="text-white/40 text-sm mt-1">{t('dashboard.subtitle')}</p>
       </div>
 
       {/* Stats grid */}
@@ -130,8 +135,8 @@ export default function AdminDashboard() {
       <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl p-6 mb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-white font-bold">Регистрации</h2>
-            <p className="text-white/40 text-xs mt-0.5">За последние 14 дней</p>
+            <h2 className="text-white font-bold">{t('dashboard.registrations')}</h2>
+            <p className="text-white/40 text-xs mt-0.5">{t('dashboard.registrationsLast14')}</p>
           </div>
         </div>
         <ResponsiveContainer width="100%" height={200}>
@@ -173,8 +178,8 @@ export default function AdminDashboard() {
         {/* Recent users */}
         <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-            <h2 className="text-white font-bold text-sm">Новые пользователи</h2>
-            <a href="/admin/users" className="text-primary text-xs hover:underline">Все →</a>
+            <h2 className="text-white font-bold text-sm">{t('dashboard.newUsers')}</h2>
+            <a href="/admin/users" className="text-primary text-xs hover:underline">{t('dashboard.viewAll')}</a>
           </div>
           <div className="divide-y divide-white/[0.04]">
             {stats.recentUsers.map((u: AdminUser) => (
@@ -190,14 +195,14 @@ export default function AdminDashboard() {
                   <RoleBadge role={u.role} />
                   {u.isBlocked && (
                     <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">
-                      Блок
+                      {t('blockedShort')}
                     </span>
                   )}
                 </div>
               </div>
             ))}
             {stats.recentUsers.length === 0 && (
-              <p className="px-5 py-6 text-white/30 text-sm text-center">Нет пользователей</p>
+              <p className="px-5 py-6 text-white/30 text-sm text-center">{t('dashboard.noUsers')}</p>
             )}
           </div>
         </div>
@@ -205,8 +210,8 @@ export default function AdminDashboard() {
         {/* Recent withdrawals */}
         <div className="bg-[#0d0c1d] border border-white/[0.06] rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-            <h2 className="text-white font-bold text-sm">Заявки на вывод</h2>
-            <a href="/admin/withdrawals" className="text-primary text-xs hover:underline">Все →</a>
+            <h2 className="text-white font-bold text-sm">{t('dashboard.withdrawalRequests')}</h2>
+            <a href="/admin/withdrawals" className="text-primary text-xs hover:underline">{t('dashboard.viewAll')}</a>
           </div>
           <div className="divide-y divide-white/[0.04]">
             {stats.recentWithdrawals.map((w: AdminWithdrawal) => (
@@ -222,7 +227,7 @@ export default function AdminDashboard() {
               </div>
             ))}
             {stats.recentWithdrawals.length === 0 && (
-              <p className="px-5 py-6 text-white/30 text-sm text-center">Нет заявок</p>
+              <p className="px-5 py-6 text-white/30 text-sm text-center">{t('dashboard.noWithdrawals')}</p>
             )}
           </div>
         </div>

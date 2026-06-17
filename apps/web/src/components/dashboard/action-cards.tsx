@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { UserPlus, CalendarPlus, ClipboardPlus, ArrowRight, type LucideIcon } from 'lucide-react'
 
 interface ActionDef {
@@ -11,12 +12,6 @@ interface ActionDef {
   color: string
   bg: string
 }
-
-const ACTIONS: ActionDef[] = [
-  { key: 'student', icon: UserPlus, title: 'Добавить ученика', desc: 'Новый ученик в вашу базу', color: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { key: 'lesson', icon: CalendarPlus, title: 'Запланировать урок', desc: 'Занятие в расписание', color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  { key: 'homework', icon: ClipboardPlus, title: 'Создать ДЗ', desc: 'Задать домашнее задание', color: 'text-amber-400', bg: 'bg-amber-500/10' },
-]
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } }
 const item = {
@@ -29,9 +24,17 @@ interface ActionCardsProps {
 }
 
 export function ActionCards({ onAction }: ActionCardsProps) {
+  const t = useTranslations('dashboard')
+
+  const ACTIONS: ActionDef[] = [
+    { key: 'student', icon: UserPlus, title: t('actionCards.student.title'), desc: t('actionCards.student.desc'), color: 'text-violet-400', bg: 'bg-violet-500/10' },
+    { key: 'lesson', icon: CalendarPlus, title: t('actionCards.lesson.title'), desc: t('actionCards.lesson.desc'), color: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { key: 'homework', icon: ClipboardPlus, title: t('actionCards.homework.title'), desc: t('actionCards.homework.desc'), color: 'text-amber-400', bg: 'bg-amber-500/10' },
+  ]
+
   return (
     <div>
-      <h3 className="text-sm font-semibold text-foreground mb-3">Быстрые действия</h3>
+      <h3 className="text-sm font-semibold text-foreground mb-3">{t('quickActionsTitle')}</h3>
       <motion.div
         variants={container}
         initial="hidden"

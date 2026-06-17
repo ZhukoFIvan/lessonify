@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { CalendarDays, ExternalLink, Unlink, RefreshCw, ToggleLeft, ToggleRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -9,50 +10,52 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useCalendarSyncStatus, useCalendarSync } from '@/hooks/use-calendar-sync'
 import { toast } from '@/components/ui/use-toast'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useFormatters } from '@/i18n/use-formatters'
 
 export function GoogleCalendarSection() {
+  const t = useTranslations('settingsSections')
+  const f = useFormatters()
   const { status, loading, refetch } = useCalendarSyncStatus()
   const { loading: actionLoading, connectCalendar, disconnectCalendar, toggleSync, syncAll } = useCalendarSync()
   const searchParams = useSearchParams()
 
   useEffect(() => {
     if (searchParams.get('calendarConnected') === '1') {
-      toast({ variant: 'success', title: 'Google Календарь подключён' })
+      toast({ variant: 'success', title: t('calendarConnected') })
       refetch()
     }
     if (searchParams.get('calendarError') === '1') {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось подключить Google Календарь' })
+      toast({ variant: 'destructive', title: t('error'), description: t('calendarConnectFailed') })
     }
   }, [searchParams, refetch])
 
   async function handleToggle() {
     try {
       const enabled = await toggleSync()
-      toast({ variant: 'success', title: enabled ? 'Синхронизация включена' : 'Синхронизация выключена' })
+      toast({ variant: 'success', title: enabled ? t('syncEnabled') : t('syncDisabled') })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка' })
+      toast({ variant: 'destructive', title: t('error') })
     }
   }
 
   async function handleSyncAll() {
     try {
       const count = await syncAll()
-      toast({ variant: 'success', title: `Синхронизировано ${count} уроков` })
+      toast({ variant: 'success', title: t('syncedLessons', { count }) })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка синхронизации' })
+      toast({ variant: 'destructive', title: t('syncError') })
     }
   }
 
   async function handleDisconnect() {
     try {
       await disconnectCalendar()
-      toast({ variant: 'success', title: 'Google Календарь отключён' })
+      toast({ variant: 'success', title: t('calendarDisconnected') })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка' })
+      toast({ variant: 'destructive', title: t('error') })
     }
   }
 
@@ -65,9 +68,9 @@ export function GoogleCalendarSection() {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-sm font-semibold text-foreground">Google Календарь</p>
+            <p className="text-sm font-semibold text-foreground">{t('googleCalendar')}</p>
             {!loading && status?.connected && (
-              <Badge variant="success" className="text-[10px]">Подключён</Badge>
+              <Badge variant="success" className="text-[10px]">{t('connected')}</Badge>
             )}
           </div>
 
@@ -76,17 +79,17 @@ export function GoogleCalendarSection() {
           ) : status?.connected ? (
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">
-                Уроки автоматически синхронизируются в Google Календарь
+                {t('calendarSyncInfo')}
               </p>
               {status.lastSyncAt && (
                 <p className="text-[11px] text-muted-foreground">
-                  Последняя синхр.: {format(new Date(status.lastSyncAt), 'd MMM HH:mm', { locale: ru })}
+                  {t('lastSync')}: {format(new Date(status.lastSyncAt), 'd MMM HH:mm', { locale: f.dateFnsLocale })}
                 </p>
               )}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Синхронизируйте уроки с Google Календарём автоматически
+              {t('calendarSyncPrompt')}
             </p>
           )}
 
@@ -105,7 +108,7 @@ export function GoogleCalendarSection() {
                 {status.syncEnabled
                   ? <ToggleRight size={20} className="text-primary" />
                   : <ToggleLeft size={20} />}
-                {status.syncEnabled ? 'Синхр. вкл.' : 'Синхр. выкл.'}
+                {status.syncEnabled ? t('syncOn') : t('syncOff')}
               </button>
 
               <Button
@@ -116,7 +119,7 @@ export function GoogleCalendarSection() {
                 disabled={actionLoading}
               >
                 <RefreshCw size={13} />
-                Синхронизировать все
+                {t('syncAll')}
               </Button>
 
               <Button
@@ -127,7 +130,7 @@ export function GoogleCalendarSection() {
                 disabled={actionLoading}
               >
                 <Unlink size={13} />
-                Отключить
+                {t('disconnect')}
               </Button>
             </div>
           ) : (
@@ -139,7 +142,7 @@ export function GoogleCalendarSection() {
                 disabled={actionLoading}
               >
                 <ExternalLink size={13} />
-                {actionLoading ? 'Загрузка...' : 'Подключить'}
+                {actionLoading ? t('loading') : t('connect')}
               </Button>
             </div>
           )}

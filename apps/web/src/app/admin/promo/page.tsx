@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { Plus, Tag, ToggleLeft, ToggleRight, Copy } from 'lucide-react'
 import api from '@/lib/api'
 import { toast } from '@/components/ui/use-toast'
@@ -19,6 +20,7 @@ interface PromoCode {
 }
 
 function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const t = useTranslations('admin')
   const [form, setForm] = useState({ code: '', description: '', daysToAdd: '30', maxUses: '', expiresAt: '' })
   const [loading, setLoading] = useState(false)
 
@@ -33,11 +35,11 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
         maxUses: form.maxUses ? Number(form.maxUses) : undefined,
         expiresAt: form.expiresAt || undefined,
       })
-      toast({ variant: 'success', title: 'Промокод создан' })
+      toast({ variant: 'success', title: t('promo.created') })
       onCreated()
       onClose()
     } catch (e: any) {
-      toast({ variant: 'destructive', title: e.response?.data?.error ?? 'Ошибка' })
+      toast({ variant: 'destructive', title: e.response?.data?.error ?? t('promo.error') })
     } finally {
       setLoading(false)
     }
@@ -46,14 +48,14 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-[#0d0c1d] border border-white/10 rounded-2xl p-6 w-full max-w-sm space-y-4">
-        <h3 className="font-bold text-white text-lg">Новый промокод</h3>
+        <h3 className="font-bold text-white text-lg">{t('promo.newTitle')}</h3>
         {(
           [
-            { label: 'Код *', key: 'code' as const, placeholder: 'BLOGGER2024', type: 'text', upper: true },
-            { label: 'Описание', key: 'description' as const, placeholder: 'Для блогера @ivan', type: 'text', upper: false },
-            { label: 'Дней Pro *', key: 'daysToAdd' as const, placeholder: '30', type: 'number', upper: false },
-            { label: 'Макс. использований', key: 'maxUses' as const, placeholder: 'Пусто = безлимит', type: 'number', upper: false },
-            { label: 'Действует до', key: 'expiresAt' as const, placeholder: '', type: 'date', upper: false },
+            { label: t('promo.fields.code'), key: 'code' as const, placeholder: 'BLOGGER2024', type: 'text', upper: true },
+            { label: t('promo.fields.description'), key: 'description' as const, placeholder: t('promo.fields.descriptionPlaceholder'), type: 'text', upper: false },
+            { label: t('promo.fields.daysToAdd'), key: 'daysToAdd' as const, placeholder: '30', type: 'number', upper: false },
+            { label: t('promo.fields.maxUses'), key: 'maxUses' as const, placeholder: t('promo.fields.maxUsesPlaceholder'), type: 'number', upper: false },
+            { label: t('promo.fields.expiresAt'), key: 'expiresAt' as const, placeholder: '', type: 'date', upper: false },
           ]
         ).map(({ label, key, placeholder, type, upper }) => (
           <div key={key}>
@@ -68,9 +70,9 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           </div>
         ))}
         <div className="flex gap-3 pt-2">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white transition-colors">Отмена</button>
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-gray-400 hover:text-white transition-colors">{t('cancel')}</button>
           <button onClick={handleSubmit} disabled={loading || !form.code || !form.daysToAdd} className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
-            {loading ? 'Создание...' : 'Создать'}
+            {loading ? t('promo.creating') : t('promo.create')}
           </button>
         </div>
       </div>
@@ -79,6 +81,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
 }
 
 export default function PromoPage() {
+  const t = useTranslations('admin')
   const [codes, setCodes] = useState<PromoCode[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -97,18 +100,18 @@ export default function PromoPage() {
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code)
-    toast({ title: 'Скопировано!' })
+    toast({ title: t('promo.copied') })
   }
 
   return (
     <div className="p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-white">Промокоды</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Коды для получения Pro-плана</p>
+          <h1 className="text-xl font-bold text-white">{t('promo.title')}</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{t('promo.subtitle')}</p>
         </div>
         <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">
-          <Plus size={16} /> Создать
+          <Plus size={16} /> {t('promo.create')}
         </button>
       </div>
 
@@ -117,7 +120,7 @@ export default function PromoPage() {
       ) : codes.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <Tag size={32} className="mx-auto mb-3 opacity-30" />
-          <p>Промокодов пока нет</p>
+          <p>{t('promo.empty')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -129,12 +132,12 @@ export default function PromoPage() {
                   <button onClick={() => copyCode(promo.code)} className="text-gray-500 hover:text-gray-300 transition-colors">
                     <Copy size={12} />
                   </button>
-                  {!promo.isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">неактивен</span>}
+                  {!promo.isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">{t('promo.inactive')}</span>}
                 </div>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  +{promo.daysToAdd} дней Pro · {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''} использований
+                  {t('promo.daysProPlus', { count: promo.daysToAdd })} · {promo.usedCount}{promo.maxUses ? `/${promo.maxUses}` : ''} {t('promo.usesLabel', { count: promo.usedCount })}
                   {promo.description ? ` · ${promo.description}` : ''}
-                  {promo.expiresAt ? ` · до ${new Date(promo.expiresAt).toLocaleDateString('ru')}` : ''}
+                  {promo.expiresAt ? ` · ${t('promo.until', { date: new Date(promo.expiresAt).toLocaleDateString('ru') })}` : ''}
                 </p>
               </div>
               <button onClick={() => toggle(promo.id, promo.isActive)} className="text-gray-400 hover:text-white transition-colors">

@@ -3,6 +3,7 @@
 import NextImage from 'next/image'
 import { Check, Upload, Loader2 } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import api from '@/lib/api'
 
@@ -33,6 +34,7 @@ interface AvatarPickerProps {
 }
 
 export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
+  const t = useTranslations('onboarding')
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -63,13 +65,13 @@ export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm font-medium text-foreground">Выберите аватарку</p>
+      <p className="text-sm font-medium text-foreground">{t('avatar.choose')}</p>
 
       {/* Текущий выбор — большой preview */}
       {value && (
         <div className="flex justify-center">
           <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-primary shadow-card">
-            <AvatarImg src={value} alt="Аватарка" size={96} />
+            <AvatarImg src={value} alt={t('avatar.alt')} size={96} />
           </div>
         </div>
       )}
@@ -86,7 +88,7 @@ export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
               value === url ? 'border-primary scale-105' : 'border-transparent',
             )}
           >
-            <AvatarImg src={url} alt={`Вариант ${i + 1}`} size={64} />
+            <AvatarImg src={url} alt={t('avatar.variant', { index: i + 1 })} size={64} />
             {value === url && (
               <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                 <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
@@ -106,7 +108,7 @@ export function AvatarPicker({ value, onChange, userName }: AvatarPickerProps) {
         className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border py-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
       >
         {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-        {uploading ? 'Загрузка...' : 'Загрузить свою фото'}
+        {uploading ? t('avatar.uploading') : t('avatar.upload')}
       </button>
       <input
         ref={fileRef}

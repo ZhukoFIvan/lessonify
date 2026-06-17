@@ -2,11 +2,10 @@
 
 import { useEffect, useRef } from 'react'
 import { format, isToday, isSameDay } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 import { cn } from '@/lib/utils'
 import type { LessonWithStudent } from '@tutorflow/types'
-
-const DAY_ABBR = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
 
 interface DateStripProps {
   days: Date[]
@@ -16,6 +15,8 @@ interface DateStripProps {
 }
 
 export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripProps) {
+  const t = useTranslations('calendar')
+  const f = useFormatters()
   const scrollRef = useRef<HTMLDivElement>(null)
   const todayRef = useRef<HTMLButtonElement>(null)
 
@@ -33,7 +34,7 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
       ref={scrollRef}
       className="scrollbar-hide flex gap-1 overflow-x-auto px-3 py-2 lg:flex-wrap lg:justify-start lg:gap-1.5 lg:px-0"
       role="group"
-      aria-label="Выбор даты"
+      aria-label={t('selectDate')}
     >
       {days.map((day) => {
         const key = format(day, 'yyyy-MM-dd')
@@ -59,7 +60,7 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
                   : 'hover:bg-surface-2',
             )}
             aria-pressed={isSelected}
-            aria-label={format(day, 'd MMMM', { locale: ru })}
+            aria-label={format(day, 'd MMMM', { locale: f.dateFnsLocale })}
           >
             {/* День недели */}
             <span
@@ -72,7 +73,7 @@ export function DateStrip({ days, selected, lessonCounts, onSelect }: DateStripP
                     : 'text-muted-foreground',
               )}
             >
-              {DAY_ABBR[day.getDay()]}
+              {format(day, 'EEEEEE', { locale: f.dateFnsLocale })}
             </span>
 
             {/* Дата */}

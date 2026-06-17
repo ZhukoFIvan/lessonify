@@ -7,14 +7,17 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatNumber } from '@/components/ui/stat'
 import { useDebtors, usePayAllForStudent } from '@/hooks/use-payments'
-import { getInitials, formatRub, pluralize } from '@tutorflow/utils'
+import { getInitials, formatRub } from '@tutorflow/utils'
 import { format } from 'date-fns'
-import { ru } from 'date-fns/locale'
 import { CheckCircle2, AlertCircle, Check } from 'lucide-react'
 import { cappedDelay } from '@/lib/motion'
 import { toast } from '@/components/ui/use-toast'
+import { useTranslations } from 'next-intl'
+import { useFormatters } from '@/i18n/use-formatters'
 
 export function DebtorsList() {
+  const t = useTranslations('finances')
+  const f = useFormatters()
   const { debtors, loading, refetch } = useDebtors()
   const { payAll, loadingId } = usePayAllForStudent()
 
@@ -23,12 +26,12 @@ export function DebtorsList() {
       const result = await payAll(studentId)
       toast({
         variant: 'success',
-        title: `${name} — долг погашен`,
-        description: `${result.count} ${pluralize(result.count, ['урок', 'урока', 'уроков'])} · ${formatRub(result.total)}`,
+        title: t('debtCleared', { name }),
+        description: `${f.count(result.count, 'lessons')} · ${formatRub(result.total)}`,
       })
       refetch()
     } catch {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось провести оплату' })
+      toast({ variant: 'destructive', title: t('error'), description: t('payFailed') })
     }
   }
 
@@ -43,13 +46,13 @@ export function DebtorsList() {
             <AlertCircle size={20} />
           </span>
           <div>
-            <h2 className="text-h3 font-bold text-foreground">Должны заплатить</h2>
+            <h2 className="text-h3 font-bold text-foreground">{t('mustPay')}</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {loading
-                ? 'Загружаем…'
+                ? t('loading')
                 : debtors.length === 0
-                  ? 'Все уроки оплачены'
-                  : `${pluralize(debtors.length, ['ученик', 'ученика', 'учеников'])} с задолженностью`}
+                  ? t('allPaid')
+                  : t('studentsWithDebt', { students: f.count(debtors.length, 'students') })}
             </p>
           </div>
         </div>
@@ -63,7 +66,7 @@ export function DebtorsList() {
               className="justify-end text-warning [&_.hero-unit]:text-warning/70"
             />
             <p className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              всего к оплате
+              {t('totalDue')}
             </p>
           </div>
         )}
@@ -82,8 +85,8 @@ export function DebtorsList() {
               <CheckCircle2 size={28} strokeWidth={1.75} className="text-success" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-foreground">Долгов нет</p>
-              <p className="mt-0.5 text-xs">Все уроки оплачены — отличная работа</p>
+              <p className="text-sm font-semibold text-foreground">{t('noDebts')}</p>
+              <p className="mt-0.5 text-xs">{t('noDebtsHint')}</p>
             </div>
           </div>
         ) : (
@@ -109,9 +112,9 @@ export function DebtorsList() {
                       {debtor.studentName}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {pluralize(debtor.unpaidLessonsCount, ['урок', 'урока', 'уроков'])}
+                      {f.count(debtor.unpaidLessonsCount, 'lessons')}
                       {debtor.lastLessonDate && (
-                        <> · {format(new Date(debtor.lastLessonDate), 'd MMM', { locale: ru })}</>
+                        <> · {format(new Date(debtor.lastLessonDate), 'd MMM', { locale: f.dateFnsLocale })}</>
                       )}
                     </p>
                   </div>
@@ -129,11 +132,11 @@ export function DebtorsList() {
                   disabled={loadingId === debtor.studentId}
                 >
                   {loadingId === debtor.studentId ? (
-                    'Проводим оплату…'
+                    t('processingPayment')
                   ) : (
                     <>
                       <Check size={13} className="mr-1.5 inline" />
-                      Принять оплату
+                      {t('acceptPayment')}
                     </>
                   )}
                 </Button>
